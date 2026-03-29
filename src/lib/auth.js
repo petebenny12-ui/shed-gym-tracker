@@ -8,6 +8,23 @@ export async function signUp({ email, password, displayName }) {
       data: { display_name: displayName },
     },
   });
+
+  // Fallback: if sign-up succeeded but trigger didn't create profile, do it here
+  if (!error && data?.user) {
+    const { data: existing } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', data.user.id)
+      .maybeSingle();
+
+    if (!existing) {
+      await supabase.from('profiles').insert({
+        id: data.user.id,
+        display_name: displayName || 'User',
+      });
+    }
+  }
+
   return { data, error };
 }
 

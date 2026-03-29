@@ -33,18 +33,33 @@ export function AuthProvider({ children }) {
   }, []);
 
   async function fetchProfile(userId) {
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', userId)
-      .single();
+      .maybeSingle();
 
-    if (error) {
-      // Profile may not exist yet (trigger delay)
+    // Fallback: profile missing (trigger failed) — create it now
+    if (!data && !error) {
+      const user = (await supabase.auth.getUser()).data?.user;
+      const displayName = user?.user_metadata?.display_name || 'User';
+      await supabase.from('profiles').insert({
+        id: userId,
+        display_name: displayName,
+      });
+      const result = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle();
+      data = result.data;
+    }
+
+    if (data) {
+      setProfile(data);
+    } else {
       console.error('Profile fetch error:', error);
       setProfile(null);
-    } else {
-      setProfile(data);
     }
     setLoading(false);
   }
