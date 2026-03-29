@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
+import PreferencesSection from './PreferencesSection';
 import ExportSection from './ExportSection';
 import ImportSection from './ImportSection';
 import DangerZone from './DangerZone';
@@ -54,6 +55,7 @@ export default function DataManager() {
         </div>
       </div>
 
+      <PreferencesSection onStatus={handleStatus} />
       <ExportSection onStatus={handleStatus} />
       <ImportSection onStatus={handleStatus} />
       <DangerZone onStatus={handleStatus} />

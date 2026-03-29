@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { SUPPLEMENT_OPTIONS, TIMING_OPTIONS } from '../../config/constants';
 import { useSupplements } from '../../hooks/useSupplements';
+import { validateSupplementName } from '../../lib/validation';
 
 export default function SupplementSetup({ onAdded }) {
   const { addSupplement } = useSupplements();
@@ -8,14 +9,29 @@ export default function SupplementSetup({ onAdded }) {
   const [customName, setCustomName] = useState('');
   const [timing, setTiming] = useState('morning');
   const [saving, setSaving] = useState(false);
+  const [nameError, setNameError] = useState(null);
+
+  const handleCustomNameChange = (e) => {
+    const { value, error } = validateSupplementName(e.target.value);
+    setCustomName(value);
+    setNameError(error);
+  };
 
   const handleAdd = async () => {
     const suppName = name === 'custom' ? customName.trim() : name;
     if (!suppName) return;
-    setSaving(true);
-    await addSupplement(suppName, timing);
+    if (name === 'custom') {
+      const { value, error } = validateSupplementName(suppName);
+      if (error) { setNameError(error); return; }
+      setSaving(true);
+      await addSupplement(value, timing);
+    } else {
+      setSaving(true);
+      await addSupplement(suppName, timing);
+    }
     setName('');
     setCustomName('');
+    setNameError(null);
     setSaving(false);
     onAdded?.();
   };
@@ -53,14 +69,18 @@ export default function SupplementSetup({ onAdded }) {
       </div>
 
       {name === 'custom' && (
-        <input
-          type="text"
-          value={customName}
-          onChange={(e) => setCustomName(e.target.value)}
-          placeholder="Supplement name"
-          className="w-full p-2 rounded text-white text-sm mb-3"
-          style={{ background: '#1a1a2e', border: '1px solid #2a2a3e' }}
-        />
+        <div className="mb-3">
+          <input
+            type="text"
+            value={customName}
+            onChange={handleCustomNameChange}
+            placeholder="Supplement name"
+            maxLength={50}
+            className="w-full p-2 rounded text-white text-sm"
+            style={{ background: '#1a1a2e', border: '1px solid #2a2a3e' }}
+          />
+          {nameError && <div className="text-red-500 text-xs mt-1">{nameError}</div>}
+        </div>
       )}
 
       <div className="flex gap-1.5 mb-3">

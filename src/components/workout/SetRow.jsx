@@ -1,10 +1,25 @@
+import { validateWeight, validateReps } from '../../lib/validation';
+
 export default function SetRow({ weight, reps, onWeightChange, onRepsChange }) {
+  const handleWeightChange = (e) => {
+    const { value } = validateWeight(e.target.value);
+    onWeightChange(value);
+  };
+
+  const handleRepsChange = (e) => {
+    const { value } = validateReps(e.target.value);
+    onRepsChange(value);
+  };
+
   return (
     <div style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
       <input
         type="number"
         value={weight}
-        onChange={(e) => onWeightChange(e.target.value)}
+        onChange={handleWeightChange}
+        min="0"
+        max="500"
+        step="any"
         style={{
           flex: 1,
           minWidth: 0,
@@ -18,13 +33,16 @@ export default function SetRow({ weight, reps, onWeightChange, onRepsChange }) {
           border: '1px solid #2a2a3e',
           boxSizing: 'border-box',
         }}
-        placeholder="\u2014"
+        placeholder="-"
         inputMode="decimal"
       />
       <input
         type="number"
         value={reps}
-        onChange={(e) => onRepsChange(e.target.value)}
+        onChange={handleRepsChange}
+        min="0"
+        max="200"
+        step="1"
         style={{
           flex: 1,
           minWidth: 0,
@@ -38,7 +56,7 @@ export default function SetRow({ weight, reps, onWeightChange, onRepsChange }) {
           border: '1px solid #2a2a3e',
           boxSizing: 'border-box',
         }}
-        placeholder="\u2014"
+        placeholder="-"
         inputMode="numeric"
       />
     </div>

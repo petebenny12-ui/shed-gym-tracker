@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import { stripHtml } from '../lib/validation';
 
 export function useWorkoutData() {
   const { user } = useAuth();
@@ -86,18 +87,23 @@ export function useWorkoutData() {
       return { error: sessionErr.message };
     }
 
-    // Create all sets
+    // Create all sets with validation
     const sets = [];
     for (const ex of exercises) {
       for (const set of ex.sets) {
         if (set.weight || set.reps) {
+          const weight = set.weight ? parseFloat(stripHtml(String(set.weight))) : null;
+          const reps = set.reps ? parseInt(stripHtml(String(set.reps)), 10) : null;
+          // Enforce bounds: weight 0-500, reps 0-200
+          if (weight != null && (isNaN(weight) || weight < 0 || weight > 500)) continue;
+          if (reps != null && (isNaN(reps) || reps < 0 || reps > 200)) continue;
           sets.push({
             session_id: session.id,
             exercise_id: ex.exerciseId,
             superset_label: ex.supersetLabel,
             set_number: set.setNumber,
-            weight_kg: set.weight ? parseFloat(set.weight) : null,
-            reps: set.reps ? parseInt(set.reps) : null,
+            weight_kg: weight,
+            reps: reps,
           });
         }
       }

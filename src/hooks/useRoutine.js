@@ -8,7 +8,10 @@ export function useRoutine() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
     fetchRoutine();
   }, [user]);
 

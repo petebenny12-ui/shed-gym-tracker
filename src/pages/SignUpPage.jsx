@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { signUp } from '../lib/auth';
+import { validateDisplayName, sanitizeText } from '../lib/validation';
 
 export default function SignUpPage() {
   const [displayName, setDisplayName] = useState('');
@@ -10,9 +11,20 @@ export default function SignUpPage() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  const handleDisplayNameChange = (e) => {
+    const { value } = validateDisplayName(e.target.value);
+    setDisplayName(value);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
+
+    const { value: cleanName, error: nameError } = validateDisplayName(displayName);
+    if (nameError) {
+      setError(nameError);
+      return;
+    }
 
     if (password.length < 6) {
       setError('Password must be at least 6 characters');
@@ -20,7 +32,7 @@ export default function SignUpPage() {
     }
 
     setLoading(true);
-    const { data, error } = await signUp({ email, password, displayName });
+    const { data, error } = await signUp({ email: sanitizeText(email), password, displayName: cleanName });
     setLoading(false);
 
     if (error) {
@@ -52,9 +64,10 @@ export default function SignUpPage() {
         <input
           type="text"
           value={displayName}
-          onChange={(e) => setDisplayName(e.target.value)}
+          onChange={handleDisplayNameChange}
           placeholder="Display Name"
           required
+          maxLength={30}
           className="w-full p-3 rounded text-white text-sm"
           style={{ background: '#1a1a2e', border: '1px solid #2a2a3e' }}
         />

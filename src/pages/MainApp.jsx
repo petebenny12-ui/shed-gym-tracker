@@ -8,10 +8,12 @@ import DataManager from '../components/data/DataManager';
 import RestDayNudge from '../components/alerts/RestDayNudge';
 import PlateauAlert from '../components/alerts/PlateauAlert';
 import SupplementChecklist from '../components/supplements/SupplementChecklist';
+import { useAuth } from '../context/AuthContext';
 import { useWorkoutData } from '../hooks/useWorkoutData';
 import { daysSinceLastSession, detectPlateaus } from '../lib/alerts';
 
 export default function MainApp() {
+  const { profile } = useAuth();
   const [view, setView] = useState('workout');
   const { fetchSessions } = useWorkoutData();
   const [daysSince, setDaysSince] = useState(0);
@@ -47,7 +49,7 @@ export default function MainApp() {
       <div style={{ maxHeight: 'calc(100vh - 44px)', overflowY: 'auto' }}>
         {view === 'workout' && <RestDayNudge daysSince={daysSince} />}
         {view === 'workout' && <PlateauAlert plateaus={plateaus} />}
-        {view === 'workout' && <SupplementChecklist />}
+        {view === 'workout' && profile?.settings?.supplements_enabled && <SupplementChecklist />}
         {renderView()}
       </div>
     </div>

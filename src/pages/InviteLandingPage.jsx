@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { signUp } from '../lib/auth';
+import { validateDisplayName, sanitizeText } from '../lib/validation';
 
 export default function InviteLandingPage() {
   const { code } = useParams();
@@ -106,12 +107,24 @@ export default function InviteLandingPage() {
     navigate('/');
   }
 
+  const handleDisplayNameChange = (e) => {
+    const { value } = validateDisplayName(e.target.value);
+    setDisplayName(value);
+  };
+
   async function handleSignUp(e) {
     e.preventDefault();
     setError(null);
+
+    const { value: cleanName, error: nameError } = validateDisplayName(displayName);
+    if (nameError) {
+      setError(nameError);
+      return;
+    }
+
     setSignUpLoading(true);
 
-    const { data, error } = await signUp({ email, password, displayName });
+    const { data, error } = await signUp({ email: sanitizeText(email), password, displayName: cleanName });
     setSignUpLoading(false);
 
     if (error) {
@@ -173,8 +186,8 @@ export default function InviteLandingPage() {
           <form onSubmit={handleSignUp} className="space-y-4">
             <div className="text-gray-400 text-xs text-center mb-2">Create your account to join</div>
             <input
-              type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)}
-              placeholder="Display Name" required
+              type="text" value={displayName} onChange={handleDisplayNameChange}
+              placeholder="Display Name" required maxLength={30}
               className="w-full p-3 rounded text-white text-sm"
               style={{ background: '#1a1a2e', border: '1px solid #2a2a3e' }}
             />

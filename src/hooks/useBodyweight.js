@@ -23,10 +23,12 @@ export function useBodyweight() {
 
   const logWeight = useCallback(async (weightKg) => {
     if (!user) return { error: 'Not authenticated' };
+    const num = parseFloat(weightKg);
+    if (isNaN(num) || num <= 0 || num > 500) return { error: 'Weight must be between 0 and 500 kg' };
     setLoading(true);
     const { data, error } = await supabase
       .from('bodyweight_logs')
-      .insert({ user_id: user.id, weight_kg: weightKg })
+      .insert({ user_id: user.id, weight_kg: num })
       .select()
       .single();
     setLoading(false);

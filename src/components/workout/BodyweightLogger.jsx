@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useBodyweight } from '../../hooks/useBodyweight';
+import { validateBodyweight } from '../../lib/validation';
 
 export default function BodyweightLogger() {
   const { fetchAll, logWeight } = useBodyweight();
   const [bodyweight, setBodyweight] = useState('');
+  const [bwError, setBwError] = useState(null);
   const [logs, setLogs] = useState([]);
   const [saved, setSaved] = useState(false);
 
@@ -22,9 +24,19 @@ export default function BodyweightLogger() {
     : 999;
   const needsWeeklyWeighIn = daysSinceLast >= 7;
 
+  const handleBodyweightChange = (e) => {
+    const { value, error } = validateBodyweight(e.target.value);
+    setBodyweight(value);
+    setBwError(error);
+  };
+
   const handleLog = async () => {
     if (!bodyweight) return;
-    const { data, error } = await logWeight(parseFloat(bodyweight));
+    const { error: valError } = validateBodyweight(bodyweight);
+    if (valError) { setBwError(valError); return; }
+    const parsed = parseFloat(bodyweight);
+    if (parsed <= 0) { setBwError('Must be positive'); return; }
+    const { data, error } = await logWeight(parsed);
     if (!error && data) {
       setLogs([...logs, data]);
       setBodyweight('');
@@ -50,10 +62,12 @@ export default function BodyweightLogger() {
         <input
           type="number"
           value={bodyweight}
-          onChange={(e) => setBodyweight(e.target.value)}
+          onChange={handleBodyweightChange}
           className="flex-1 p-2 rounded text-white text-center font-bold"
-          style={{ background: '#1a1a2e', border: '1px solid #2a2a3e' }}
+          style={{ background: '#1a1a2e', border: bwError ? '1px solid #ef4444' : '1px solid #2a2a3e' }}
           placeholder="120"
+          min="0"
+          max="500"
           step="0.1"
         />
         <button
@@ -64,6 +78,8 @@ export default function BodyweightLogger() {
           Log
         </button>
       </div>
+
+      {bwError && <div className="text-red-500 text-xs mt-1">{bwError}</div>}
 
       {rollingAvg && (
         <div className="flex justify-between mt-2">

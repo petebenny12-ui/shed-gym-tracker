@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import { sanitizeText } from '../lib/validation';
 
 export function useSupplements() {
   const { user } = useAuth();
@@ -20,9 +21,11 @@ export function useSupplements() {
 
   const addSupplement = useCallback(async (name, timing) => {
     if (!user) return null;
+    const cleanName = sanitizeText(name).slice(0, 50);
+    if (!cleanName) return { data: null, error: 'Name is required' };
     const { data, error } = await supabase
       .from('user_supplements')
-      .insert({ user_id: user.id, name, timing })
+      .insert({ user_id: user.id, name: cleanName, timing })
       .select()
       .single();
     return { data, error };
