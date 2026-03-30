@@ -15,7 +15,7 @@ export default function NavBar({ view, setView }) {
   return (
     <div
       className="flex items-center justify-between px-3 py-2"
-      style={{ background: '#0f0f18', borderBottom: '1px solid #2a2a3e' }}
+      style={{ background: '#0f0f18', borderBottom: '1px solid #2a2a3e', paddingTop: 'calc(env(safe-area-inset-top, 0px) + 8px)' }}
     >
       <button onClick={signOut} className="text-gray-500 text-xs uppercase tracking-wider">
         &larr; Out
