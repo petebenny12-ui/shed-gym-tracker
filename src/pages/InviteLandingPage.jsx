@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
+import { supabase, withTimeout } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { signUp } from '../lib/auth';
 import { validateDisplayName, sanitizeText } from '../lib/validation';
@@ -25,12 +25,16 @@ export default function InviteLandingPage() {
   }, [code]);
 
   async function loadInvite() {
-    const { data, error } = await supabase
-      .from('vs_partnerships')
-      .select('*')
-      .eq('invite_code', code)
-      .eq('status', 'pending')
-      .single();
+    console.log('[Invite] Loading invite code:', code);
+    const { data, error } = await withTimeout(
+      supabase
+        .from('vs_partnerships')
+        .select('*')
+        .eq('invite_code', code)
+        .eq('status', 'pending')
+        .single(),
+      'loadInvite'
+    );
 
     if (error || !data) {
       setError('This invite link is invalid or has already been used.');
@@ -41,11 +45,14 @@ export default function InviteLandingPage() {
     setInvite(data);
 
     // Get inviter name
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('display_name')
-      .eq('id', data.inviter_id)
-      .single();
+    const { data: profile } = await withTimeout(
+      supabase
+        .from('profiles')
+        .select('display_name')
+        .eq('id', data.inviter_id)
+        .single(),
+      'loadInviterProfile'
+    );
 
     setInviterName(profile?.display_name || 'Someone');
     setLoading(false);

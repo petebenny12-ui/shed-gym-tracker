@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase, withTimeout } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 
 export function useBodyweight() {
@@ -8,16 +8,18 @@ export function useBodyweight() {
 
   const fetchAll = useCallback(async () => {
     if (!user) return [];
-    const { data, error } = await supabase
-      .from('bodyweight_logs')
-      .select('id, weight_kg, logged_at')
-      .eq('user_id', user.id)
-      .order('logged_at', { ascending: true });
+    console.log('[Bodyweight] Fetching all logs...');
+    const { data, error } = await withTimeout(
+      supabase
+        .from('bodyweight_logs')
+        .select('id, weight_kg, logged_at')
+        .eq('user_id', user.id)
+        .order('logged_at', { ascending: true }),
+      'fetchBodyweight'
+    );
 
-    if (error) {
-      console.error('Bodyweight fetch error:', error);
-      return [];
-    }
+    if (error) return [];
+    console.log('[Bodyweight] Loaded', data?.length ?? 0, 'entries');
     return data || [];
   }, [user]);
 
@@ -26,11 +28,15 @@ export function useBodyweight() {
     const num = parseFloat(weightKg);
     if (isNaN(num) || num <= 0 || num > 500) return { error: 'Weight must be between 0 and 500 kg' };
     setLoading(true);
-    const { data, error } = await supabase
-      .from('bodyweight_logs')
-      .insert({ user_id: user.id, weight_kg: num })
-      .select()
-      .single();
+    console.log('[Bodyweight] Logging weight:', num);
+    const { data, error } = await withTimeout(
+      supabase
+        .from('bodyweight_logs')
+        .insert({ user_id: user.id, weight_kg: num })
+        .select()
+        .single(),
+      'logBodyweight'
+    );
     setLoading(false);
     return { data, error };
   }, [user]);

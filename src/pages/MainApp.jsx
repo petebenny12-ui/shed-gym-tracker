@@ -20,10 +20,17 @@ export default function MainApp() {
   const [plateaus, setPlateaus] = useState([]);
 
   useEffect(() => {
-    fetchSessions().then((sessions) => {
-      setDaysSince(daysSinceLastSession(sessions));
-      setPlateaus(detectPlateaus(sessions));
-    });
+    console.log('[MainApp] Mounted — fetching alert data...');
+    fetchSessions()
+      .then((sessions) => {
+        console.log('[MainApp] Alert data loaded —', sessions.length, 'sessions');
+        setDaysSince(daysSinceLastSession(sessions));
+        setPlateaus(detectPlateaus(sessions));
+      })
+      .catch((err) => {
+        console.error('[MainApp] Alert fetch failed (non-blocking):', err);
+        // Alerts are non-critical — app still works without them
+      });
   }, [fetchSessions]);
 
   const renderView = () => {

@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase, withTimeout } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 
 export function useRoutine() {
   const { user } = useAuth();
   const [days, setDays] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (!user) {
@@ -17,28 +18,35 @@ export function useRoutine() {
 
   async function fetchRoutine() {
     setLoading(true);
-    const { data: routines, error } = await supabase
-      .from('routines')
-      .select(`
-        id,
-        day_number,
-        title,
-        routine_supersets (
-          id,
-          label,
-          sort_order,
-          exercise1:exercises!exercise1_id ( id, name, muscle_group, load_type, has_demo ),
-          exercise2:exercises!exercise2_id ( id, name, muscle_group, load_type, has_demo )
-        )
-      `)
-      .eq('user_id', user.id)
-      .order('day_number');
+    setError(null);
+    console.log('[Routine] Fetching routine for user', user.id);
 
-    if (error) {
-      console.error('Routine fetch error:', error);
+    const { data: routines, error: fetchErr } = await withTimeout(
+      supabase
+        .from('routines')
+        .select(`
+          id,
+          day_number,
+          title,
+          routine_supersets (
+            id,
+            label,
+            sort_order,
+            exercise1:exercises!exercise1_id ( id, name, muscle_group, load_type, has_demo ),
+            exercise2:exercises!exercise2_id ( id, name, muscle_group, load_type, has_demo )
+          )
+        `)
+        .eq('user_id', user.id)
+        .order('day_number'),
+      'fetchRoutine'
+    );
+
+    if (fetchErr) {
+      setError(fetchErr.message || 'Failed to load routine');
       setDays([]);
     } else {
-      const mapped = routines.map((r) => ({
+      console.log('[Routine] Loaded', routines?.length ?? 0, 'days');
+      const mapped = (routines || []).map((r) => ({
         id: r.id,
         day: r.day_number,
         title: r.title,
@@ -56,5 +64,5 @@ export function useRoutine() {
     setLoading(false);
   }
 
-  return { days, loading, refetch: fetchRoutine };
+  return { days, loading, error, refetch: fetchRoutine };
 }

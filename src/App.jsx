@@ -8,8 +8,22 @@ import OnboardingPage from './pages/OnboardingPage';
 import InviteLandingPage from './pages/InviteLandingPage';
 import MainApp from './pages/MainApp';
 
+function ErrorScreen({ message }) {
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center gap-4 px-6" style={{ background: '#0a0a0f' }}>
+      <div className="text-red-500 font-bold uppercase tracking-wider text-center">{message}</div>
+      <button
+        onClick={() => window.location.reload()}
+        className="px-6 py-2 bg-amber-600 text-black font-bold rounded uppercase tracking-wider"
+      >
+        Refresh
+      </button>
+    </div>
+  );
+}
+
 function AppRoutes() {
-  const { session, profile, loading } = useAuth();
+  const { session, profile, loading, authError } = useAuth();
 
   if (loading) {
     return (
@@ -17,6 +31,10 @@ function AppRoutes() {
         <div className="text-amber-600 font-bold uppercase tracking-wider animate-pulse">Loading...</div>
       </div>
     );
+  }
+
+  if (authError) {
+    return <ErrorScreen message={authError} />;
   }
 
   return (
@@ -35,7 +53,7 @@ function AppRoutes() {
         path="/*"
         element={
           <ProtectedRoute>
-            {profile && !profile.onboarded ? <OnboardingPage /> : <MainApp />}
+            {!profile || !profile.onboarded ? <OnboardingPage /> : <MainApp />}
           </ProtectedRoute>
         }
       />

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../../lib/supabase';
+import { supabase, withTimeout } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { useWorkoutData } from '../../hooks/useWorkoutData';
 import ExerciseComparison from './ExerciseComparison';
@@ -24,14 +24,19 @@ export default function VSOverview() {
     setLoading(true);
 
     // Find active VS partnership
-    const { data: partnerships } = await supabase
-      .from('vs_partnerships')
-      .select('inviter_id, invitee_id')
-      .eq('status', 'accepted')
-      .or(`inviter_id.eq.${user.id},invitee_id.eq.${user.id}`)
-      .limit(1);
+    console.log('[VS] Loading partnership data...');
+    const { data: partnerships } = await withTimeout(
+      supabase
+        .from('vs_partnerships')
+        .select('inviter_id, invitee_id')
+        .eq('status', 'accepted')
+        .or(`inviter_id.eq.${user.id},invitee_id.eq.${user.id}`)
+        .limit(1),
+      'fetchPartnership'
+    );
 
     if (!partnerships || partnerships.length === 0) {
+      console.log('[VS] No active partnership found');
       setLoading(false);
       return;
     }
@@ -40,11 +45,14 @@ export default function VSOverview() {
     const partnerId = p.inviter_id === user.id ? p.invitee_id : p.inviter_id;
 
     // Fetch partner profile
-    const { data: partnerProfile } = await supabase
-      .from('profiles')
-      .select('display_name')
-      .eq('id', partnerId)
-      .single();
+    const { data: partnerProfile } = await withTimeout(
+      supabase
+        .from('profiles')
+        .select('display_name')
+        .eq('id', partnerId)
+        .single(),
+      'fetchPartnerProfile'
+    );
 
     setPartner({ id: partnerId, name: partnerProfile?.display_name || 'Partner' });
 

@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase, withTimeout } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { stripHtml } from '../lib/validation';
 
@@ -10,55 +10,61 @@ export function useWorkoutData() {
   // Fetch all sessions for the current user (with sets)
   const fetchSessions = useCallback(async () => {
     if (!user) return [];
-    const { data, error } = await supabase
-      .from('sessions')
-      .select(`
-        id,
-        day_number,
-        routine_id,
-        started_at,
-        finished_at,
-        session_sets (
+    console.log('[WorkoutData] Fetching all sessions...');
+    const { data, error } = await withTimeout(
+      supabase
+        .from('sessions')
+        .select(`
           id,
-          exercise_id,
-          superset_label,
-          set_number,
-          weight_kg,
-          reps,
-          exercises ( id, name, load_type )
-        )
-      `)
-      .eq('user_id', user.id)
-      .order('started_at', { ascending: false });
+          day_number,
+          routine_id,
+          started_at,
+          finished_at,
+          session_sets (
+            id,
+            exercise_id,
+            superset_label,
+            set_number,
+            weight_kg,
+            reps,
+            exercises ( id, name, load_type )
+          )
+        `)
+        .eq('user_id', user.id)
+        .order('started_at', { ascending: false }),
+      'fetchSessions'
+    );
 
-    if (error) {
-      console.error('Sessions fetch error:', error);
-      return [];
-    }
+    if (error) return [];
+    console.log('[WorkoutData] Sessions loaded:', data?.length ?? 0);
     return data || [];
   }, [user]);
 
   // Fetch last session for a specific day (for prepopulation)
   const fetchLastSession = useCallback(async (dayNumber) => {
     if (!user) return null;
-    const { data, error } = await supabase
-      .from('sessions')
-      .select(`
-        id,
-        session_sets (
-          exercise_id,
-          superset_label,
-          set_number,
-          weight_kg,
-          reps,
-          exercises ( id, name )
-        )
-      `)
-      .eq('user_id', user.id)
-      .eq('day_number', dayNumber)
-      .order('started_at', { ascending: false })
-      .limit(1)
-      .single();
+    console.log('[WorkoutData] Fetching last session for day', dayNumber);
+    const { data, error } = await withTimeout(
+      supabase
+        .from('sessions')
+        .select(`
+          id,
+          session_sets (
+            exercise_id,
+            superset_label,
+            set_number,
+            weight_kg,
+            reps,
+            exercises ( id, name )
+          )
+        `)
+        .eq('user_id', user.id)
+        .eq('day_number', dayNumber)
+        .order('started_at', { ascending: false })
+        .limit(1)
+        .single(),
+      'fetchLastSession'
+    );
 
     if (error) return null;
     return data;
@@ -68,19 +74,23 @@ export function useWorkoutData() {
   const saveSession = useCallback(async ({ routineId, dayNumber, startedAt, exercises }) => {
     if (!user) return { error: 'Not authenticated' };
     setLoading(true);
+    console.log('[WorkoutData] Saving session — day', dayNumber);
 
     // Create session
-    const { data: session, error: sessionErr } = await supabase
-      .from('sessions')
-      .insert({
-        user_id: user.id,
-        routine_id: routineId,
-        day_number: dayNumber,
-        started_at: startedAt || new Date().toISOString(),
-        finished_at: new Date().toISOString(),
-      })
-      .select()
-      .single();
+    const { data: session, error: sessionErr } = await withTimeout(
+      supabase
+        .from('sessions')
+        .insert({
+          user_id: user.id,
+          routine_id: routineId,
+          day_number: dayNumber,
+          started_at: startedAt || new Date().toISOString(),
+          finished_at: new Date().toISOString(),
+        })
+        .select()
+        .single(),
+      'saveSession (insert)'
+    );
 
     if (sessionErr) {
       setLoading(false);
@@ -110,7 +120,11 @@ export function useWorkoutData() {
     }
 
     if (sets.length > 0) {
-      const { error: setsErr } = await supabase.from('session_sets').insert(sets);
+      console.log('[WorkoutData] Saving', sets.length, 'sets...');
+      const { error: setsErr } = await withTimeout(
+        supabase.from('session_sets').insert(sets),
+        'saveSession (sets)'
+      );
       if (setsErr) {
         setLoading(false);
         return { error: setsErr.message };
@@ -123,23 +137,27 @@ export function useWorkoutData() {
 
   // Fetch sessions for a VS partner
   const fetchPartnerSessions = useCallback(async (partnerId) => {
-    const { data, error } = await supabase
-      .from('sessions')
-      .select(`
-        id,
-        day_number,
-        started_at,
-        session_sets (
-          exercise_id,
-          superset_label,
-          set_number,
-          weight_kg,
-          reps,
-          exercises ( id, name, load_type )
-        )
-      `)
-      .eq('user_id', partnerId)
-      .order('started_at', { ascending: false });
+    console.log('[WorkoutData] Fetching partner sessions for', partnerId);
+    const { data, error } = await withTimeout(
+      supabase
+        .from('sessions')
+        .select(`
+          id,
+          day_number,
+          started_at,
+          session_sets (
+            exercise_id,
+            superset_label,
+            set_number,
+            weight_kg,
+            reps,
+            exercises ( id, name, load_type )
+          )
+        `)
+        .eq('user_id', partnerId)
+        .order('started_at', { ascending: false }),
+      'fetchPartnerSessions'
+    );
 
     if (error) return [];
     return data || [];
