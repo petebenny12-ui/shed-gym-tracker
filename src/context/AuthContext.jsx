@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { supabase, withTimeout } from '../lib/supabase';
 
 const AuthContext = createContext(null);
@@ -10,9 +10,14 @@ export function AuthProvider({ children }) {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [authError, setAuthError] = useState(null);
+  const mountedRef = useRef(true);
+  // Track whether initial load has set the session so the session
+  // watcher useEffect doesn't double-fire on mount.
+  const initializedRef = useRef(false);
 
+  // 1. Initial session load — runs once on mount
   useEffect(() => {
-    let mounted = true;
+    mountedRef.current = true;
 
     async function init() {
       console.log('[Auth] Initializing — fetching session...');
@@ -23,7 +28,7 @@ export function AuthProvider({ children }) {
         );
         const { data: { session: s }, error } = await Promise.race([sessionPromise, timeout]);
 
-        if (!mounted) return;
+        if (!mountedRef.current) return;
 
         if (error) {
           console.error('[Auth] getSession error:', error);
@@ -34,15 +39,18 @@ export function AuthProvider({ children }) {
 
         console.log('[Auth] Session:', s ? `user ${s.user.id}` : 'none');
         setSession(s);
+        initializedRef.current = true;
 
+        // Fetch profile inline for initial load so we don't wait for
+        // the session-watcher useEffect to fire.
         if (s) {
-          await fetchProfile(s.user.id, mounted);
+          await fetchProfile(s.user);
         } else {
           setLoading(false);
         }
       } catch (err) {
         console.error('[Auth] Init failed:', err.message);
-        if (mounted) {
+        if (mountedRef.current) {
           setAuthError('Connection timed out. Please refresh the page.');
           setLoading(false);
         }
@@ -51,37 +59,48 @@ export function AuthProvider({ children }) {
 
     init();
 
-    // Listen for auth changes (sign in, sign out, token refresh)
+    // onAuthStateChange must NEVER make async Supabase calls.
+    // It only synchronously updates session state. A separate useEffect
+    // watches session and fetches the profile outside the lock.
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, newSession) => {
+      (event, newSession) => {
         console.log('[Auth] State change:', event);
-        if (!mounted) return;
+        if (!mountedRef.current) return;
         setSession(newSession);
-        if (newSession) {
-          await fetchProfile(newSession.user.id, mounted);
-        } else {
-          setProfile(null);
-          setLoading(false);
-        }
       }
     );
 
     return () => {
-      mounted = false;
+      mountedRef.current = false;
       subscription.unsubscribe();
     };
   }, []);
 
-  async function fetchProfile(userId, mounted = true) {
-    console.log('[Auth] Fetching profile for', userId);
+  // 2. React to session changes (from onAuthStateChange) — fetches profile
+  //    outside the auth lock so we never deadlock.
+  useEffect(() => {
+    // Skip the first run — init() already handled the initial session.
+    if (!initializedRef.current) return;
+
+    if (session) {
+      console.log('[Auth] Session changed — loading profile...');
+      fetchProfile(session.user);
+    } else {
+      setProfile(null);
+      setLoading(false);
+    }
+  }, [session]);
+
+  async function fetchProfile(user) {
+    console.log('[Auth] Fetching profile for', user.id);
     setAuthError(null);
 
     const { data, error } = await withTimeout(
-      supabase.from('profiles').select('*').eq('id', userId).maybeSingle(),
+      supabase.from('profiles').select('*').eq('id', user.id).maybeSingle(),
       'profile fetch'
     );
 
-    if (!mounted) return;
+    if (!mountedRef.current) return;
 
     if (error) {
       console.error('[Auth] Profile fetch failed:', error);
@@ -91,14 +110,15 @@ export function AuthProvider({ children }) {
       return;
     }
 
-    // Fallback: profile missing (trigger failed) — create it now
+    // Fallback: profile missing (trigger failed) — create it now.
+    // Use user.user_metadata from the session — never call supabase.auth.getUser()
+    // here, as that could re-enter the auth lock.
     if (!data) {
       console.warn('[Auth] No profile found — creating fallback profile');
-      const user = (await supabase.auth.getUser()).data?.user;
-      const displayName = user?.user_metadata?.display_name || 'User';
+      const displayName = user.user_metadata?.display_name || 'User';
 
       const { error: insertErr } = await withTimeout(
-        supabase.from('profiles').insert({ id: userId, display_name: displayName }),
+        supabase.from('profiles').insert({ id: user.id, display_name: displayName }),
         'profile insert (fallback)'
       );
 
@@ -111,11 +131,11 @@ export function AuthProvider({ children }) {
       }
 
       const { data: newProfile, error: refetchErr } = await withTimeout(
-        supabase.from('profiles').select('*').eq('id', userId).maybeSingle(),
+        supabase.from('profiles').select('*').eq('id', user.id).maybeSingle(),
         'profile re-fetch after insert'
       );
 
-      if (!mounted) return;
+      if (!mountedRef.current) return;
 
       if (refetchErr || !newProfile) {
         console.error('[Auth] Profile re-fetch failed:', refetchErr);
@@ -135,8 +155,8 @@ export function AuthProvider({ children }) {
   }
 
   async function refreshProfile() {
-    if (session?.user?.id) {
-      await fetchProfile(session.user.id);
+    if (session?.user) {
+      await fetchProfile(session.user);
     }
   }
 

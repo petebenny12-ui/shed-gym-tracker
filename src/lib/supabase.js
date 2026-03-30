@@ -7,7 +7,18 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.error('[Supabase] Missing env vars — VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY not set');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Workaround for Supabase Web Locks deadlock (supabase-js #1594).
+// The default lock implementation can deadlock when async Supabase calls
+// are made inside onAuthStateChange or during concurrent auth operations.
+const noOpLock = async (name, acquireTimeout, fn) => {
+  return await fn();
+};
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    lock: noOpLock,
+  },
+});
 
 const QUERY_TIMEOUT_MS = 10_000;
 
