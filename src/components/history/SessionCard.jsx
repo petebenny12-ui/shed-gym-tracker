@@ -1,7 +1,8 @@
 import { useState } from 'react';
 
-export default function SessionCard({ session, dayTitle }) {
+export default function SessionCard({ session, dayTitle, onEdit, onDelete }) {
   const [expanded, setExpanded] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   // Group sets by exercise
   const exerciseMap = {};
@@ -57,6 +58,43 @@ export default function SessionCard({ session, dayTitle }) {
               </div>
             </div>
           ))}
+
+          {/* Edit / Delete actions */}
+          <div className="flex gap-2 pt-2" style={{ borderTop: '1px solid #1a1a2e' }}>
+            <button
+              onClick={(e) => { e.stopPropagation(); onEdit(); }}
+              className="flex-1 py-1.5 text-xs font-bold uppercase rounded"
+              style={{ background: '#1a1a2e', color: '#d97706', border: '1px solid #2a2a3e' }}
+            >
+              Edit
+            </button>
+            {!confirmDelete ? (
+              <button
+                onClick={(e) => { e.stopPropagation(); setConfirmDelete(true); }}
+                className="flex-1 py-1.5 text-xs font-bold uppercase rounded"
+                style={{ background: '#1a1a2e', color: '#ef4444', border: '1px solid #2a2a3e' }}
+              >
+                Delete
+              </button>
+            ) : (
+              <div className="flex-1 flex gap-1">
+                <button
+                  onClick={(e) => { e.stopPropagation(); onDelete(); }}
+                  className="flex-1 py-1.5 text-xs font-bold uppercase rounded"
+                  style={{ background: '#ef4444', color: '#fff' }}
+                >
+                  Confirm
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); setConfirmDelete(false); }}
+                  className="flex-1 py-1.5 text-xs font-bold uppercase rounded"
+                  style={{ background: '#1a1a2e', color: '#9ca3af', border: '1px solid #2a2a3e' }}
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

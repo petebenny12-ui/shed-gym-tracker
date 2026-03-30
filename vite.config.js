@@ -9,8 +9,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icons/icon-192.png', 'icons/icon-512.png'],
       manifest: {
-        name: 'SHED GYM',
-        short_name: 'SHED GYM',
+        name: 'Shed Gym',
+        short_name: 'Shed Gym',
         description: 'Workout tracking for the shed',
         start_url: '/',
         display: 'standalone',

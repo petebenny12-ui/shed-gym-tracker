@@ -163,5 +163,80 @@ export function useWorkoutData() {
     return data || [];
   }, []);
 
-  return { fetchSessions, fetchLastSession, saveSession, fetchPartnerSessions, loading };
+  // Delete a session and all its sets
+  const deleteSession = useCallback(async (sessionId) => {
+    if (!user) return { error: 'Not authenticated' };
+    setLoading(true);
+
+    // Delete sets first (foreign key)
+    const { error: setsErr } = await withTimeout(
+      supabase.from('session_sets').delete().eq('session_id', sessionId),
+      'deleteSession (sets)'
+    );
+    if (setsErr) { setLoading(false); return { error: setsErr.message }; }
+
+    const { error: sessionErr } = await withTimeout(
+      supabase.from('sessions').delete().eq('id', sessionId).eq('user_id', user.id),
+      'deleteSession'
+    );
+    setLoading(false);
+    if (sessionErr) return { error: sessionErr.message };
+    return { error: null };
+  }, [user]);
+
+  // Update a session's sets (delete old sets, insert new ones)
+  const updateSession = useCallback(async (sessionId, { dayNumber, startedAt, exercises }) => {
+    if (!user) return { error: 'Not authenticated' };
+    setLoading(true);
+
+    // Update session metadata
+    const { error: sessionErr } = await withTimeout(
+      supabase.from('sessions')
+        .update({ day_number: dayNumber, started_at: startedAt })
+        .eq('id', sessionId)
+        .eq('user_id', user.id),
+      'updateSession'
+    );
+    if (sessionErr) { setLoading(false); return { error: sessionErr.message }; }
+
+    // Replace all sets: delete old, insert new
+    const { error: delErr } = await withTimeout(
+      supabase.from('session_sets').delete().eq('session_id', sessionId),
+      'updateSession (delete sets)'
+    );
+    if (delErr) { setLoading(false); return { error: delErr.message }; }
+
+    const sets = [];
+    for (const ex of exercises) {
+      for (const set of ex.sets) {
+        if (set.weight || set.reps) {
+          const weight = set.weight ? parseFloat(stripHtml(String(set.weight))) : null;
+          const reps = set.reps ? parseInt(stripHtml(String(set.reps)), 10) : null;
+          if (weight != null && (isNaN(weight) || weight < 0 || weight > 500)) continue;
+          if (reps != null && (isNaN(reps) || reps < 0 || reps > 200)) continue;
+          sets.push({
+            session_id: sessionId,
+            exercise_id: ex.exerciseId,
+            superset_label: ex.supersetLabel,
+            set_number: set.setNumber,
+            weight_kg: weight,
+            reps: reps,
+          });
+        }
+      }
+    }
+
+    if (sets.length > 0) {
+      const { error: setsErr } = await withTimeout(
+        supabase.from('session_sets').insert(sets),
+        'updateSession (insert sets)'
+      );
+      if (setsErr) { setLoading(false); return { error: setsErr.message }; }
+    }
+
+    setLoading(false);
+    return { error: null };
+  }, [user]);
+
+  return { fetchSessions, fetchLastSession, saveSession, deleteSession, updateSession, fetchPartnerSessions, loading };
 }

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
+import { resetInstallDismissal } from '../layout/InstallPrompt';
 
 export default function PreferencesSection({ onStatus }) {
   const { profile, refreshProfile } = useAuth();
@@ -28,6 +29,14 @@ export default function PreferencesSection({ onStatus }) {
     { key: 'warmup_enabled', label: 'Warm-Up Section', desc: 'Show warm-up guidance before workout' },
     { key: 'cooldown_enabled', label: 'Cool-Down Section', desc: 'Show cool-down guidance after workout' },
   ];
+
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+    || navigator.standalone === true;
+
+  const handleInstallApp = () => {
+    resetInstallDismissal();
+    onStatus('Install prompt will show on next page load');
+  };
 
   return (
     <div className="p-3 rounded-lg" style={{ background: '#12121f', border: '1px solid #2a2a3e' }}>
@@ -57,6 +66,21 @@ export default function PreferencesSection({ onStatus }) {
             </button>
           </div>
         ))}
+        {!isStandalone && (
+          <div className="flex items-center justify-between pt-2" style={{ borderTop: '1px solid #1a1a2e' }}>
+            <div>
+              <div className="text-white text-sm">Install App</div>
+              <div className="text-gray-600 text-xs">Add Shed Gym to your home screen</div>
+            </div>
+            <button
+              onClick={handleInstallApp}
+              className="px-3 py-1 text-xs font-bold uppercase rounded"
+              style={{ background: '#d97706', color: '#0a0a0f' }}
+            >
+              Install
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

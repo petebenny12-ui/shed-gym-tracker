@@ -8,6 +8,7 @@ import DataManager from '../components/data/DataManager';
 import RestDayNudge from '../components/alerts/RestDayNudge';
 import PlateauAlert from '../components/alerts/PlateauAlert';
 import SupplementChecklist from '../components/supplements/SupplementChecklist';
+import InstallPrompt from '../components/layout/InstallPrompt';
 import { useAuth } from '../context/AuthContext';
 import { useWorkoutData } from '../hooks/useWorkoutData';
 import { daysSinceLastSession, detectPlateaus } from '../lib/alerts';
@@ -54,6 +55,7 @@ export default function MainApp() {
     <div className="min-h-screen" style={{ background: '#0a0a0f' }}>
       <NavBar view={view} setView={setView} />
       <div style={{ maxHeight: 'calc(100vh - 44px)', overflowY: 'auto' }}>
+        <InstallPrompt />
         {view === 'workout' && <RestDayNudge daysSince={daysSince} />}
         {view === 'workout' && <PlateauAlert plateaus={plateaus} />}
         {view === 'workout' && profile?.settings?.supplements_enabled && <SupplementChecklist />}
