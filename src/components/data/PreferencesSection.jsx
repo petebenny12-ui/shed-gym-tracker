@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
-import { triggerInstall, resetInstallDismissal } from '../layout/InstallPrompt';
+import { triggerInstall, resetInstallDismissal, getIOSBrowser } from '../layout/InstallPrompt';
 
 export default function PreferencesSection({ onStatus }) {
   const { profile, refreshProfile } = useAuth();
@@ -33,11 +33,15 @@ export default function PreferencesSection({ onStatus }) {
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches
     || navigator.standalone === true;
 
+  const [showIOSTip, setShowIOSTip] = useState(false);
+
   const handleInstallApp = async () => {
     resetInstallDismissal();
-    const accepted = await triggerInstall();
-    if (accepted) {
+    const result = await triggerInstall();
+    if (result === true) {
       onStatus('App installed!');
+    } else if (result === 'ios') {
+      setShowIOSTip(true);
     } else {
       onStatus('Install prompt will show on next page load');
     }
@@ -72,18 +76,29 @@ export default function PreferencesSection({ onStatus }) {
           </div>
         ))}
         {!isStandalone && (
-          <div className="flex items-center justify-between pt-2" style={{ borderTop: '1px solid #1a1a2e' }}>
-            <div>
-              <div className="text-white text-sm">Install App</div>
-              <div className="text-gray-600 text-xs">Add Shed Gym to your home screen</div>
+          <div className="pt-2" style={{ borderTop: '1px solid #1a1a2e' }}>
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-white text-sm">Install App</div>
+                <div className="text-gray-600 text-xs">Add Shed Gym to your home screen</div>
+              </div>
+              <button
+                onClick={handleInstallApp}
+                className="px-3 py-1 text-xs font-bold uppercase rounded"
+                style={{ background: '#d97706', color: '#0a0a0f' }}
+              >
+                Install
+              </button>
             </div>
-            <button
-              onClick={handleInstallApp}
-              className="px-3 py-1 text-xs font-bold uppercase rounded"
-              style={{ background: '#d97706', color: '#0a0a0f' }}
-            >
-              Install
-            </button>
+            {showIOSTip && (
+              <div className="mt-2 p-2 rounded text-xs text-gray-400" style={{ background: '#0a0a0f' }}>
+                {getIOSBrowser() === 'safari' ? (
+                  <>Tap <span className="text-white font-bold">Share</span> (↑) then <span className="text-white font-bold">Add to Home Screen</span></>
+                ) : (
+                  <>Open this page in <span className="text-white font-bold">Safari</span>, tap <span className="text-white font-bold">Share</span> (↑), then <span className="text-white font-bold">Add to Home Screen</span></>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>
