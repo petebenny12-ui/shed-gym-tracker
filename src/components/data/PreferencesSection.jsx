@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
-import { resetInstallDismissal } from '../layout/InstallPrompt';
+import { triggerInstall, resetInstallDismissal } from '../layout/InstallPrompt';
 
 export default function PreferencesSection({ onStatus }) {
   const { profile, refreshProfile } = useAuth();
@@ -33,9 +33,14 @@ export default function PreferencesSection({ onStatus }) {
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches
     || navigator.standalone === true;
 
-  const handleInstallApp = () => {
+  const handleInstallApp = async () => {
     resetInstallDismissal();
-    onStatus('Install prompt will show on next page load');
+    const accepted = await triggerInstall();
+    if (accepted) {
+      onStatus('App installed!');
+    } else {
+      onStatus('Install prompt will show on next page load');
+    }
   };
 
   return (

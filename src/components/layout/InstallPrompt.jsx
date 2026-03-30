@@ -3,6 +3,9 @@ import { useState, useEffect } from 'react';
 const DISMISS_KEY = 'pwa-install-dismissed';
 const RESHOW_DAYS = 7;
 
+// Module-level so settings page can trigger install too
+let _deferredPrompt = null;
+
 function isDismissed() {
   const val = localStorage.getItem(DISMISS_KEY);
   if (!val) return false;
@@ -20,8 +23,16 @@ function isStandalone() {
     || navigator.standalone === true;
 }
 
+// Trigger install from anywhere (e.g. settings page)
+export async function triggerInstall() {
+  if (!_deferredPrompt) return false;
+  _deferredPrompt.prompt();
+  const { outcome } = await _deferredPrompt.userChoice;
+  _deferredPrompt = null;
+  return outcome === 'accepted';
+}
+
 export default function InstallPrompt() {
-  const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showBanner, setShowBanner] = useState(false);
   const [showIOSGuide, setShowIOSGuide] = useState(false);
 
@@ -36,7 +47,7 @@ export default function InstallPrompt() {
 
     const handler = (e) => {
       e.preventDefault();
-      setDeferredPrompt(e);
+      _deferredPrompt = e;
       setShowBanner(true);
     };
     window.addEventListener('beforeinstallprompt', handler);
@@ -44,13 +55,8 @@ export default function InstallPrompt() {
   }, []);
 
   const handleInstall = async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      setShowBanner(false);
-    }
-    setDeferredPrompt(null);
+    const accepted = await triggerInstall();
+    if (accepted) setShowBanner(false);
   };
 
   const handleDismiss = () => {
