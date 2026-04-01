@@ -35,6 +35,8 @@ export default function VSOverview() {
       'fetchPartnership'
     );
 
+    console.log('[VS] Partnership query result:', partnerships);
+
     if (!partnerships || partnerships.length === 0) {
       console.log('[VS] No active partnership found');
       setLoading(false);
@@ -85,6 +87,13 @@ export default function VSOverview() {
           VS
         </h2>
         <div className="text-gray-500 mb-4">No VS partner linked yet.</div>
+        <button
+          onClick={loadVSData}
+          className="mb-4 px-4 py-2 text-xs font-bold uppercase tracking-wider rounded"
+          style={{ background: '#1a1a2e', color: '#d97706', border: '1px solid #2a2a3e' }}
+        >
+          Retry
+        </button>
         <InvitePartner />
       </div>
     );

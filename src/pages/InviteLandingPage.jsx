@@ -61,14 +61,39 @@ export default function InviteLandingPage() {
   async function handleAccept() {
     if (!user || !invite) return;
     setSignUpLoading(true);
+    setError(null);
 
     // Accept the invite
-    await supabase.from('vs_partnerships').update({
+    console.log('[Invite] Accepting invite:', invite.id, 'as user:', user.id);
+    const { error: updateError } = await supabase.from('vs_partnerships').update({
       invitee_id: user.id,
       status: 'accepted',
       routine_mode: 'copy',
       accepted_at: new Date().toISOString(),
     }).eq('id', invite.id);
+
+    if (updateError) {
+      console.error('[Invite] Update failed:', updateError);
+      setError('Failed to accept invite. Please try again.');
+      setSignUpLoading(false);
+      return;
+    }
+
+    // Verify the update actually worked
+    const { data: verified } = await supabase
+      .from('vs_partnerships')
+      .select('id, status, invitee_id')
+      .eq('id', invite.id)
+      .single();
+
+    console.log('[Invite] Verified partnership after update:', verified);
+
+    if (!verified || verified.status !== 'accepted') {
+      console.error('[Invite] Update appeared to succeed but row not updated:', verified);
+      setError('Something went wrong accepting the invite. Please try again.');
+      setSignUpLoading(false);
+      return;
+    }
 
     // Copy inviter's routine
     const { data: inviterRoutines } = await supabase

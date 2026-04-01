@@ -10,6 +10,31 @@ export default function InvitePartner({ onInviteSent }) {
 
   const generateInvite = async () => {
     setLoading(true);
+
+    // Check for existing pending or accepted partnership
+    const { data: existing } = await supabase
+      .from('vs_partnerships')
+      .select('id, status, invite_code')
+      .or(`inviter_id.eq.${user.id},invitee_id.eq.${user.id}`)
+      .in('status', ['pending', 'accepted']);
+
+    if (existing && existing.length > 0) {
+      const accepted = existing.find(p => p.status === 'accepted');
+      if (accepted) {
+        console.log('[Invite] Already have an accepted partnership');
+        setLoading(false);
+        return;
+      }
+      const pending = existing.find(p => p.status === 'pending');
+      if (pending) {
+        // Reuse existing pending invite
+        const link = `${window.location.origin}/invite/${pending.invite_code}`;
+        setInviteLink(link);
+        setLoading(false);
+        return;
+      }
+    }
+
     const code = crypto.randomUUID().slice(0, 8);
 
     const { error } = await supabase.from('vs_partnerships').insert({
