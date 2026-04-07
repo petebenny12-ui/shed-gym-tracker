@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { useTimer } from '../../hooks/useTimer';
@@ -11,18 +11,64 @@ import PRCelebration from '../alerts/PRCelebration';
 import WarmUpSection from '../warmup/WarmUpSection';
 import CoolDownSection from '../warmup/CoolDownSection';
 
+function getStorageKey(userId, dayNumber) {
+  return `workout-progress-${userId}-${dayNumber}`;
+}
+
 export default function WorkoutSession({ day, onBack }) {
   const { user, profile } = useAuth();
   const { saveSession } = useWorkoutData();
   const { timerCount, alarmOn, startTimer, toggleAlarm } = useTimer();
-  const [entries, setEntries] = useState(day._prefilled || {});
+
+  const storageKey = getStorageKey(user?.id, day.day);
+
+  // Restore saved progress from localStorage if available
+  const restored = useRef(false);
+  const initState = () => {
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (raw) {
+        const saved = JSON.parse(raw);
+        if (saved.entries && Object.keys(saved.entries).length > 0) {
+          restored.current = true;
+          return saved;
+        }
+      }
+    } catch { /* ignore corrupt data */ }
+    return null;
+  };
+
+  const savedProgress = useRef(initState());
+  const [entries, setEntries] = useState(savedProgress.current?.entries || day._prefilled || {});
   const [saved, setSaved] = useState(false);
+  const [resumed, setResumed] = useState(restored.current);
   const [demoExercise, setDemoExercise] = useState(null);
   const [prInfo, setPrInfo] = useState(null);
-  const [sessionDate, setSessionDate] = useState(new Date().toISOString().slice(0, 10));
-  const startedAtRef = useRef(new Date().toISOString());
+  const [sessionDate, setSessionDate] = useState(
+    savedProgress.current?.sessionDate || new Date().toISOString().slice(0, 10)
+  );
+  const startedAtRef = useRef(savedProgress.current?.startedAt || new Date().toISOString());
 
-  const hasPrefill = Object.keys(day._prefilled || {}).length > 0;
+  const hasPrefill = !restored.current && Object.keys(day._prefilled || {}).length > 0;
+
+  // Dismiss resumed banner after 3 seconds
+  useEffect(() => {
+    if (resumed) {
+      const t = setTimeout(() => setResumed(false), 3000);
+      return () => clearTimeout(t);
+    }
+  }, [resumed]);
+
+  // Auto-save to localStorage on every change
+  useEffect(() => {
+    try {
+      localStorage.setItem(storageKey, JSON.stringify({
+        entries,
+        sessionDate,
+        startedAt: startedAtRef.current,
+      }));
+    } catch { /* storage full — non-critical */ }
+  }, [entries, sessionDate, storageKey]);
 
   const updateSet = (exKey, idx, field, val) => {
     const sets = entries[exKey] || [{ weight: '', reps: '' }, { weight: '', reps: '' }, { weight: '', reps: '' }];
@@ -71,6 +117,9 @@ export default function WorkoutSession({ day, onBack }) {
     });
 
     if (!error) {
+      // Clear saved progress — workout is committed
+      try { localStorage.removeItem(storageKey); } catch { /* ok */ }
+
       // Check for PRs
       await checkPRs(exercises);
 
@@ -137,7 +186,14 @@ export default function WorkoutSession({ day, onBack }) {
         />
       </div>
 
-      {hasPrefill && !saved && (
+      {resumed && (
+        <div className="text-xs text-center mb-2 py-1.5 rounded font-bold uppercase tracking-wider"
+          style={{ background: '#1a2e1a', color: '#22c55e', border: '1px solid #2a3e2a' }}>
+          Resumed your session
+        </div>
+      )}
+
+      {hasPrefill && !saved && !resumed && (
         <div className="text-gray-500 text-xs text-center mb-2 italic">
           Prefilled from your last session — adjust and go
         </div>
