@@ -6,6 +6,7 @@ import ExerciseComparison from './ExerciseComparison';
 import VolumeComparison from './VolumeComparison';
 import InvitePartner from './InvitePartner';
 import PRFeed from './PRFeed';
+import BeastScore from './BeastScore';
 
 export default function VSOverview() {
   const { user, profile } = useAuth();
@@ -161,6 +162,13 @@ export default function VSOverview() {
       >
         {myName} vs {theirName}
       </h2>
+
+      <BeastScore
+        mySessions={mySessions}
+        partnerSessions={partnerSessions}
+        myName={myName}
+        theirName={theirName}
+      />
 
       {comparisons.length === 0 ? (
         <div className="text-gray-500 text-center py-8">Both of you need to log sessions first.</div>
