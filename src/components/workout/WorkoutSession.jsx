@@ -15,6 +15,8 @@ function getStorageKey(userId, dayNumber) {
   return `workout-progress-${userId}-${dayNumber}`;
 }
 
+const SESSION_TIMEOUT_MS = 120 * 60 * 1000;
+
 export default function WorkoutSession({ day, onBack }) {
   const { user, profile } = useAuth();
   const { saveSession } = useWorkoutData();
@@ -29,6 +31,11 @@ export default function WorkoutSession({ day, onBack }) {
       const raw = localStorage.getItem(storageKey);
       if (raw) {
         const saved = JSON.parse(raw);
+        const age = saved.savedAt ? Date.now() - saved.savedAt : Infinity;
+        if (age > SESSION_TIMEOUT_MS) {
+          localStorage.removeItem(storageKey);
+          return null;
+        }
         if (saved.entries && Object.keys(saved.entries).length > 0) {
           restored.current = true;
           return saved;
@@ -66,6 +73,7 @@ export default function WorkoutSession({ day, onBack }) {
         entries,
         sessionDate,
         startedAt: startedAtRef.current,
+        savedAt: Date.now(),
       }));
     } catch { /* storage full — non-critical */ }
   }, [entries, sessionDate, storageKey]);

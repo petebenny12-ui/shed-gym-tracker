@@ -7,6 +7,7 @@ import VerifyEmailPage from './pages/VerifyEmailPage';
 import OnboardingPage from './pages/OnboardingPage';
 import InviteLandingPage from './pages/InviteLandingPage';
 import MainApp from './pages/MainApp';
+import SplashScreen from './components/layout/SplashScreen';
 
 function ErrorScreen({ message }) {
   return (
@@ -64,6 +65,7 @@ function AppRoutes() {
 export default function App() {
   return (
     <AuthProvider>
+      <SplashScreen />
       <AppRoutes />
     </AuthProvider>
   );
