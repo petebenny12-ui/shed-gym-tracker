@@ -3,6 +3,11 @@ import { useEffect, useState } from 'react';
 const SESSION_TIMEOUT_MS = 120 * 60 * 1000;
 const FLAG_KEY = 'splash-shown';
 
+const FADE_IN_MS = 1500;
+const HOLD_MS = 2000;
+const FADE_OUT_MS = 1500;
+const FAILSAFE_MS = 6000;
+
 function hasResumableWorkout() {
   try {
     for (let i = 0; i < localStorage.length; i++) {
@@ -27,31 +32,61 @@ function shouldShow() {
 }
 
 export default function SplashScreen() {
-  // phase: 'mount' (opacity 0, before fade-in), 'visible' (opacity 1), 'fading' (opacity 0), 'gone'
+  // phase: 'mount' (opacity 0, pre-fade-in), 'visible' (opacity 1), 'fading' (opacity 0), 'gone'
   const [phase, setPhase] = useState(() => (shouldShow() ? 'mount' : 'gone'));
 
   useEffect(() => {
-    if (phase !== 'mount') return;
+    if (phase === 'gone') return;
     try { sessionStorage.setItem(FLAG_KEY, '1'); } catch { /* ignore */ }
-    const raf = requestAnimationFrame(() => setPhase('visible'));
-    const t1 = setTimeout(() => setPhase('fading'), 1500 + 2000);
-    const t2 = setTimeout(() => setPhase('gone'), 1500 + 2000 + 1500);
+
+    console.log('[Splash] mounted, beginning fade-in');
+
+    const raf = requestAnimationFrame(() => {
+      console.log('[Splash] fade-in start');
+      setPhase('visible');
+    });
+
+    const tHold = setTimeout(() => {
+      console.log('[Splash] hold complete, fade-out start');
+      setPhase('fading');
+    }, FADE_IN_MS + HOLD_MS);
+
+    const tGone = setTimeout(() => {
+      console.log('[Splash] removed from DOM');
+      setPhase('gone');
+    }, FADE_IN_MS + HOLD_MS + FADE_OUT_MS);
+
+    // Hard failsafe — kill the splash no matter what
+    const tFailsafe = setTimeout(() => {
+      console.warn('[Splash] FAILSAFE fired — forcing removal');
+      setPhase('gone');
+    }, FAILSAFE_MS);
+
     return () => {
       cancelAnimationFrame(raf);
-      clearTimeout(t1);
-      clearTimeout(t2);
+      clearTimeout(tHold);
+      clearTimeout(tGone);
+      clearTimeout(tFailsafe);
     };
-  }, [phase]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // run ONCE — phase changes must not re-run this effect
 
   if (phase === 'gone') return null;
 
   const opacity = phase === 'visible' ? 1 : 0;
 
+  const handleTransitionEnd = () => {
+    if (phase === 'fading') {
+      console.log('[Splash] transitionend after fade-out — removing');
+      setPhase('gone');
+    }
+  };
+
   const layerStyle = {
     position: 'absolute',
     inset: 0,
     opacity,
-    transition: 'opacity 1.5s ease-in-out',
+    transition: `opacity ${phase === 'mount' || phase === 'visible' ? FADE_IN_MS : FADE_OUT_MS}ms ease-in-out`,
   };
 
   return (
@@ -65,6 +100,7 @@ export default function SplashScreen() {
       }}
     >
       <div
+        onTransitionEnd={handleTransitionEnd}
         style={{
           ...layerStyle,
           backgroundImage: 'url(/splash.jpg)',
