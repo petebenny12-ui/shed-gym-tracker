@@ -31,7 +31,9 @@ export default function DaySelector({ days, onSelectDay }) {
       for (const ss of day.supersets) {
         const ex1Key = `${ss.label}1`;
         const ex2Key = `${ss.label}2`;
-        for (const [key, ex] of [[ex1Key, ss.ex1], [ex2Key, ss.ex2]]) {
+        const pairs = [[ex1Key, ss.ex1]];
+        if (ss.ex2) pairs.push([ex2Key, ss.ex2]);
+        for (const [key, ex] of pairs) {
           const prevSets = lastSession.session_sets
             .filter((s) => s.exercise_id === ex.id)
             .sort((a, b) => a.set_number - b.set_number);

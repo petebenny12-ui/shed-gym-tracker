@@ -6,7 +6,7 @@ const tabs = [
   { id: 'history', label: 'LOG' },
   { id: 'progress', label: 'CHARTS' },
   { id: 'compare', label: 'VS' },
-  { id: 'data', label: 'DATA' },
+  { id: 'settings', label: 'SETTINGS' },
 ];
 
 export default function NavBar({ view, setView }) {

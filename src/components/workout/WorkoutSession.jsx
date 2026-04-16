@@ -96,7 +96,9 @@ export default function WorkoutSession({ day, onBack }) {
     for (const ss of day.supersets) {
       const ex1Key = `${ss.label}1`;
       const ex2Key = `${ss.label}2`;
-      for (const [key, ex] of [[ex1Key, ss.ex1], [ex2Key, ss.ex2]]) {
+      const pairs = [[ex1Key, ss.ex1]];
+      if (ss.ex2) pairs.push([ex2Key, ss.ex2]);
+      for (const [key, ex] of pairs) {
         const sets = (entries[key] || [])
           .map((s, i) => ({ setNumber: i + 1, weight: s.weight, reps: s.reps }))
           .filter((s) => s.weight || s.reps);

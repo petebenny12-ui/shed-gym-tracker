@@ -51,12 +51,14 @@ export function useRoutine() {
         day: r.day_number,
         title: r.title,
         supersets: (r.routine_supersets || [])
-          .sort((a, b) => a.label.localeCompare(b.label))
+          .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0) || a.label.localeCompare(b.label))
           .map((ss) => ({
             id: ss.id,
             label: ss.label,
             ex1: { id: ss.exercise1.id, name: ss.exercise1.name, muscleGroup: ss.exercise1.muscle_group, loadType: ss.exercise1.load_type, hasDemo: ss.exercise1.has_demo },
-            ex2: { id: ss.exercise2.id, name: ss.exercise2.name, muscleGroup: ss.exercise2.muscle_group, loadType: ss.exercise2.load_type, hasDemo: ss.exercise2.has_demo },
+            ex2: ss.exercise2
+              ? { id: ss.exercise2.id, name: ss.exercise2.name, muscleGroup: ss.exercise2.muscle_group, loadType: ss.exercise2.load_type, hasDemo: ss.exercise2.has_demo }
+              : null,
           })),
       }));
       setDays(mapped);

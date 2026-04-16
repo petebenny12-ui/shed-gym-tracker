@@ -1,10 +1,10 @@
 import SetRow from './SetRow';
 
-export default function ExerciseColumn({ exercise, sets, onUpdateSet, onAddSet, onShowDemo, isRight }) {
+export default function ExerciseColumn({ exercise, sets, onUpdateSet, onAddSet, onShowDemo, isRight, fullWidth }) {
   return (
     <div
       style={{
-        width: '50%',
+        width: fullWidth ? '100%' : '50%',
         boxSizing: 'border-box',
         padding: '6px',
         borderLeft: isRight ? '1px solid #2a2a3e' : 'none',
