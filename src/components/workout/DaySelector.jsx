@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useWorkoutData } from '../../hooks/useWorkoutData';
 import BodyweightLogger from './BodyweightLogger';
-import { C, SERIF, CARD_DEPTH } from '../../config/constants';
+import { C, FONTS, SPACE, DayChooserRow, SectionLabel } from '../../design';
 
 export default function DaySelector({ days, onSelectDay }) {
   const { fetchSessions, fetchLastSession } = useWorkoutData();
@@ -24,7 +24,6 @@ export default function DaySelector({ days, onSelectDay }) {
   }, [fetchSessions]);
 
   const handleDayClick = async (day) => {
-    // Prepopulate from last session
     const lastSession = await fetchLastSession(day.day);
     const prefilled = {};
 
@@ -52,37 +51,39 @@ export default function DaySelector({ days, onSelectDay }) {
   };
 
   return (
-    <div className="p-4 space-y-3">
+    <div style={{ padding: SPACE.lg }}>
       <h2
-        className="text-lg font-bold uppercase tracking-wider mb-4"
-        style={{ fontFamily: SERIF, color: C.text }}
+        style={{
+          fontFamily: FONTS.serif,
+          color: C.text,
+          fontSize: 22,
+          fontWeight: 700,
+          letterSpacing: 0.8,
+          textTransform: 'uppercase',
+          marginBottom: SPACE.lg,
+        }}
       >
         Choose Your Day
       </h2>
 
-      {days.map((day) => (
-        <button
-          key={day.day}
-          onClick={() => handleDayClick(day)}
-          className="w-full text-left p-4 rounded-lg border transition-all"
-          style={{ background: C.card, borderColor: C.border, boxShadow: CARD_DEPTH }}
-          onMouseEnter={(e) => (e.currentTarget.style.borderColor = C.amber)}
-          onMouseLeave={(e) => (e.currentTarget.style.borderColor = C.border)}
-        >
-          <div className="flex justify-between items-center">
-            <div>
-              <span className="font-bold text-sm" style={{ color: C.amber }}>DAY {day.day}</span>
-              <span className="text-sm ml-2" style={{ color: C.muted }}>— {day.title}</span>
-            </div>
-            <span className="text-xs" style={{ color: C.dim }}>{sessionCounts[day.day] || 0} sessions logged</span>
-          </div>
-          {lastDates[day.day] && (
-            <div className="text-xs mt-1" style={{ color: C.dim }}>
-              Last: {new Date(lastDates[day.day]).toLocaleDateString()}
-            </div>
-          )}
-        </button>
-      ))}
+      <div style={{ display: 'grid', gap: 10 }}>
+        {days.map((day) => {
+          const count = sessionCounts[day.day] || 0;
+          const lastDate = lastDates[day.day]
+            ? new Date(lastDates[day.day]).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })
+            : null;
+          return (
+            <DayChooserRow
+              key={day.day}
+              dayNumber={day.day}
+              dayName={day.title}
+              sessionsLogged={count}
+              lastDate={lastDate}
+              onClick={() => handleDayClick(day)}
+            />
+          );
+        })}
+      </div>
 
       <BodyweightLogger />
     </div>

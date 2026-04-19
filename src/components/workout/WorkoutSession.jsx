@@ -1,17 +1,22 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
-import { useTimer } from '../../hooks/useTimer';
 import { useWorkoutData } from '../../hooks/useWorkoutData';
-import SupersetCard from './SupersetCard';
-import RestTimer from './RestTimer';
-import SessionDuration from './SessionDuration';
-import { C } from '../../config/constants';
 import { useExerciseSettings } from '../../hooks/useExerciseSettings';
+import SessionDuration from './SessionDuration';
 import ExerciseDemo from '../exercises/ExerciseDemo';
 import PRCelebration from '../alerts/PRCelebration';
 import WarmUpSection from '../warmup/WarmUpSection';
 import CoolDownSection from '../warmup/CoolDownSection';
+import {
+  C,
+  FONTS,
+  SPACE,
+  Button,
+  RestTimer as DesignRestTimer,
+  Superset,
+} from '../../design';
+import { TIMER_PRESETS } from '../../config/constants';
 
 function getStorageKey(userId, dayNumber) {
   return `workout-progress-${userId}-${dayNumber}`;
@@ -19,15 +24,32 @@ function getStorageKey(userId, dayNumber) {
 
 const SESSION_TIMEOUT_MS = 120 * 60 * 1000;
 
+// Alarm sound via Web Audio API — called when rest timer finishes
+function playAlarm() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [0, 0.25, 0.5].forEach((delay) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = 880;
+      osc.type = 'square';
+      gain.gain.setValueAtTime(0.4, ctx.currentTime + delay);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + delay + 0.2);
+      osc.start(ctx.currentTime + delay);
+      osc.stop(ctx.currentTime + delay + 0.2);
+    });
+  } catch (e) { console.log('Audio not supported'); }
+}
+
 export default function WorkoutSession({ day, onBack }) {
   const { user, profile } = useAuth();
   const { saveSession } = useWorkoutData();
-  const { timerCount, timerDuration, alarmOn, startTimer, toggleAlarm } = useTimer();
   const exerciseSettings = useExerciseSettings();
 
   const storageKey = getStorageKey(user?.id, day.day);
 
-  // Restore saved progress from localStorage if available
   const restored = useRef(false);
   const initState = () => {
     try {
@@ -61,7 +83,6 @@ export default function WorkoutSession({ day, onBack }) {
 
   const hasPrefill = !restored.current && Object.keys(day._prefilled || {}).length > 0;
 
-  // Dismiss resumed banner after 3 seconds
   useEffect(() => {
     if (resumed) {
       const t = setTimeout(() => setResumed(false), 3000);
@@ -69,7 +90,6 @@ export default function WorkoutSession({ day, onBack }) {
     }
   }, [resumed]);
 
-  // Auto-save to localStorage on every change
   useEffect(() => {
     try {
       localStorage.setItem(storageKey, JSON.stringify({
@@ -94,7 +114,6 @@ export default function WorkoutSession({ day, onBack }) {
   };
 
   const handleSave = async () => {
-    // Build exercises array for save
     const exercises = [];
     for (const ss of day.supersets) {
       const ex1Key = `${ss.label}1`;
@@ -130,12 +149,8 @@ export default function WorkoutSession({ day, onBack }) {
     });
 
     if (!error) {
-      // Clear saved progress — workout is committed
       try { localStorage.removeItem(storageKey); } catch { /* ok */ }
-
-      // Check for PRs
       await checkPRs(exercises);
-
       setSaved(true);
       setTimeout(() => {
         setSaved(false);
@@ -145,7 +160,6 @@ export default function WorkoutSession({ day, onBack }) {
   };
 
   async function checkPRs(exercises) {
-    // Fetch existing PRs for this user
     const { data: existingPRs } = await supabase
       .from('personal_records')
       .select('exercise_id, weight_kg')
@@ -161,7 +175,6 @@ export default function WorkoutSession({ day, onBack }) {
       const currentPR = prMap[ex.exerciseId] || 0;
 
       if (bestWeight > currentPR && bestWeight > 0) {
-        // New PR!
         await supabase.from('personal_records').upsert({
           user_id: user.id,
           exercise_id: ex.exerciseId,
@@ -170,7 +183,6 @@ export default function WorkoutSession({ day, onBack }) {
           achieved_at: new Date().toISOString(),
         }, { onConflict: 'user_id,exercise_id' });
 
-        // Show celebration for the first PR found
         if (!prInfo) {
           setPrInfo({ exerciseName: ex.exerciseName, weight: bestWeight });
         }
@@ -178,76 +190,133 @@ export default function WorkoutSession({ day, onBack }) {
     }
   }
 
+  // Build ExerciseBlock props for a given exercise within a superset
+  const buildExerciseBlockProps = (ss, exKey, exercise) => {
+    const lastSets = day._prefilled?.[exKey];
+    const lastBest = lastSets
+      ? lastSets.reduce((best, s) => {
+          const w = parseFloat(s.weight) || 0;
+          const r = parseInt(s.reps) || 0;
+          return w > (best.w || 0) ? { w, r } : best;
+        }, {})
+      : {};
+
+    const currentSets = entries[exKey] || [
+      { weight: '', reps: '' },
+      { weight: '', reps: '' },
+      { weight: '', reps: '' },
+    ];
+
+    return {
+      name: exercise.name,
+      mode: exerciseSettings?.getWeightMode(exercise.id) || 'total',
+      lastKg: lastBest.w || null,
+      lastReps: lastBest.r || null,
+      // Design system ExerciseBlock expects { kg, reps }
+      sets: currentSets.map((s) => ({ kg: s.weight, reps: s.reps })),
+      onSetChange: (idx, field, val) => {
+        // Map ExerciseBlock's "kg" field back to internal "weight"
+        const internalField = field === 'kg' ? 'weight' : 'reps';
+        updateSet(exKey, idx, internalField, val);
+      },
+      onAddSet: () => addSet(exKey),
+      onToggleMode: () => {
+        const current = exerciseSettings?.getWeightMode(exercise.id);
+        exerciseSettings?.setWeightMode(exercise.id, current === 'per_side' ? 'total' : 'per_side');
+      },
+    };
+  };
+
   return (
-    <div className="p-3">
-      <div className="flex items-center justify-between mb-3">
-        <button onClick={onBack} className="text-sm" style={{ color: C.muted }}>&larr; Back</button>
-        <span className="font-bold text-sm uppercase" style={{ color: C.amber }}>
+    <div style={{ padding: SPACE.md }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: SPACE.md }}>
+        <button onClick={onBack} style={{ color: C.muted, fontSize: 14, background: 'none', border: 'none', cursor: 'pointer' }}>
+          &larr; Back
+        </button>
+        <span style={{ color: C.amber, fontWeight: 700, fontSize: 14, textTransform: 'uppercase', fontFamily: FONTS.sans }}>
           Day {day.day} — {day.title}
         </span>
       </div>
 
-      <div className="flex items-center justify-center gap-2 mb-2">
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 8 }}>
         <SessionDuration startedAt={startedAtRef.current} />
-        <span className="text-gray-600">|</span>
+        <span style={{ color: C.dim }}>|</span>
         <input
           type="date"
           value={sessionDate}
           onChange={(e) => setSessionDate(e.target.value)}
-          className="text-xs text-gray-400 bg-transparent border-b border-gray-700 focus:border-amber-600 outline-none px-1 py-0.5"
-          style={{ colorScheme: 'dark' }}
+          style={{
+            fontSize: 12,
+            color: C.muted,
+            background: 'transparent',
+            border: 'none',
+            borderBottom: `1px solid ${C.border}`,
+            outline: 'none',
+            padding: '2px 4px',
+            colorScheme: 'dark',
+          }}
         />
       </div>
 
       {resumed && (
-        <div className="text-xs text-center mb-2 py-1.5 rounded font-bold uppercase tracking-wider"
-          style={{ background: '#1a2e1a', color: '#22c55e', border: '1px solid #2a3e2a' }}>
+        <div style={{
+          fontSize: 12,
+          textAlign: 'center',
+          marginBottom: 8,
+          padding: '6px 0',
+          borderRadius: 6,
+          fontWeight: 700,
+          textTransform: 'uppercase',
+          letterSpacing: 1.2,
+          background: 'rgba(34,197,94,0.1)',
+          color: '#22c55e',
+          border: '1px solid rgba(34,197,94,0.2)',
+        }}>
           Resumed your session
         </div>
       )}
 
       {hasPrefill && !saved && !resumed && (
-        <div className="text-gray-500 text-xs text-center mb-2 italic">
+        <div style={{ color: C.dim, fontSize: 12, textAlign: 'center', marginBottom: 8, fontStyle: 'italic' }}>
           Prefilled from your last session — adjust and go
         </div>
       )}
 
-      <RestTimer
-        timerCount={timerCount}
-        timerDuration={timerDuration}
-        alarmOn={alarmOn}
-        startTimer={startTimer}
-        toggleAlarm={toggleAlarm}
-      />
+      <DesignRestTimer durations={TIMER_PRESETS} onComplete={playAlarm} />
 
       {profile?.settings?.warmup_enabled && <WarmUpSection />}
 
-      {day.supersets.map((ss) => (
-        <SupersetCard
-          key={ss.label}
-          superset={ss}
-          entries={entries}
-          lastSets={day._prefilled}
-          exerciseSettings={exerciseSettings}
-          onUpdateSet={updateSet}
-          onAddSet={addSet}
-          onToggleWeightMode={exerciseSettings.setWeightMode}
-        />
-      ))}
+      {day.supersets.map((ss) => {
+        const ex1Key = `${ss.label}1`;
+        const ex2Key = `${ss.label}2`;
+        const exerciseBlocks = [buildExerciseBlockProps(ss, ex1Key, ss.ex1)];
+        if (ss.ex2) exerciseBlocks.push(buildExerciseBlockProps(ss, ex2Key, ss.ex2));
+
+        // For single exercises (no superset pair), still use Superset layout
+        return (
+          <Superset
+            key={ss.label}
+            letter={ss.label}
+            exercises={exerciseBlocks}
+          />
+        );
+      })}
 
       {profile?.settings?.cooldown_enabled && <CoolDownSection />}
 
-      <button
+      <Button
+        variant={saved ? 'secondary' : 'primary'}
         onClick={handleSave}
-        className="w-full py-3 font-bold text-lg uppercase rounded-lg mt-2 transition-all"
         style={{
-          background: saved ? '#22c55e' : '#d97706',
-          color: '#0a0a0f',
-          letterSpacing: '0.1em',
+          width: '100%',
+          padding: '14px 0',
+          fontSize: 16,
+          marginTop: 8,
+          ...(saved ? { background: '#22c55e', color: C.bg, borderColor: '#22c55e' } : {}),
         }}
       >
         {saved ? 'SAVED \u2713' : 'LOG SESSION'}
-      </button>
+      </Button>
 
       {demoExercise && <ExerciseDemo name={demoExercise} onClose={() => setDemoExercise(null)} />}
       {prInfo && <PRCelebration exerciseName={prInfo.exerciseName} weight={prInfo.weight} onDismiss={() => setPrInfo(null)} />}

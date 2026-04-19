@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { supabase, withTimeout } from '../../lib/supabase';
 import DaySelector from './DaySelector';
 import WorkoutSession from './WorkoutSession';
-import { C } from '../../config/constants';
+import { C, Button } from '../../design';
 
 export default function WorkoutView() {
   const { days, loading, error: routineError } = useRoutine();
@@ -24,7 +24,7 @@ export default function WorkoutView() {
 
   if (loading) {
     return (
-      <div className="p-6 text-center animate-pulse font-bold uppercase tracking-wider" style={{ color: C.amber }}>
+      <div style={{ padding: 24, textAlign: 'center', color: C.amber, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2 }}>
         Loading...
       </div>
     );
@@ -32,23 +32,19 @@ export default function WorkoutView() {
 
   if (routineError) {
     return (
-      <div className="p-6 text-center">
-        <div className="font-bold mb-2" style={{ color: C.warn }}>Failed to load routine</div>
-        <div className="text-sm mb-4" style={{ color: C.dim }}>{routineError}</div>
-        <button
-          onClick={() => window.location.reload()}
-          className="px-4 py-2 font-bold rounded uppercase text-sm"
-          style={{ background: C.amber, color: C.bg }}
-        >
+      <div style={{ padding: 24, textAlign: 'center' }}>
+        <div style={{ color: C.warn, fontWeight: 700, marginBottom: 8 }}>Failed to load routine</div>
+        <div style={{ color: C.dim, fontSize: 14, marginBottom: 16 }}>{routineError}</div>
+        <Button variant="primary" onClick={() => window.location.reload()}>
           Refresh
-        </button>
+        </Button>
       </div>
     );
   }
 
   if (days.length === 0) {
     return (
-      <div className="p-6 text-center" style={{ color: C.dim }}>
+      <div style={{ padding: 24, textAlign: 'center', color: C.dim }}>
         No routine set up yet. Redirecting to setup...
       </div>
     );

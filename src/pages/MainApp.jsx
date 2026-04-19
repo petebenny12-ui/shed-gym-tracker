@@ -6,7 +6,6 @@ import ProgressView from '../components/progress/ProgressView';
 import VSOverview from '../components/compare/VSOverview';
 import DataManager from '../components/data/DataManager';
 import RestDayNudge from '../components/alerts/RestDayNudge';
-import PlateauAlert from '../components/alerts/PlateauAlert';
 import SupplementChecklist from '../components/supplements/SupplementChecklist';
 import InstallPrompt from '../components/layout/InstallPrompt';
 import RoutineInviteBanner from '../components/wizard/RoutineInviteBanner';
@@ -14,7 +13,7 @@ import V2MigrationFlow from '../components/onboarding/V2MigrationFlow';
 import { useAuth } from '../context/AuthContext';
 import { useWorkoutData } from '../hooks/useWorkoutData';
 import { daysSinceLastSession, detectPlateaus } from '../lib/alerts';
-import { C } from '../config/constants';
+import { C, PlateauBanner, defaultPlateauSuggestions } from '../design';
 
 export default function MainApp() {
   const { profile } = useAuth();
@@ -72,7 +71,17 @@ export default function MainApp() {
         <InstallPrompt />
         <RoutineInviteBanner />
         {view === 'workout' && <RestDayNudge daysSince={daysSince} />}
-        {view === 'workout' && <PlateauAlert plateaus={plateaus} />}
+        {view === 'workout' && (
+          <PlateauBanner
+            plateaus={plateaus.map((p) => ({
+              exerciseName: p.exerciseName,
+              weight: p.lastWeight,
+              reps: p.lastReps,
+              sessions: p.sessions,
+              suggestions: defaultPlateauSuggestions(),
+            }))}
+          />
+        )}
         {view === 'workout' && profile?.settings?.supplements_enabled && <SupplementChecklist />}
         {renderView()}
       </div>

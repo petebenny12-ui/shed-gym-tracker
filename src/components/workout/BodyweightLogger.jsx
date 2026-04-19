@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useBodyweight } from '../../hooks/useBodyweight';
 import { validateBodyweight } from '../../lib/validation';
-import { C, CARD_DEPTH } from '../../config/constants';
+import { C, cardBase } from '../../design';
 
 export default function BodyweightLogger() {
   const { fetchAll, logWeight } = useBodyweight();
@@ -47,7 +47,7 @@ export default function BodyweightLogger() {
   };
 
   return (
-    <div className="mt-6 p-4 rounded-lg" style={{ background: C.card, border: `1px solid ${C.border}`, boxShadow: CARD_DEPTH }}>
+    <div className="mt-6 p-4 rounded-lg" style={{ ...cardBase, padding: 16 }}>
       <label className="text-xs uppercase tracking-wider block mb-2" style={{ color: C.muted }}>Log Bodyweight (kg)</label>
 
       {needsWeeklyWeighIn && (
