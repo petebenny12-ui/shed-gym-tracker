@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useWorkoutData } from '../../hooks/useWorkoutData';
 import { useBodyweight } from '../../hooks/useBodyweight';
+import { C, SERIF } from '../../config/constants';
 import BodyweightChart from './BodyweightChart';
 import TrainingCalendar from './TrainingCalendar';
+import FrequencyChart from './FrequencyChart';
 import ExerciseSelector from './ExerciseSelector';
 import ExerciseChart from './ExerciseChart';
 
@@ -31,7 +33,7 @@ export default function ProgressView() {
 
   if (loading) {
     return (
-      <div className="p-6 text-center text-amber-600 animate-pulse font-bold uppercase tracking-wider">
+      <div className="p-6 text-center animate-pulse font-bold uppercase tracking-wider" style={{ color: C.amber }}>
         Loading...
       </div>
     );
@@ -40,8 +42,8 @@ export default function ProgressView() {
   return (
     <div className="p-3">
       <h2
-        className="text-white text-lg font-bold uppercase tracking-wider mb-3"
-        style={{ fontFamily: "'Georgia', serif" }}
+        className="text-lg font-bold uppercase tracking-wider mb-3"
+        style={{ fontFamily: SERIF, color: C.text }}
       >
         Progress
       </h2>
@@ -49,6 +51,8 @@ export default function ProgressView() {
       <BodyweightChart logs={bwLogs} />
 
       <TrainingCalendar sessions={sessions} />
+
+      <FrequencyChart sessions={sessions} />
 
       <ExerciseSelector
         exercises={allExercises}
