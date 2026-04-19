@@ -253,14 +253,13 @@ export default function HistoryList() {
 
       {/* Calendar grid with swipe */}
       <div
-        className="grid grid-cols-7 gap-px"
-        style={{ background: C.cardHi }}
+        className="grid grid-cols-7 gap-1"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
         {cells.map((dayNum, i) => {
           if (dayNum === null) {
-            return <div key={i} style={{ background: C.bg, minHeight: 52 }} />;
+            return <div key={i} style={{ minHeight: 52 }} />;
           }
 
           const dateKey = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
@@ -270,13 +269,13 @@ export default function HistoryList() {
           const partnerWorked = partnerHere.length > 0;
           const isToday = dateKey === todayKey;
 
-          let bgStyle = { background: C.bg };
+          let bg = C.bg;
           if (iWorked && partnerWorked) {
-            bgStyle = { background: 'linear-gradient(135deg, rgba(59,130,246,0.27) 0%, rgba(59,130,246,0.27) 50%, rgba(20,184,166,0.27) 50%, rgba(20,184,166,0.27) 100%)' };
+            bg = 'linear-gradient(135deg, rgba(59,130,246,0.27) 0%, rgba(59,130,246,0.27) 50%, rgba(20,184,166,0.27) 50%, rgba(20,184,166,0.27) 100%)';
           } else if (iWorked) {
-            bgStyle = { background: 'rgba(59,130,246,0.2)' };
+            bg = 'rgba(59,130,246,0.2)';
           } else if (partnerWorked) {
-            bgStyle = { background: 'rgba(20,184,166,0.2)' };
+            bg = 'rgba(20,184,166,0.2)';
           }
 
           const isClickable = iWorked || partnerWorked;
@@ -291,12 +290,12 @@ export default function HistoryList() {
               key={i}
               onClick={() => isClickable && setSelectedDate(dateKey)}
               disabled={!isClickable}
-              className="text-left p-1 transition-all relative"
+              className="text-left p-1 transition-all rounded"
               style={{
-                ...bgStyle,
+                background: bg,
                 minHeight: 52,
                 cursor: isClickable ? 'pointer' : 'default',
-                border: isToday ? `1.5px solid ${C.amber}` : '1px solid transparent',
+                border: isToday ? `1.5px solid ${C.amber}` : `1px solid ${C.border}`,
               }}
             >
               <div className="text-[10px] font-bold" style={{ color: isToday ? C.amber : C.dim }}>
