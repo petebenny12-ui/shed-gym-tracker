@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase, withTimeout } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { useWorkoutData } from '../../hooks/useWorkoutData';
+import { C, SERIF } from '../../config/constants';
 import ExerciseComparison from './ExerciseComparison';
 import VolumeComparison from './VolumeComparison';
 import InvitePartner from './InvitePartner';
@@ -72,7 +73,7 @@ export default function VSOverview() {
 
   if (loading) {
     return (
-      <div className="p-6 text-center text-amber-600 animate-pulse font-bold uppercase tracking-wider">
+      <div className="p-6 text-center animate-pulse font-bold uppercase tracking-wider" style={{ color: C.amber }}>
         Loading...
       </div>
     );
@@ -82,16 +83,16 @@ export default function VSOverview() {
     return (
       <div className="p-6 text-center">
         <h2
-          className="text-white text-lg font-bold uppercase tracking-wider mb-3"
-          style={{ fontFamily: "'Georgia', serif" }}
+          className="text-lg font-bold uppercase tracking-wider mb-3"
+          style={{ fontFamily: SERIF, color: C.text }}
         >
           VS
         </h2>
-        <div className="text-gray-500 mb-4">No VS partner linked yet.</div>
+        <div className="mb-4" style={{ color: C.dim }}>No VS partner linked yet.</div>
         <button
           onClick={loadVSData}
           className="mb-4 px-4 py-2 text-xs font-bold uppercase tracking-wider rounded"
-          style={{ background: '#1a1a2e', color: '#d97706', border: '1px solid #2a2a3e' }}
+          style={{ background: C.cardHi, color: C.amber, border: `1px solid ${C.border}` }}
         >
           Retry
         </button>
@@ -157,8 +158,8 @@ export default function VSOverview() {
   return (
     <div className="p-3">
       <h2
-        className="text-white text-lg font-bold uppercase tracking-wider mb-3"
-        style={{ fontFamily: "'Georgia', serif" }}
+        className="text-lg font-bold uppercase tracking-wider mb-3"
+        style={{ fontFamily: SERIF, color: C.text }}
       >
         {myName} vs {theirName}
       </h2>
@@ -171,7 +172,7 @@ export default function VSOverview() {
       />
 
       {comparisons.length === 0 ? (
-        <div className="text-gray-500 text-center py-8">Both of you need to log sessions first.</div>
+        <div className="text-center py-8" style={{ color: C.dim }}>Both of you need to log sessions first.</div>
       ) : (
         <div className="space-y-2">
           {comparisons.map((c) => (
