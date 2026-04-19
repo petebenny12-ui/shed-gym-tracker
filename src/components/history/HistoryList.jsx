@@ -3,6 +3,7 @@ import { supabase, withTimeout } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { useWorkoutData } from '../../hooks/useWorkoutData';
 import { useRoutine } from '../../hooks/useRoutine';
+import { C, SERIF } from '../../config/constants';
 import SessionEditor from './SessionEditor';
 import CalendarDayDetail from './CalendarDayDetail';
 
@@ -211,16 +212,18 @@ export default function HistoryList() {
       {partner && (
         <div className="flex justify-center gap-4 mb-2">
           <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded" style={{ background: 'rgba(59, 130, 246, 0.4)' }} />
-            <span className="text-gray-500 text-[10px]">You</span>
+            <div className="w-3 h-3 rounded" style={{ background: 'rgba(59,130,246,0.35)' }} />
+            <span className="text-[10px]" style={{ color: C.muted }}>You</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded" style={{ background: 'rgba(234, 179, 8, 0.4)' }} />
-            <span className="text-gray-500 text-[10px]">{partner.name}</span>
+            <div className="w-3 h-3 rounded" style={{ background: 'rgba(20,184,166,0.35)' }} />
+            <span className="text-[10px]" style={{ color: C.muted }}>{partner.name}</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded" style={{ background: 'rgba(34, 197, 94, 0.4)' }} />
-            <span className="text-gray-500 text-[10px]">Both</span>
+            <div className="w-3 h-3 rounded" style={{
+              background: 'linear-gradient(135deg, rgba(59,130,246,0.35) 50%, rgba(20,184,166,0.35) 50%)',
+            }} />
+            <span className="text-[10px]" style={{ color: C.muted }}>Both</span>
           </div>
         </div>
       )}
@@ -248,13 +251,15 @@ export default function HistoryList() {
           const partnerWorked = partnerHere.length > 0;
           const isToday = dateKey === todayKey;
 
-          let bgColor = '#0a0a0f';
+          let bgStyle = { background: C.bg };
           if (iWorked && partnerWorked) {
-            bgColor = 'rgba(34, 197, 94, 0.25)';
+            bgStyle = {
+              background: `linear-gradient(135deg, rgba(59,130,246,0.27) 0%, rgba(59,130,246,0.27) 50%, rgba(20,184,166,0.27) 50%, rgba(20,184,166,0.27) 100%)`,
+            };
           } else if (iWorked) {
-            bgColor = 'rgba(59, 130, 246, 0.25)';
+            bgStyle = { background: 'rgba(59,130,246,0.2)' };
           } else if (partnerWorked) {
-            bgColor = 'rgba(234, 179, 8, 0.25)';
+            bgStyle = { background: 'rgba(20,184,166,0.2)' };
           }
 
           const isClickable = iWorked || partnerWorked;
@@ -270,10 +275,10 @@ export default function HistoryList() {
               disabled={!isClickable}
               className="text-left p-1 transition-all relative"
               style={{
-                background: bgColor,
+                ...bgStyle,
                 minHeight: 52,
                 cursor: isClickable ? 'pointer' : 'default',
-                border: isToday ? '1px solid #d97706' : '1px solid transparent',
+                border: isToday ? `1.5px solid ${C.amber}` : '1px solid transparent',
               }}
             >
               <div

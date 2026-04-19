@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { C, SERIF, CARD_DEPTH } from '../../config/constants';
 
 // Calculate raw trait values from a user's sessions.
 // Sessions are expected in descending order by started_at (as returned by useWorkoutData).
@@ -126,7 +127,7 @@ function TraitBar({ label, mineVal, theirsVal, myName, theirName }) {
         <div className="flex-1 h-2 rounded" style={{ background: '#1a1a2e' }}>
           <div
             className="h-full rounded transition-all"
-            style={{ width: `${minePct}%`, background: '#d97706' }}
+            style={{ width: `${minePct}%`, background: C.user }}
           />
         </div>
       </div>
@@ -135,7 +136,7 @@ function TraitBar({ label, mineVal, theirsVal, myName, theirName }) {
         <div className="flex-1 h-2 rounded" style={{ background: '#1a1a2e' }}>
           <div
             className="h-full rounded transition-all"
-            style={{ width: `${theirsPct}%`, background: '#6b7280' }}
+            style={{ width: `${theirsPct}%`, background: C.vs }}
           />
         </div>
       </div>

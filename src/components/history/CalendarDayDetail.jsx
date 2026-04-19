@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { C, SERIF } from '../../config/constants';
 
 function SessionDetail({ session, dayTitle, isOwn, onEdit, onDelete }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -130,7 +131,7 @@ export default function CalendarDayDetail({
         {hasMine && (
           <div>
             <div className="text-xs font-bold uppercase tracking-wider mb-2"
-              style={{ color: '#3b82f6' }}>
+              style={{ color: C.user }}>
               Your Workouts
             </div>
             <div className="space-y-2">
@@ -152,7 +153,7 @@ export default function CalendarDayDetail({
         {hasPartner && (
           <div>
             <div className="text-xs font-bold uppercase tracking-wider mb-2"
-              style={{ color: '#eab308' }}>
+              style={{ color: C.vs }}>
               {partnerName || 'Partner'}'s Workouts
             </div>
             <div className="space-y-2">
