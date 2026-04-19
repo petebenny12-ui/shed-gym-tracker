@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase, withTimeout } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
-import { WelcomeMigration, smartDefaultMode } from '../../design';
+import { C, WelcomeMigration, smartDefaultMode } from '../../design';
 
 export default function V2MigrationFlow({ onComplete }) {
   const { user, profile, refreshProfile } = useAuth();
@@ -88,8 +88,8 @@ export default function V2MigrationFlow({ onComplete }) {
   // Loading state
   if (exercises === null) {
     return (
-      <div style={{ background: '#0a0a0f', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ color: '#d97706', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2 }}>Loading...</div>
+      <div style={{ background: C.bg, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ color: C.amber, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2 }}>Loading...</div>
       </div>
     );
   }

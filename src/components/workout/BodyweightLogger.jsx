@@ -53,7 +53,7 @@ export default function BodyweightLogger() {
       {needsWeeklyWeighIn && (
         <div
           className="mb-2 p-2 rounded text-center text-xs font-bold"
-          style={{ background: 'rgba(244,63,94,0.08)', border: `1px solid ${C.warn}`, color: C.warn }}
+          style={{ background: C.warnDim, border: `1px solid ${C.warn}`, color: C.warn }}
         >
           &#9888; WEEKLY WEIGH-IN DUE — last logged {daysSinceLast === 999 ? 'never' : `${daysSinceLast} days ago`}
         </div>
@@ -91,7 +91,7 @@ export default function BodyweightLogger() {
         </div>
       )}
 
-      {saved && <div className="text-center text-sm font-bold mt-2" style={{ color: C.success }}>Saved!</div>}
+      {saved && <div className="text-center text-sm font-bold mt-2" style={{ color: '#22c55e' }}>Saved!</div>}
     </div>
   );
 }
