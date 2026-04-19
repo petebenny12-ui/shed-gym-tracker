@@ -1,13 +1,48 @@
-// Design tokens (matching existing artifact exactly)
-export const COLORS = {
-  bg: '#0a0a0f',
-  card: '#12121f',
-  border: '#2a2a3e',
-  input: '#1a1a2e',
-  accent: '#d97706',
+// ── v2 Design Tokens ──
+export const C = {
+  // Backgrounds
+  bg:      '#0a0a0f',
+  card:    '#141422',
+  cardHi:  '#1a1a2e',
+  border:  '#2a2a3e',
+
+  // Brand + action
+  amber:   '#d97706',
+  amberDim:'rgba(217,118,6,0.15)',
+
+  // Identity — role-based, NEVER per-person
+  user:    '#3b82f6',   // logged-in user (blue)
+  vs:      '#14b8a6',   // opponent (teal)
+
+  // Feedback
+  warn:    '#f43f5e',
   success: '#22c55e',
-  danger: '#8b0000',
-  navBg: '#0f0f18',
+
+  // Text
+  text:    '#f5f5f5',
+  muted:   '#9ca3af',
+  dim:     '#6b7280',
+
+  // Legacy compat aliases
+  navBg:   '#0f0f18',
+};
+
+// Card inner-top highlight — apply as boxShadow on all cards
+export const CARD_DEPTH = 'inset 0 1px 0 rgba(255,255,255,0.04)';
+
+// Serif font stack for headers
+export const SERIF = "'Georgia', 'Times New Roman', serif";
+
+// Legacy COLORS alias for existing code that imports it
+export const COLORS = {
+  bg: C.bg,
+  card: C.card,
+  border: C.border,
+  input: C.cardHi,
+  accent: C.amber,
+  success: C.success,
+  danger: C.warn,
+  navBg: C.navBg,
 };
 
 export const QUOTES = [
