@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { C, CARD_DEPTH, SERIF } from '../../config/constants';
 
 const MUSCLE_COLORS = {
   chest: '#ef4444',
@@ -46,20 +47,39 @@ export default function TrainingCalendar({ sessions }) {
     return weeks.reverse();
   }, [sessions]);
 
-  // Check for gaps
+  // Compute muscle group gaps from actual session data (on the fly, not denormalized)
   const allMuscles = ['chest', 'back', 'shoulders', 'biceps', 'triceps', 'legs', 'core'];
-  const recent3Weeks = weekData.slice(-3);
-  const trainedRecently = new Set(recent3Weeks.flatMap((w) => w.muscles));
-  const gaps = allMuscles.filter((m) => !trainedRecently.has(m));
+
+  const gaps = useMemo(() => {
+    const twoWeeksAgo = Date.now() - 14 * 24 * 60 * 60 * 1000;
+    const recentMuscles = new Set();
+
+    for (const s of sessions) {
+      if (new Date(s.started_at).getTime() < twoWeeksAgo) continue;
+      for (const set of s.session_sets || []) {
+        const mg = set.exercises?.muscle_group;
+        if (mg) recentMuscles.add(mg);
+      }
+    }
+
+    const gapped = allMuscles.filter(m => !recentMuscles.has(m));
+
+    // Suppress false positive: if ALL groups are gapped, something is wrong
+    // (likely no recent sessions at all — don't show a misleading alert)
+    if (gapped.length === allMuscles.length) return [];
+    // Only show when 1-6 groups are gapped
+    if (gapped.length === 0) return [];
+    return gapped;
+  }, [sessions]);
 
   return (
-    <div className="mb-4 p-3 rounded-lg" style={{ background: '#12121f', border: '1px solid #2a2a3e' }}>
-      <h3 className="text-amber-600 text-xs font-bold uppercase mb-3">Training Split</h3>
+    <div className="mb-4 p-3 rounded-lg" style={{ background: C.card, border: `1px solid ${C.border}`, boxShadow: CARD_DEPTH }}>
+      <h3 className="text-xs font-bold uppercase mb-3" style={{ fontFamily: SERIF, color: C.amber }}>Training Split</h3>
 
       <div className="space-y-2">
         {weekData.map((week, i) => (
           <div key={i} className="flex items-center gap-2">
-            <span className="text-gray-500 text-xs w-16 shrink-0">{week.label}</span>
+            <span className="text-xs w-16 shrink-0" style={{ color: C.dim }}>{week.label}</span>
             <div className="flex gap-1 flex-wrap flex-1">
               {week.muscles.length > 0 ? (
                 week.muscles.map((m) => (
@@ -72,19 +92,19 @@ export default function TrainingCalendar({ sessions }) {
                   </span>
                 ))
               ) : (
-                <span className="text-gray-600 text-xs">rest week</span>
+                <span className="text-xs" style={{ color: C.dim }}>rest week</span>
               )}
             </div>
-            <span className="text-gray-600 text-xs">{week.sessionCount}x</span>
+            <span className="text-xs" style={{ color: C.dim }}>{week.sessionCount}x</span>
           </div>
         ))}
       </div>
 
       {gaps.length > 0 && (
-        <div className="mt-3 p-2 rounded text-xs" style={{ background: '#d9770610', border: '1px solid #d97706' }}>
-          <span className="text-amber-600 font-bold">Gap alert:</span>
-          <span className="text-gray-400 ml-1">
-            No {gaps.join(', ')} in 3 weeks
+        <div className="mt-3 p-2 rounded text-xs" style={{ background: 'rgba(244,63,94,0.08)', border: `1px solid ${C.warn}` }}>
+          <span className="font-bold" style={{ color: C.warn }}>Gap alert:</span>
+          <span className="ml-1" style={{ color: C.muted }}>
+            No {gaps.join(', ')} in 2 weeks
           </span>
         </div>
       )}
