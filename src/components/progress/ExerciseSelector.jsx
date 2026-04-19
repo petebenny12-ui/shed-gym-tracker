@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { C, SERIF, CARD_DEPTH } from '../../config/constants';
 
-const GROUP_ORDER = ['chest', 'back', 'shoulders', 'biceps', 'triceps', 'legs', 'core'];
+const GROUP_ORDER = ['chest', 'back', 'shoulders', 'arms', 'biceps', 'triceps', 'legs', 'core'];
 
 export default function ExerciseSelector({ exercises, sessions, selected, onSelect }) {
   const [openGroup, setOpenGroup] = useState(null);

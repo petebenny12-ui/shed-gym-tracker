@@ -27,12 +27,19 @@ function getMonthGrid(year, month) {
   return cells;
 }
 
-// Truncate routine day title for tile label
+const DAY_LABEL_SHORT = {
+  'Chest + Triceps': 'Chest+Tri',
+  'Back + Biceps': 'Back+Bi',
+  'Shoulders + Upper Back': 'Shldrs',
+  'Legs + Core': 'Legs',
+};
+
+// Short routine day title for calendar tile
 function tileLabel(dayNumber, routineDays) {
   const day = routineDays.find(d => d.day === dayNumber);
   if (!day) return `D${dayNumber}`;
   const title = day.title || `Day ${dayNumber}`;
-  // Truncate long names
+  if (DAY_LABEL_SHORT[title]) return DAY_LABEL_SHORT[title];
   if (title.length <= 8) return title;
   return title.slice(0, 7) + '\u2026';
 }
@@ -337,9 +344,13 @@ export default function HistoryList() {
             {recentSessions.map(s => {
               const dateStr = new Date(s.started_at).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' });
               const dayTitle = getDayTitle(s.day_number);
-              const duration = s.finished_at
-                ? `${Math.round((new Date(s.finished_at) - new Date(s.started_at)) / 60000)}m`
-                : '';
+              let duration = '';
+              if (s.finished_at) {
+                const ms = new Date(s.finished_at) - new Date(s.started_at);
+                if (ms > 0 && ms < 4 * 60 * 60 * 1000) {
+                  duration = `${Math.round(ms / 60000)}m`;
+                }
+              }
               return (
                 <button
                   key={s.id}

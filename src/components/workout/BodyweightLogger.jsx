@@ -53,7 +53,7 @@ export default function BodyweightLogger() {
       {needsWeeklyWeighIn && (
         <div
           className="mb-2 p-2 rounded text-center text-xs font-bold"
-          style={{ background: C.amberDim, border: `1px solid ${C.amber}`, color: C.amber }}
+          style={{ background: 'rgba(244,63,94,0.08)', border: `1px solid ${C.warn}`, color: C.warn }}
         >
           &#9888; WEEKLY WEIGH-IN DUE — last logged {daysSinceLast === 999 ? 'never' : `${daysSinceLast} days ago`}
         </div>

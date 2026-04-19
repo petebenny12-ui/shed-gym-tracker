@@ -27,7 +27,7 @@ export function useWorkoutData() {
             set_number,
             weight_kg,
             reps,
-            exercises ( id, name, load_type )
+            exercises ( id, name, muscle_group, load_type )
           )
         `)
         .eq('user_id', user.id)
@@ -151,7 +151,7 @@ export function useWorkoutData() {
             set_number,
             weight_kg,
             reps,
-            exercises ( id, name, load_type )
+            exercises ( id, name, muscle_group, load_type )
           )
         `)
         .eq('user_id', partnerId)

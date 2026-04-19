@@ -3,7 +3,6 @@ import { useWorkoutData } from '../../hooks/useWorkoutData';
 import { useBodyweight } from '../../hooks/useBodyweight';
 import { C, SERIF } from '../../config/constants';
 import BodyweightChart from './BodyweightChart';
-import TrainingCalendar from './TrainingCalendar';
 import FrequencyChart from './FrequencyChart';
 import ExerciseSelector from './ExerciseSelector';
 import ExerciseChart from './ExerciseChart';
@@ -49,8 +48,6 @@ export default function ProgressView() {
       </h2>
 
       <BodyweightChart logs={bwLogs} />
-
-      <TrainingCalendar sessions={sessions} />
 
       <FrequencyChart sessions={sessions} />
 
