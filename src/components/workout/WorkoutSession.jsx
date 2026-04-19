@@ -6,6 +6,7 @@ import { useWorkoutData } from '../../hooks/useWorkoutData';
 import SupersetCard from './SupersetCard';
 import RestTimer from './RestTimer';
 import SessionDuration from './SessionDuration';
+import { C } from '../../config/constants';
 import ExerciseDemo from '../exercises/ExerciseDemo';
 import PRCelebration from '../alerts/PRCelebration';
 import WarmUpSection from '../warmup/WarmUpSection';
@@ -20,7 +21,7 @@ const SESSION_TIMEOUT_MS = 120 * 60 * 1000;
 export default function WorkoutSession({ day, onBack }) {
   const { user, profile } = useAuth();
   const { saveSession } = useWorkoutData();
-  const { timerCount, alarmOn, startTimer, toggleAlarm } = useTimer();
+  const { timerCount, timerDuration, alarmOn, startTimer, toggleAlarm } = useTimer();
 
   const storageKey = getStorageKey(user?.id, day.day);
 
@@ -178,8 +179,8 @@ export default function WorkoutSession({ day, onBack }) {
   return (
     <div className="p-3">
       <div className="flex items-center justify-between mb-3">
-        <button onClick={onBack} className="text-gray-500 text-sm">&larr; Back</button>
-        <span className="text-amber-600 font-bold text-sm uppercase">
+        <button onClick={onBack} className="text-sm" style={{ color: C.muted }}>&larr; Back</button>
+        <span className="font-bold text-sm uppercase" style={{ color: C.amber }}>
           Day {day.day} — {day.title}
         </span>
       </div>
@@ -211,6 +212,7 @@ export default function WorkoutSession({ day, onBack }) {
 
       <RestTimer
         timerCount={timerCount}
+        timerDuration={timerDuration}
         alarmOn={alarmOn}
         startTimer={startTimer}
         toggleAlarm={toggleAlarm}
@@ -223,6 +225,7 @@ export default function WorkoutSession({ day, onBack }) {
           key={ss.label}
           superset={ss}
           entries={entries}
+          lastSets={day._prefilled}
           onUpdateSet={updateSet}
           onAddSet={addSet}
           onShowDemo={setDemoExercise}

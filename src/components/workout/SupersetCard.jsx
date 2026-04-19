@@ -1,24 +1,33 @@
 import ExerciseColumn from './ExerciseColumn';
+import { C, CARD_DEPTH } from '../../config/constants';
 
-export default function SupersetCard({ superset, entries, onUpdateSet, onAddSet, onShowDemo }) {
+export default function SupersetCard({ superset, entries, lastSets, onUpdateSet, onAddSet, onShowDemo }) {
   const ex1Key = `${superset.label}1`;
   const ex2Key = `${superset.label}2`;
   const hasEx2 = !!superset.ex2;
 
+  // Best weight from last session for this exercise
+  const lastBest = (key) => {
+    const sets = lastSets?.[key];
+    if (!sets) return null;
+    const weights = sets.map(s => parseFloat(s.weight) || 0).filter(w => w > 0);
+    return weights.length > 0 ? Math.max(...weights) : null;
+  };
+
   return (
-    <div className="mb-3 rounded-lg overflow-hidden" style={{ border: '1px solid #2a2a3e' }}>
-      <div className="px-3 py-1" style={{ background: '#1a1a2e' }}>
-        <span className="text-amber-600 font-bold text-xs">
+    <div className="mb-3 rounded-lg overflow-hidden" style={{ border: `1px solid ${C.border}`, boxShadow: CARD_DEPTH }}>
+      <div className="px-3 py-1" style={{ background: C.cardHi }}>
+        <span className="text-xs font-bold" style={{ color: C.amber }}>
           {hasEx2 ? `SUPERSET ${superset.label}` : superset.label}
         </span>
       </div>
-      <div style={{ display: 'flex', width: '100%', background: '#0f0f18' }}>
+      <div style={{ display: 'flex', width: '100%', background: C.navBg }}>
         <ExerciseColumn
           exercise={superset.ex1}
           sets={entries[ex1Key] || [{ weight: '', reps: '' }, { weight: '', reps: '' }, { weight: '', reps: '' }]}
+          lastBestWeight={lastBest(ex1Key)}
           onUpdateSet={(idx, field, val) => onUpdateSet(ex1Key, idx, field, val)}
           onAddSet={() => onAddSet(ex1Key)}
-          onShowDemo={onShowDemo}
           isRight={false}
           fullWidth={!hasEx2}
         />
@@ -26,9 +35,9 @@ export default function SupersetCard({ superset, entries, onUpdateSet, onAddSet,
           <ExerciseColumn
             exercise={superset.ex2}
             sets={entries[ex2Key] || [{ weight: '', reps: '' }, { weight: '', reps: '' }, { weight: '', reps: '' }]}
+            lastBestWeight={lastBest(ex2Key)}
             onUpdateSet={(idx, field, val) => onUpdateSet(ex2Key, idx, field, val)}
             onAddSet={() => onAddSet(ex2Key)}
-            onShowDemo={onShowDemo}
             isRight={true}
           />
         )}

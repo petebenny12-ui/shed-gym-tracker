@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 
 export function useTimer() {
   const [timerCount, setTimerCount] = useState(0);
+  const [timerDuration, setTimerDuration] = useState(0);
   const [timerRunning, setTimerRunning] = useState(false);
   const [alarmOn, setAlarmOn] = useState(true);
   const audioCtxRef = useRef(null);
@@ -54,10 +55,11 @@ export function useTimer() {
   const startTimer = (seconds) => {
     getAudioCtx();
     setTimerCount(seconds);
+    setTimerDuration(seconds);
     setTimerRunning(true);
   };
 
   const toggleAlarm = () => setAlarmOn(!alarmOn);
 
-  return { timerCount, timerRunning, alarmOn, startTimer, toggleAlarm };
+  return { timerCount, timerDuration, timerRunning, alarmOn, startTimer, toggleAlarm };
 }

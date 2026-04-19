@@ -1,27 +1,28 @@
 import SetRow from './SetRow';
+import { C } from '../../config/constants';
 
-export default function ExerciseColumn({ exercise, sets, onUpdateSet, onAddSet, onShowDemo, isRight, fullWidth }) {
+export default function ExerciseColumn({ exercise, sets, lastBestWeight, onUpdateSet, onAddSet, isRight, fullWidth }) {
   return (
     <div
       style={{
         width: fullWidth ? '100%' : '50%',
         boxSizing: 'border-box',
         padding: '6px',
-        borderLeft: isRight ? '1px solid #2a2a3e' : 'none',
+        borderLeft: isRight ? `1px solid ${C.border}` : 'none',
         overflow: 'hidden',
       }}
     >
-      <div
-        className="font-bold truncate"
-        style={{ fontSize: 11, marginBottom: 4, cursor: 'pointer' }}
-        onClick={() => onShowDemo(exercise.name)}
-      >
-        <span className="text-white">{exercise.name}</span>
-        <span className="text-gray-600 ml-1" style={{ fontSize: 9 }}>&#8505;</span>
+      <div className="font-bold truncate" style={{ fontSize: 11, marginBottom: 2 }}>
+        <span style={{ color: C.text }}>{exercise.name}</span>
       </div>
+      {lastBestWeight && (
+        <div style={{ fontSize: 9, color: C.dim, marginBottom: 3 }}>
+          Last: {lastBestWeight}kg
+        </div>
+      )}
       <div style={{ display: 'flex', gap: 4, marginBottom: 3 }}>
-        <div style={{ flex: 1, textAlign: 'center', fontSize: 9, color: '#888' }}>KG</div>
-        <div style={{ flex: 1, textAlign: 'center', fontSize: 9, color: '#888' }}>REPS</div>
+        <div style={{ flex: 1, textAlign: 'center', fontSize: 9, color: C.dim }}>KG</div>
+        <div style={{ flex: 1, textAlign: 'center', fontSize: 9, color: C.dim }}>REPS</div>
       </div>
       {sets.map((s, idx) => (
         <SetRow
@@ -34,7 +35,7 @@ export default function ExerciseColumn({ exercise, sets, onUpdateSet, onAddSet, 
       ))}
       <button
         onClick={onAddSet}
-        style={{ fontSize: 10, color: '#555', background: 'none', border: 'none', cursor: 'pointer', marginTop: 2 }}
+        style={{ fontSize: 10, color: C.dim, background: 'none', border: 'none', cursor: 'pointer', marginTop: 2 }}
       >
         + set
       </button>

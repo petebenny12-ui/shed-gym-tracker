@@ -1,4 +1,5 @@
 import { validateWeight, validateReps } from '../../lib/validation';
+import { C } from '../../config/constants';
 
 export default function SetRow({ weight, reps, onWeightChange, onRepsChange }) {
   const handleWeightChange = (e) => {
@@ -26,11 +27,11 @@ export default function SetRow({ weight, reps, onWeightChange, onRepsChange }) {
           padding: '5px 2px',
           borderRadius: 4,
           textAlign: 'center',
-          color: '#fff',
+          color: C.text,
           fontSize: 12,
           fontWeight: 'bold',
-          background: '#1a1a2e',
-          border: '1px solid #2a2a3e',
+          background: C.cardHi,
+          border: `1px solid ${C.border}`,
           boxSizing: 'border-box',
         }}
         placeholder="-"
@@ -49,11 +50,11 @@ export default function SetRow({ weight, reps, onWeightChange, onRepsChange }) {
           padding: '5px 2px',
           borderRadius: 4,
           textAlign: 'center',
-          color: '#fff',
+          color: C.text,
           fontSize: 12,
           fontWeight: 'bold',
-          background: '#1a1a2e',
-          border: '1px solid #2a2a3e',
+          background: C.cardHi,
+          border: `1px solid ${C.border}`,
           boxSizing: 'border-box',
         }}
         placeholder="-"
