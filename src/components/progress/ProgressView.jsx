@@ -56,6 +56,7 @@ export default function ProgressView() {
 
       <ExerciseSelector
         exercises={allExercises}
+        sessions={sessions}
         selected={selectedExercise}
         onSelect={setSelectedExercise}
       />
