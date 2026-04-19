@@ -1,43 +1,56 @@
-import { useAuth } from '../../context/AuthContext';
-import { signOut } from '../../lib/auth';
+import { Dumbbell, Calendar, TrendingUp, Swords, Settings } from 'lucide-react';
+import { C } from '../../config/constants';
 
 const tabs = [
-  { id: 'workout', label: 'LIFT' },
-  { id: 'history', label: 'LOG' },
-  { id: 'progress', label: 'CHARTS' },
-  { id: 'compare', label: 'VS' },
-  { id: 'settings', label: 'SETTINGS' },
+  { id: 'workout', label: 'Lift', icon: Dumbbell },
+  { id: 'history', label: 'Log', icon: Calendar },
+  { id: 'progress', label: 'Charts', icon: TrendingUp },
+  { id: 'compare', label: 'VS', icon: Swords },
+  { id: 'settings', label: 'Settings', icon: Settings },
 ];
 
 export default function NavBar({ view, setView }) {
-  const { profile } = useAuth();
-
   return (
-    <div
-      className="flex items-center justify-between px-3 py-2"
-      style={{ background: '#0f0f18', borderBottom: '1px solid #2a2a3e', paddingTop: 'calc(env(safe-area-inset-top, 0px) + 8px)' }}
+    <nav
+      style={{
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        zIndex: 50,
+        background: 'rgba(15, 15, 24, 0.92)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        borderTop: `1px solid ${C.border}`,
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+      }}
     >
-      <button onClick={signOut} className="text-gray-500 text-xs uppercase tracking-wider">
-        &larr; Out
-      </button>
-      <div className="flex gap-1">
-        {tabs.map((t) => (
-          <button
-            key={t.id}
-            onClick={() => setView(t.id)}
-            className="px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded transition-all"
-            style={{
-              background: view === t.id ? '#d97706' : 'transparent',
-              color: view === t.id ? '#0a0a0f' : '#888',
-            }}
-          >
-            {t.label}
-          </button>
-        ))}
+      <div className="flex justify-around items-center" style={{ height: 56 }}>
+        {tabs.map((t) => {
+          const active = view === t.id;
+          const Icon = t.icon;
+          return (
+            <button
+              key={t.id}
+              onClick={() => setView(t.id)}
+              className="flex flex-col items-center justify-center gap-0.5 flex-1 h-full"
+              style={{ background: 'transparent', border: 'none' }}
+            >
+              <Icon
+                size={20}
+                strokeWidth={active ? 2.4 : 1.8}
+                color={active ? C.amber : C.muted}
+              />
+              <span
+                className="text-[10px] font-bold uppercase tracking-wider"
+                style={{ color: active ? C.amber : C.muted }}
+              >
+                {t.label}
+              </span>
+            </button>
+          );
+        })}
       </div>
-      <span className="text-amber-600 text-xs font-bold uppercase">
-        {profile?.display_name || ''}
-      </span>
-    </div>
+    </nav>
   );
 }

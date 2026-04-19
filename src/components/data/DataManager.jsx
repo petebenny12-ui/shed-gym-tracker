@@ -7,6 +7,8 @@ import ExportSection from './ExportSection';
 import ImportSection from './ImportSection';
 import DangerZone from './DangerZone';
 import WorkoutWizard from '../wizard/WorkoutWizard';
+import { signOut } from '../../lib/auth';
+import { C, SERIF } from '../../config/constants';
 
 export default function DataManager() {
   const { user, profile } = useAuth();
@@ -151,6 +153,17 @@ export default function DataManager() {
       <ExportSection onStatus={handleStatus} />
       <ImportSection onStatus={handleStatus} />
       <DangerZone onStatus={handleStatus} />
+
+      {/* Sign out */}
+      <div className="pt-4 text-center">
+        <button
+          onClick={signOut}
+          className="text-sm uppercase tracking-wider"
+          style={{ color: C.muted, background: 'none', border: 'none' }}
+        >
+          Sign out
+        </button>
+      </div>
 
       {status && (
         <div

@@ -13,6 +13,7 @@ import RoutineInviteBanner from '../components/wizard/RoutineInviteBanner';
 import { useAuth } from '../context/AuthContext';
 import { useWorkoutData } from '../hooks/useWorkoutData';
 import { daysSinceLastSession, detectPlateaus } from '../lib/alerts';
+import { C } from '../config/constants';
 
 export default function MainApp() {
   const { profile } = useAuth();
@@ -31,7 +32,6 @@ export default function MainApp() {
       })
       .catch((err) => {
         console.error('[MainApp] Alert fetch failed (non-blocking):', err);
-        // Alerts are non-critical — app still works without them
       });
   }, [fetchSessions]);
 
@@ -53,9 +53,16 @@ export default function MainApp() {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: '#0a0a0f' }}>
-      <NavBar view={view} setView={setView} />
-      <div style={{ maxHeight: 'calc(100vh - 44px)', overflowY: 'auto' }}>
+    <div className="min-h-screen" style={{ background: C.bg }}>
+      {/* Content area — pad top for safe area, pad bottom for tab bar */}
+      <div
+        style={{
+          paddingTop: 'env(safe-area-inset-top, 0px)',
+          paddingBottom: 'calc(56px + env(safe-area-inset-bottom, 0px))',
+          minHeight: '100vh',
+          overflowY: 'auto',
+        }}
+      >
         <InstallPrompt />
         <RoutineInviteBanner />
         {view === 'workout' && <RestDayNudge daysSince={daysSince} />}
@@ -63,6 +70,7 @@ export default function MainApp() {
         {view === 'workout' && profile?.settings?.supplements_enabled && <SupplementChecklist />}
         {renderView()}
       </div>
+      <NavBar view={view} setView={setView} />
     </div>
   );
 }
