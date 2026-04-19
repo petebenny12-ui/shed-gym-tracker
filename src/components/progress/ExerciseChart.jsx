@@ -19,7 +19,8 @@ export default function ExerciseChart({ exerciseName, sessions }) {
         weight: parseFloat(bestSet?.weight_kg) || 0,
         volume: Math.round(totalVol),
       };
-    });
+    })
+    .reverse(); // chronological: oldest left, newest right
 
   if (history.length < 2) {
     return <div className="text-gray-500 text-sm text-center py-4">Need at least 2 sessions to chart.</div>;
