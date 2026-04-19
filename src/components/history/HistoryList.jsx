@@ -3,46 +3,29 @@ import { supabase, withTimeout } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { useWorkoutData } from '../../hooks/useWorkoutData';
 import { useRoutine } from '../../hooks/useRoutine';
-import { C, SERIF, CARD_DEPTH } from '../../config/constants';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import {
+  C,
+  CalendarHeader,
+  CalendarLegend,
+  CalendarGrid,
+  buildCalendarDays,
+  shortenDayLabel,
+  MonthlySummary,
+  RecentSessions,
+  formatVolume,
+  sessionDurationMinutes,
+} from '../../design';
 import SessionEditor from './SessionEditor';
 import CalendarDayDetail from './CalendarDayDetail';
-
-const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 function toDateKey(dateStr) {
   return new Date(dateStr).toISOString().slice(0, 10);
 }
 
-function getMonthGrid(year, month) {
-  const firstDay = new Date(year, month, 1);
-  const lastDay = new Date(year, month + 1, 0);
-  const daysInMonth = lastDay.getDate();
-  let startDow = firstDay.getDay() - 1;
-  if (startDow < 0) startDow = 6;
-  const cells = [];
-  for (let i = 0; i < startDow; i++) cells.push(null);
-  for (let d = 1; d <= daysInMonth; d++) cells.push(d);
-  while (cells.length % 7 !== 0) cells.push(null);
-  return cells;
-}
-
-const DAY_LABEL_SHORT = {
-  'Chest + Triceps': 'Chest+Tri',
-  'Back + Biceps': 'Back+Bi',
-  'Shoulders + Upper Back': 'Shldrs',
-  'Legs + Core': 'Legs',
-};
-
-// Short routine day title for calendar tile
-function tileLabel(dayNumber, routineDays) {
-  const day = routineDays.find(d => d.day === dayNumber);
-  if (!day) return `D${dayNumber}`;
-  const title = day.title || `Day ${dayNumber}`;
-  if (DAY_LABEL_SHORT[title]) return DAY_LABEL_SHORT[title];
-  if (title.length <= 8) return title;
-  return title.slice(0, 7) + '\u2026';
-}
+const MONTHS = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
 
 export default function HistoryList() {
   const { user } = useAuth();
@@ -101,6 +84,7 @@ export default function HistoryList() {
 
   useEffect(() => { loadData(); }, [loadData]);
 
+  // Index sessions by date
   const myByDate = useMemo(() => {
     const map = {};
     for (const s of mySessions) { const k = toDateKey(s.started_at); if (!map[k]) map[k] = []; map[k].push(s); }
@@ -113,9 +97,37 @@ export default function HistoryList() {
     return map;
   }, [partnerSessions]);
 
-  const cells = useMemo(() => getMonthGrid(viewYear, viewMonth), [viewYear, viewMonth]);
+  // Build sessionsByDate for design system's buildCalendarDays
+  const sessionsByDate = useMemo(() => {
+    const allDates = new Set([...Object.keys(myByDate), ...Object.keys(partnerByDate)]);
+    const map = {};
+    for (const date of allDates) {
+      const mySess = myByDate[date] || [];
+      const partnerSess = partnerByDate[date] || [];
+      const allSess = [...mySess, ...partnerSess];
+      // Get label from routine day title
+      const labels = [...new Set(allSess.map(s => {
+        const day = routineDays.find(d => d.day === s.day_number);
+        return day?.title || null;
+      }).filter(Boolean))];
+      map[date] = {
+        you: mySess.length > 0,
+        them: partnerSess.length > 0,
+        label: labels[0] || null, // shortenDayLabel is called inside buildCalendarDays
+      };
+    }
+    return map;
+  }, [myByDate, partnerByDate, routineDays]);
 
-  const monthLabel = new Date(viewYear, viewMonth).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  const monthLabel = `${MONTHS[viewMonth]} ${viewYear}`;
+  const isCurrentMonth = viewYear === now.getFullYear() && viewMonth === now.getMonth();
+
+  const calendarDays = useMemo(() => buildCalendarDays({
+    year: viewYear,
+    month: viewMonth,
+    sessionsByDate,
+    today: now,
+  }), [viewYear, viewMonth, sessionsByDate]);
 
   const prevMonth = () => {
     if (viewMonth === 0) { setViewYear(y => y - 1); setViewMonth(11); } else setViewMonth(m => m - 1);
@@ -124,8 +136,6 @@ export default function HistoryList() {
     if (viewMonth === 11) { setViewYear(y => y + 1); setViewMonth(0); } else setViewMonth(m => m + 1);
   };
   const goToday = () => { const n = new Date(); setViewYear(n.getFullYear()); setViewMonth(n.getMonth()); };
-
-  const isCurrentMonth = viewYear === now.getFullYear() && viewMonth === now.getMonth();
 
   const getDayTitle = (dayNumber) => {
     const day = routineDays.find(d => d.day === dayNumber);
@@ -139,7 +149,16 @@ export default function HistoryList() {
 
   const handleEditDone = () => { setEditingSession(null); loadData(); };
 
-  // --- Monthly summary stats ---
+  const handleDayClick = (day) => {
+    if (!day?.date) return;
+    const myHere = myByDate[day.date] || [];
+    const partnerHere = partnerByDate[day.date] || [];
+    if (myHere.length > 0 || partnerHere.length > 0) {
+      setSelectedDate(day.date);
+    }
+  };
+
+  // Monthly summary stats
   const monthSessions = useMemo(() => {
     const prefix = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}`;
     return mySessions.filter(s => toDateKey(s.started_at).startsWith(prefix));
@@ -151,7 +170,6 @@ export default function HistoryList() {
         ss + (parseFloat(set.weight_kg) || 0) * (parseInt(set.reps) || 0), 0), 0);
   }, [monthSessions]);
 
-  // Streak: consecutive weeks with at least 1 session
   const weekStreak = useMemo(() => {
     if (mySessions.length === 0) return 0;
     const weekOf = (d) => { const dt = new Date(d); dt.setDate(dt.getDate() - dt.getDay()); return dt.toISOString().slice(0, 10); };
@@ -165,9 +183,22 @@ export default function HistoryList() {
     return streak;
   }, [mySessions]);
 
-  // Recent sessions (last 4)
-  const recentSessions = useMemo(() => mySessions.slice(0, 4), [mySessions]);
+  // Recent sessions shaped for design system
+  const recentSessionsData = useMemo(() => {
+    return mySessions.slice(0, 4).map(s => {
+      const partnerAlso = (partnerByDate[toDateKey(s.started_at)] || []).length > 0;
+      return {
+        dateLabel: new Date(s.started_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
+        title: getDayTitle(s.day_number),
+        startIso: s.started_at,
+        endIso: s.finished_at,
+        who: partnerAlso ? 'both' : 'you',
+        _dateKey: toDateKey(s.started_at),
+      };
+    });
+  }, [mySessions, partnerByDate, routineDays]);
 
+  // Sub-screens
   if (editingSession) {
     return (
       <SessionEditor
@@ -195,181 +226,44 @@ export default function HistoryList() {
   }
 
   if (loading) {
-    return <div className="p-6 text-center animate-pulse font-bold uppercase tracking-wider" style={{ color: C.amber }}>Loading...</div>;
+    return (
+      <div style={{ padding: 24, textAlign: 'center', color: C.amber, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2 }}>
+        Loading...
+      </div>
+    );
   }
 
-  const todayKey = new Date().toISOString().slice(0, 10);
-
   return (
-    <div className="p-3">
-      <h2 className="text-lg font-bold uppercase tracking-wider mb-3" style={{ fontFamily: SERIF, color: C.text }}>
-        Training Log
-      </h2>
+    <div style={{ padding: '0 12px 24px' }}>
+      <CalendarHeader
+        monthLabel={monthLabel}
+        onPrev={prevMonth}
+        onNext={nextMonth}
+        onToday={goToday}
+        showTodayButton={!isCurrentMonth}
+      />
 
-      {/* Month navigation */}
-      <div className="flex items-center justify-between mb-3">
-        <button onClick={prevMonth} className="px-2 py-1"><ChevronLeft size={20} color={C.muted} /></button>
-        <span className="font-bold uppercase tracking-wider" style={{ fontFamily: SERIF, color: C.text }}>
-          {monthLabel}
-        </span>
-        <div className="flex items-center gap-1">
-          {!isCurrentMonth && (
-            <button
-              onClick={goToday}
-              className="px-2 py-0.5 rounded text-[10px] font-bold uppercase"
-              style={{ color: C.amber, background: C.card, border: `1px solid ${C.border}` }}
-            >
-              Today
-            </button>
-          )}
-          <button onClick={nextMonth} className="px-2 py-1"><ChevronRight size={20} color={C.muted} /></button>
-        </div>
+      {partner && <CalendarLegend opponentName={partner.name} />}
+
+      <div onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+        <CalendarGrid days={calendarDays} onDayClick={handleDayClick} />
       </div>
 
-      {/* Legend */}
-      {partner && (
-        <div className="flex justify-center gap-4 mb-2">
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded" style={{ background: 'rgba(59,130,246,0.35)' }} />
-            <span className="text-[10px]" style={{ color: C.muted }}>You</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded" style={{ background: 'rgba(20,184,166,0.35)' }} />
-            <span className="text-[10px]" style={{ color: C.muted }}>{partner.name}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded" style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.35) 50%, rgba(20,184,166,0.35) 50%)' }} />
-            <span className="text-[10px]" style={{ color: C.muted }}>Both</span>
-          </div>
-        </div>
-      )}
-
-      {/* Weekday headers */}
-      <div className="grid grid-cols-7 gap-px mb-px">
-        {WEEKDAYS.map(d => (
-          <div key={d} className="text-center text-[10px] font-bold uppercase py-1" style={{ color: C.dim }}>{d}</div>
-        ))}
+      <div style={{ marginTop: 20 }}>
+        <MonthlySummary
+          stats={{
+            sessions: { value: monthSessions.length, target: 16 },
+            streakWeeks: weekStreak,
+            volumeKg: monthVolume,
+          }}
+        />
+        <RecentSessions
+          sessions={recentSessionsData.map(s => ({
+            ...s,
+            onClick: () => setSelectedDate(s._dateKey),
+          }))}
+        />
       </div>
-
-      {/* Calendar grid with swipe */}
-      <div
-        className="grid grid-cols-7 gap-1"
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-      >
-        {cells.map((dayNum, i) => {
-          if (dayNum === null) {
-            return <div key={i} style={{ minHeight: 52 }} />;
-          }
-
-          const dateKey = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
-          const myHere = myByDate[dateKey] || [];
-          const partnerHere = partnerByDate[dateKey] || [];
-          const iWorked = myHere.length > 0;
-          const partnerWorked = partnerHere.length > 0;
-          const isToday = dateKey === todayKey;
-
-          let bg = C.bg;
-          if (iWorked && partnerWorked) {
-            bg = 'linear-gradient(135deg, rgba(59,130,246,0.27) 0%, rgba(59,130,246,0.27) 50%, rgba(20,184,166,0.27) 50%, rgba(20,184,166,0.27) 100%)';
-          } else if (iWorked) {
-            bg = 'rgba(59,130,246,0.2)';
-          } else if (partnerWorked) {
-            bg = 'rgba(20,184,166,0.2)';
-          }
-
-          const isClickable = iWorked || partnerWorked;
-
-          // Muscle group label from routine day name (show for both users)
-          const allHere = [...myHere, ...partnerHere];
-          const labels = [...new Set(allHere.map(s => tileLabel(s.day_number, routineDays)))];
-          const labelText = labels.join(', ');
-
-          return (
-            <button
-              key={i}
-              onClick={() => isClickable && setSelectedDate(dateKey)}
-              disabled={!isClickable}
-              className="text-left p-1 transition-all rounded"
-              style={{
-                background: bg,
-                minHeight: 52,
-                cursor: isClickable ? 'pointer' : 'default',
-                border: isToday ? `1.5px solid ${C.amber}` : `1px solid ${C.border}`,
-              }}
-            >
-              <div className="text-[10px] font-bold" style={{ color: isToday ? C.amber : C.dim }}>
-                {dayNum}
-              </div>
-              {labelText && (
-                <div className="text-[7px] leading-tight mt-0.5" style={{ color: C.text, opacity: 0.7 }}>
-                  {labelText}
-                </div>
-              )}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Monthly Summary */}
-      <div className="mt-3 p-3 rounded-lg" style={{ background: C.card, border: `1px solid ${C.border}`, boxShadow: CARD_DEPTH }}>
-        <div className="text-xs font-bold uppercase tracking-wider mb-2" style={{ fontFamily: SERIF, color: C.muted }}>
-          This Month
-        </div>
-        <div className="flex justify-around">
-          <div className="text-center">
-            <div className="text-xl font-bold" style={{ color: C.amber }}>{monthSessions.length}</div>
-            <div className="text-[10px]" style={{ color: C.dim }}>Sessions</div>
-          </div>
-          <div className="text-center">
-            <div className="text-xl font-bold" style={{ color: C.amber }}>{weekStreak}</div>
-            <div className="text-[10px]" style={{ color: C.dim }}>Week Streak</div>
-          </div>
-          <div className="text-center">
-            <div className="text-xl font-bold" style={{ color: C.amber }}>
-              {monthVolume >= 1000 ? `${(monthVolume / 1000).toFixed(1)}t` : `${Math.round(monthVolume)}kg`}
-            </div>
-            <div className="text-[10px]" style={{ color: C.dim }}>Volume</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Recent Sessions */}
-      {recentSessions.length > 0 && (
-        <div className="mt-3 p-3 rounded-lg" style={{ background: C.card, border: `1px solid ${C.border}`, boxShadow: CARD_DEPTH }}>
-          <div className="text-xs font-bold uppercase tracking-wider mb-2" style={{ fontFamily: SERIF, color: C.muted }}>
-            Recent Sessions
-          </div>
-          <div className="space-y-1.5">
-            {recentSessions.map(s => {
-              const dateStr = new Date(s.started_at).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' });
-              const dayTitle = getDayTitle(s.day_number);
-              let duration = '';
-              if (s.finished_at) {
-                const ms = new Date(s.finished_at) - new Date(s.started_at);
-                if (ms > 0 && ms < 4 * 60 * 60 * 1000) {
-                  duration = `${Math.round(ms / 60000)}m`;
-                }
-              }
-              return (
-                <button
-                  key={s.id}
-                  onClick={() => setSelectedDate(toDateKey(s.started_at))}
-                  className="w-full flex items-center gap-2 p-1.5 rounded text-left transition-all"
-                  style={{ background: 'transparent' }}
-                  onMouseEnter={e => e.currentTarget.style.background = C.cardHi}
-                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                >
-                  <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: C.user }} />
-                  <span className="text-xs" style={{ color: C.dim }}>{dateStr}</span>
-                  <span className="text-xs font-bold flex-1" style={{ color: C.text }}>{dayTitle}</span>
-                  {duration && <span className="text-[10px]" style={{ color: C.dim }}>{duration}</span>}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
