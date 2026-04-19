@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useWorkoutData } from '../../hooks/useWorkoutData';
 import BodyweightLogger from './BodyweightLogger';
+import { C, SERIF, CARD_DEPTH } from '../../config/constants';
 
 export default function DaySelector({ days, onSelectDay }) {
   const { fetchSessions, fetchLastSession } = useWorkoutData();
@@ -53,8 +54,8 @@ export default function DaySelector({ days, onSelectDay }) {
   return (
     <div className="p-4 space-y-3">
       <h2
-        className="text-white text-lg font-bold uppercase tracking-wider mb-4"
-        style={{ fontFamily: "'Georgia', serif" }}
+        className="text-lg font-bold uppercase tracking-wider mb-4"
+        style={{ fontFamily: SERIF, color: C.text }}
       >
         Choose Your Day
       </h2>
@@ -64,19 +65,19 @@ export default function DaySelector({ days, onSelectDay }) {
           key={day.day}
           onClick={() => handleDayClick(day)}
           className="w-full text-left p-4 rounded-lg border transition-all"
-          style={{ background: '#12121f', borderColor: '#2a2a3e' }}
-          onMouseEnter={(e) => (e.currentTarget.style.borderColor = '#d97706')}
-          onMouseLeave={(e) => (e.currentTarget.style.borderColor = '#2a2a3e')}
+          style={{ background: C.card, borderColor: C.border, boxShadow: CARD_DEPTH }}
+          onMouseEnter={(e) => (e.currentTarget.style.borderColor = C.amber)}
+          onMouseLeave={(e) => (e.currentTarget.style.borderColor = C.border)}
         >
           <div className="flex justify-between items-center">
             <div>
-              <span className="text-amber-600 font-bold text-sm">DAY {day.day}</span>
-              <span className="text-gray-400 text-sm ml-2">— {day.title}</span>
+              <span className="font-bold text-sm" style={{ color: C.amber }}>DAY {day.day}</span>
+              <span className="text-sm ml-2" style={{ color: C.muted }}>— {day.title}</span>
             </div>
-            <span className="text-gray-600 text-xs">{sessionCounts[day.day] || 0} sessions logged</span>
+            <span className="text-xs" style={{ color: C.dim }}>{sessionCounts[day.day] || 0} sessions logged</span>
           </div>
           {lastDates[day.day] && (
-            <div className="text-gray-600 text-xs mt-1">
+            <div className="text-xs mt-1" style={{ color: C.dim }}>
               Last: {new Date(lastDates[day.day]).toLocaleDateString()}
             </div>
           )}

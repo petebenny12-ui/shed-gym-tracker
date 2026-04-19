@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useBodyweight } from '../../hooks/useBodyweight';
 import { validateBodyweight } from '../../lib/validation';
+import { C, CARD_DEPTH } from '../../config/constants';
 
 export default function BodyweightLogger() {
   const { fetchAll, logWeight } = useBodyweight();
@@ -46,13 +47,13 @@ export default function BodyweightLogger() {
   };
 
   return (
-    <div className="mt-6 p-4 rounded-lg" style={{ background: '#12121f', border: '1px solid #2a2a3e' }}>
-      <label className="text-gray-400 text-xs uppercase tracking-wider block mb-2">Log Bodyweight (kg)</label>
+    <div className="mt-6 p-4 rounded-lg" style={{ background: C.card, border: `1px solid ${C.border}`, boxShadow: CARD_DEPTH }}>
+      <label className="text-xs uppercase tracking-wider block mb-2" style={{ color: C.muted }}>Log Bodyweight (kg)</label>
 
       {needsWeeklyWeighIn && (
         <div
           className="mb-2 p-2 rounded text-center text-xs font-bold"
-          style={{ background: '#d9770620', border: '1px solid #d97706', color: '#d97706' }}
+          style={{ background: C.amberDim, border: `1px solid ${C.amber}`, color: C.amber }}
         >
           &#9888; WEEKLY WEIGH-IN DUE — last logged {daysSinceLast === 999 ? 'never' : `${daysSinceLast} days ago`}
         </div>
@@ -63,8 +64,8 @@ export default function BodyweightLogger() {
           type="number"
           value={bodyweight}
           onChange={handleBodyweightChange}
-          className="flex-1 p-2 rounded text-white text-center font-bold"
-          style={{ background: '#1a1a2e', border: bwError ? '1px solid #ef4444' : '1px solid #2a2a3e' }}
+          className="flex-1 p-2 rounded text-center font-bold"
+          style={{ background: C.cardHi, border: bwError ? `1px solid ${C.warn}` : `1px solid ${C.border}`, color: C.text }}
           placeholder="120"
           min="0"
           max="500"
@@ -73,24 +74,24 @@ export default function BodyweightLogger() {
         <button
           onClick={handleLog}
           className="px-4 py-2 font-bold text-sm uppercase rounded"
-          style={{ background: '#d97706', color: '#0a0a0f' }}
+          style={{ background: C.amber, color: C.bg }}
         >
           Log
         </button>
       </div>
 
-      {bwError && <div className="text-red-500 text-xs mt-1">{bwError}</div>}
+      {bwError && <div className="text-xs mt-1" style={{ color: C.warn }}>{bwError}</div>}
 
       {rollingAvg && (
         <div className="flex justify-between mt-2">
-          <div className="text-gray-500 text-xs">
+          <div className="text-xs" style={{ color: C.dim }}>
             Latest: {lastEntry.weight_kg}kg ({new Date(lastEntry.logged_at).toLocaleDateString()})
           </div>
-          <div className="text-amber-600 text-xs font-bold">5-day avg: {rollingAvg}kg</div>
+          <div className="text-xs font-bold" style={{ color: C.amber }}>5-day avg: {rollingAvg}kg</div>
         </div>
       )}
 
-      {saved && <div className="text-center text-green-500 text-sm font-bold mt-2">Saved!</div>}
+      {saved && <div className="text-center text-sm font-bold mt-2" style={{ color: C.success }}>Saved!</div>}
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { supabase, withTimeout } from '../../lib/supabase';
 import DaySelector from './DaySelector';
 import WorkoutSession from './WorkoutSession';
+import { C } from '../../config/constants';
 
 export default function WorkoutView() {
   const { days, loading, error: routineError } = useRoutine();
@@ -23,7 +24,7 @@ export default function WorkoutView() {
 
   if (loading) {
     return (
-      <div className="p-6 text-center text-amber-600 animate-pulse font-bold uppercase tracking-wider">
+      <div className="p-6 text-center animate-pulse font-bold uppercase tracking-wider" style={{ color: C.amber }}>
         Loading...
       </div>
     );
@@ -32,11 +33,12 @@ export default function WorkoutView() {
   if (routineError) {
     return (
       <div className="p-6 text-center">
-        <div className="text-red-500 font-bold mb-2">Failed to load routine</div>
-        <div className="text-gray-500 text-sm mb-4">{routineError}</div>
+        <div className="font-bold mb-2" style={{ color: C.warn }}>Failed to load routine</div>
+        <div className="text-sm mb-4" style={{ color: C.dim }}>{routineError}</div>
         <button
           onClick={() => window.location.reload()}
-          className="px-4 py-2 bg-amber-600 text-black font-bold rounded uppercase text-sm"
+          className="px-4 py-2 font-bold rounded uppercase text-sm"
+          style={{ background: C.amber, color: C.bg }}
         >
           Refresh
         </button>
@@ -46,7 +48,7 @@ export default function WorkoutView() {
 
   if (days.length === 0) {
     return (
-      <div className="p-6 text-center text-gray-500">
+      <div className="p-6 text-center" style={{ color: C.dim }}>
         No routine set up yet. Redirecting to setup...
       </div>
     );

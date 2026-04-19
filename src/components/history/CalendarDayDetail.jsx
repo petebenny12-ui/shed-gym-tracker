@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { C, SERIF } from '../../config/constants';
+import { C, CARD_DEPTH } from '../../config/constants';
 
 function SessionDetail({ session, dayTitle, isOwn, onEdit, onDelete }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -22,16 +22,16 @@ function SessionDetail({ session, dayTitle, isOwn, onEdit, onDelete }) {
   );
 
   return (
-    <div className="rounded-lg overflow-hidden" style={{ background: '#12121f', border: '1px solid #2a2a3e' }}>
+    <div className="rounded-lg overflow-hidden" style={{ background: C.card, border: `1px solid ${C.border}`, boxShadow: CARD_DEPTH }}>
       <div className="p-3">
         <div className="flex justify-between items-center mb-2">
           <div>
-            <span className="text-amber-600 font-bold text-sm">DAY {session.day_number}</span>
-            <span className="text-gray-400 text-sm ml-2">— {dayTitle}</span>
+            <span className="font-bold text-sm" style={{ color: C.amber }}>DAY {session.day_number}</span>
+            <span className="text-sm ml-2" style={{ color: C.muted }}>— {dayTitle}</span>
           </div>
           <div className="text-right">
-            <div className="text-white text-sm font-bold">{Math.round(totalVol).toLocaleString()}kg</div>
-            <div className="text-gray-600 text-[10px]">total vol</div>
+            <div className="text-sm font-bold" style={{ color: C.text }}>{Math.round(totalVol).toLocaleString()}kg</div>
+            <div className="text-[10px]" style={{ color: C.dim }}>total vol</div>
           </div>
         </div>
 
@@ -39,12 +39,12 @@ function SessionDetail({ session, dayTitle, isOwn, onEdit, onDelete }) {
           {exercises.map((ex, eidx) => (
             <div key={eidx}>
               <div className="flex items-center gap-2">
-                <span className="text-gray-500 text-xs font-bold">{ex.label}</span>
-                <span className="text-white text-xs font-bold">{ex.name}</span>
+                <span className="text-xs font-bold" style={{ color: C.dim }}>{ex.label}</span>
+                <span className="text-xs font-bold" style={{ color: C.text }}>{ex.name}</span>
               </div>
               <div className="flex gap-3 mt-0.5">
                 {ex.sets.map((s, sidx) => (
-                  <span key={sidx} className="text-gray-400 text-xs">
+                  <span key={sidx} className="text-xs" style={{ color: C.muted }}>
                     {s.weight_kg}kg &times; {s.reps}
                   </span>
                 ))}
@@ -55,11 +55,11 @@ function SessionDetail({ session, dayTitle, isOwn, onEdit, onDelete }) {
 
         {/* Edit/Delete — only for own sessions */}
         {isOwn && (
-          <div className="flex gap-2 pt-2 mt-2" style={{ borderTop: '1px solid #1a1a2e' }}>
+          <div className="flex gap-2 pt-2 mt-2" style={{ borderTop: `1px solid ${C.cardHi}` }}>
             <button
               onClick={() => onEdit(session)}
               className="flex-1 py-1.5 text-xs font-bold uppercase rounded"
-              style={{ background: '#1a1a2e', color: '#d97706', border: '1px solid #2a2a3e' }}
+              style={{ background: C.cardHi, color: C.amber, border: `1px solid ${C.border}` }}
             >
               Edit
             </button>
@@ -67,7 +67,7 @@ function SessionDetail({ session, dayTitle, isOwn, onEdit, onDelete }) {
               <button
                 onClick={() => setConfirmDelete(true)}
                 className="flex-1 py-1.5 text-xs font-bold uppercase rounded"
-                style={{ background: '#1a1a2e', color: '#ef4444', border: '1px solid #2a2a3e' }}
+                style={{ background: C.cardHi, color: C.warn, border: `1px solid ${C.border}` }}
               >
                 Delete
               </button>
@@ -76,14 +76,14 @@ function SessionDetail({ session, dayTitle, isOwn, onEdit, onDelete }) {
                 <button
                   onClick={() => onDelete(session.id)}
                   className="flex-1 py-1.5 text-xs font-bold uppercase rounded"
-                  style={{ background: '#ef4444', color: '#fff' }}
+                  style={{ background: C.warn, color: C.text }}
                 >
                   Confirm
                 </button>
                 <button
                   onClick={() => setConfirmDelete(false)}
                   className="flex-1 py-1.5 text-xs font-bold uppercase rounded"
-                  style={{ background: '#1a1a2e', color: '#9ca3af', border: '1px solid #2a2a3e' }}
+                  style={{ background: C.cardHi, color: C.muted, border: `1px solid ${C.border}` }}
                 >
                   Cancel
                 </button>
@@ -119,8 +119,8 @@ export default function CalendarDayDetail({
   return (
     <div className="p-3">
       <div className="flex items-center justify-between mb-3">
-        <button onClick={onBack} className="text-gray-500 text-sm">&larr; Back</button>
-        <span className="text-amber-600 font-bold text-sm uppercase tracking-wider">
+        <button onClick={onBack} className="text-sm" style={{ color: C.dim }}>&larr; Back</button>
+        <span className="font-bold text-sm uppercase tracking-wider" style={{ color: C.amber }}>
           {dateDisplay}
         </span>
       </div>

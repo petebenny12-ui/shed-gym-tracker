@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { C } from '../../config/constants';
 
 export default function SessionDuration({ startedAt }) {
   const [elapsed, setElapsed] = useState(0);
@@ -15,7 +16,7 @@ export default function SessionDuration({ startedAt }) {
   const secs = elapsed % 60;
 
   return (
-    <span className="text-gray-500 text-xs">
+    <span className="text-xs" style={{ color: C.dim }}>
       Session: {mins}:{secs.toString().padStart(2, '0')}
     </span>
   );
