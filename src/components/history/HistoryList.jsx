@@ -281,8 +281,9 @@ export default function HistoryList() {
 
           const isClickable = iWorked || partnerWorked;
 
-          // Muscle group label from routine day name
-          const labels = [...new Set(myHere.map(s => tileLabel(s.day_number, routineDays)))];
+          // Muscle group label from routine day name (show for both users)
+          const allHere = [...myHere, ...partnerHere];
+          const labels = [...new Set(allHere.map(s => tileLabel(s.day_number, routineDays)))];
           const labelText = labels.join(', ');
 
           return (
