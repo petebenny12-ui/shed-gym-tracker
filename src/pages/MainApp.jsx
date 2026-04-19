@@ -10,6 +10,7 @@ import PlateauAlert from '../components/alerts/PlateauAlert';
 import SupplementChecklist from '../components/supplements/SupplementChecklist';
 import InstallPrompt from '../components/layout/InstallPrompt';
 import RoutineInviteBanner from '../components/wizard/RoutineInviteBanner';
+import V2MigrationFlow from '../components/onboarding/V2MigrationFlow';
 import { useAuth } from '../context/AuthContext';
 import { useWorkoutData } from '../hooks/useWorkoutData';
 import { daysSinceLastSession, detectPlateaus } from '../lib/alerts';
@@ -21,6 +22,7 @@ export default function MainApp() {
   const { fetchSessions } = useWorkoutData();
   const [daysSince, setDaysSince] = useState(0);
   const [plateaus, setPlateaus] = useState([]);
+  const [v2Done, setV2Done] = useState(profile?.settings?.completed_v2_migration || false);
 
   useEffect(() => {
     console.log('[MainApp] Mounted — fetching alert data...');
@@ -51,6 +53,10 @@ export default function MainApp() {
         return null;
     }
   };
+
+  if (!v2Done) {
+    return <V2MigrationFlow onComplete={() => setV2Done(true)} />;
+  }
 
   return (
     <div className="min-h-screen" style={{ background: C.bg }}>
