@@ -1,12 +1,11 @@
 import ExerciseColumn from './ExerciseColumn';
 import { C, CARD_DEPTH } from '../../config/constants';
 
-export default function SupersetCard({ superset, entries, lastSets, onUpdateSet, onAddSet, onShowDemo }) {
+export default function SupersetCard({ superset, entries, lastSets, exerciseSettings, onUpdateSet, onAddSet, onToggleWeightMode }) {
   const ex1Key = `${superset.label}1`;
   const ex2Key = `${superset.label}2`;
   const hasEx2 = !!superset.ex2;
 
-  // Best weight from last session for this exercise
   const lastBest = (key) => {
     const sets = lastSets?.[key];
     if (!sets) return null;
@@ -26,6 +25,11 @@ export default function SupersetCard({ superset, entries, lastSets, onUpdateSet,
           exercise={superset.ex1}
           sets={entries[ex1Key] || [{ weight: '', reps: '' }, { weight: '', reps: '' }, { weight: '', reps: '' }]}
           lastBestWeight={lastBest(ex1Key)}
+          weightMode={exerciseSettings?.getWeightMode(superset.ex1.id)}
+          onToggleWeightMode={() => {
+            const current = exerciseSettings?.getWeightMode(superset.ex1.id);
+            onToggleWeightMode?.(superset.ex1.id, current === 'per_side' ? 'total' : 'per_side');
+          }}
           onUpdateSet={(idx, field, val) => onUpdateSet(ex1Key, idx, field, val)}
           onAddSet={() => onAddSet(ex1Key)}
           isRight={false}
@@ -36,6 +40,11 @@ export default function SupersetCard({ superset, entries, lastSets, onUpdateSet,
             exercise={superset.ex2}
             sets={entries[ex2Key] || [{ weight: '', reps: '' }, { weight: '', reps: '' }, { weight: '', reps: '' }]}
             lastBestWeight={lastBest(ex2Key)}
+            weightMode={exerciseSettings?.getWeightMode(superset.ex2.id)}
+            onToggleWeightMode={() => {
+              const current = exerciseSettings?.getWeightMode(superset.ex2.id);
+              onToggleWeightMode?.(superset.ex2.id, current === 'per_side' ? 'total' : 'per_side');
+            }}
             onUpdateSet={(idx, field, val) => onUpdateSet(ex2Key, idx, field, val)}
             onAddSet={() => onAddSet(ex2Key)}
             isRight={true}

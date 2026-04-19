@@ -7,6 +7,7 @@ import SupersetCard from './SupersetCard';
 import RestTimer from './RestTimer';
 import SessionDuration from './SessionDuration';
 import { C } from '../../config/constants';
+import { useExerciseSettings } from '../../hooks/useExerciseSettings';
 import ExerciseDemo from '../exercises/ExerciseDemo';
 import PRCelebration from '../alerts/PRCelebration';
 import WarmUpSection from '../warmup/WarmUpSection';
@@ -22,6 +23,7 @@ export default function WorkoutSession({ day, onBack }) {
   const { user, profile } = useAuth();
   const { saveSession } = useWorkoutData();
   const { timerCount, timerDuration, alarmOn, startTimer, toggleAlarm } = useTimer();
+  const exerciseSettings = useExerciseSettings();
 
   const storageKey = getStorageKey(user?.id, day.day);
 
@@ -226,9 +228,10 @@ export default function WorkoutSession({ day, onBack }) {
           superset={ss}
           entries={entries}
           lastSets={day._prefilled}
+          exerciseSettings={exerciseSettings}
           onUpdateSet={updateSet}
           onAddSet={addSet}
-          onShowDemo={setDemoExercise}
+          onToggleWeightMode={exerciseSettings.setWeightMode}
         />
       ))}
 
