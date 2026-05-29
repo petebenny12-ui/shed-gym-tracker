@@ -46,11 +46,18 @@ export function computeGoalProjection(logs, settings, today = new Date()) {
   const goalWeightKg = settings?.goal_weight_kg != null ? parseFloat(settings.goal_weight_kg) : null;
   const goalDate = settings?.goal_date || null;
 
+  // The locked anchor captured at the moment the goal was last saved — drives
+  // the fixed (green) goal line. Stays put as new weigh-ins come in.
+  const anchorWeight = settings?.goal_anchor_weight_kg != null ? parseFloat(settings.goal_anchor_weight_kg) : null;
+  const anchorDate = settings?.goal_anchor_date || null;
+
   const dormant = {
     status: 'no_goal',
     goalWeightKg, goalDate,
     lastWeight: null, lastDate: null,
-    requiredRatePerDay: null, targetToday: null, targetLine: null,
+    anchorWeight, anchorDate,
+    requiredRatePerDay: null, targetToday: null,
+    targetLine: null, lockedLine: null,
   };
 
   if (goalWeightKg == null || isNaN(goalWeightKg) || !goalDate) return dormant;
@@ -64,10 +71,18 @@ export function computeGoalProjection(logs, settings, today = new Date()) {
   const tLast = lastEntry.logged_at;
   if (isNaN(wLast)) return dormant;
 
+  // The fixed (green) line — from the locked anchor to the goal. Available
+  // whenever an anchor and goal exist, regardless of current progress.
+  const lockedLine = (anchorWeight != null && anchorDate)
+    ? [{ date: anchorDate, weight: anchorWeight }, { date: goalDate, weight: goalWeightKg }]
+    : null;
+
   const base = {
     goalWeightKg, goalDate,
     lastWeight: wLast, lastDate: tLast,
-    requiredRatePerDay: null, targetToday: null, targetLine: null,
+    anchorWeight, anchorDate,
+    requiredRatePerDay: null, targetToday: null,
+    targetLine: null, lockedLine,
   };
 
   // Goal already met.
@@ -98,3 +113,28 @@ export function computeGoalProjection(logs, settings, today = new Date()) {
     ],
   };
 }
+
+/**
+ * Build the profiles.settings patch for saving a goal. Captures the current
+ * most-recent weigh-in as the locked anchor (drives the fixed green line), so
+ * the green line freezes at save time and only moves when the goal is resaved.
+ */
+export function buildGoalUpdate(logs, goalWeightKg, goalDate) {
+  const sorted = [...(logs || [])].sort((a, b) => new Date(b.logged_at) - new Date(a.logged_at));
+  const last = sorted[0];
+  const w = parseFloat(goalWeightKg);
+  return {
+    goal_weight_kg: isNaN(w) ? null : w,
+    goal_date: goalDate || null,
+    goal_anchor_weight_kg: last ? parseFloat(last.weight_kg) : null,
+    goal_anchor_date: last ? last.logged_at : null,
+  };
+}
+
+/** The settings patch for clearing a goal (and its locked anchor). */
+export const CLEARED_GOAL = {
+  goal_weight_kg: null,
+  goal_date: null,
+  goal_anchor_weight_kg: null,
+  goal_anchor_date: null,
+};

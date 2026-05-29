@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { computeGoalProjection, daysBetween } from '../lib/bodyweightGoal';
+import { computeGoalProjection, daysBetween, buildGoalUpdate, CLEARED_GOAL } from '../lib/bodyweightGoal';
 
 const logs = [
   { weight_kg: 130, logged_at: '2026-03-01T08:00:00.000Z' },
@@ -65,6 +65,22 @@ describe('computeGoalProjection', () => {
     expect(p.requiredRatePerDay).toBeNull();
   });
 
+  it('exposes a locked line from the saved anchor, independent of new logs', () => {
+    const settings = {
+      goal_weight_kg: 110,
+      goal_date: '2026-08-28',
+      goal_anchor_weight_kg: 130,
+      goal_anchor_date: '2026-03-01T08:00:00.000Z',
+    };
+    const today = new Date('2026-05-30T12:00:00.000Z');
+    const p = computeGoalProjection(logs, settings, today);
+    // Green (locked) line starts at the anchor, not the latest log.
+    expect(p.lockedLine[0].weight).toBe(130);
+    expect(p.lockedLine[1]).toEqual({ date: '2026-08-28', weight: 110 });
+    // Blue (updated) line re-paths from the latest actual weigh-in.
+    expect(p.targetLine[0].weight).toBe(124);
+  });
+
   it('guards divide-by-zero when goal date equals the last log date', () => {
     const today = new Date('2026-05-30T12:00:00.000Z');
     const p = computeGoalProjection(
@@ -74,5 +90,32 @@ describe('computeGoalProjection', () => {
     );
     expect(p.status).toBe('date_passed');
     expect(p.requiredRatePerDay).toBeNull();
+  });
+});
+
+describe('buildGoalUpdate', () => {
+  it('captures the most recent weigh-in as the locked anchor', () => {
+    const patch = buildGoalUpdate(logs, '110', '2026-08-28');
+    expect(patch).toEqual({
+      goal_weight_kg: 110,
+      goal_date: '2026-08-28',
+      goal_anchor_weight_kg: 124,
+      goal_anchor_date: '2026-05-30T08:00:00.000Z',
+    });
+  });
+
+  it('handles having no logs yet (no anchor)', () => {
+    const patch = buildGoalUpdate([], '110', '2026-08-28');
+    expect(patch.goal_anchor_weight_kg).toBeNull();
+    expect(patch.goal_anchor_date).toBeNull();
+  });
+
+  it('CLEARED_GOAL wipes goal and anchor', () => {
+    expect(CLEARED_GOAL).toEqual({
+      goal_weight_kg: null,
+      goal_date: null,
+      goal_anchor_weight_kg: null,
+      goal_anchor_date: null,
+    });
   });
 });

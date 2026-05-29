@@ -3,7 +3,7 @@ import { useBodyweight } from '../../hooks/useBodyweight';
 import { useAuth } from '../../context/AuthContext';
 import { supabase, withTimeout } from '../../lib/supabase';
 import { validateBodyweight } from '../../lib/validation';
-import { computeGoalProjection } from '../../lib/bodyweightGoal';
+import { computeGoalProjection, buildGoalUpdate, CLEARED_GOAL } from '../../lib/bodyweightGoal';
 import { C, cardBase } from '../../design';
 
 function formatGoalDate(value) {
@@ -84,12 +84,8 @@ export default function BodyweightLogger() {
   const handleSaveGoal = async () => {
     if (!profile) return;
     setGoalSaving(true);
-    const w = parseFloat(goalWeight);
-    const updated = {
-      ...settings,
-      goal_weight_kg: isNaN(w) ? null : w,
-      goal_date: goalDate || null,
-    };
+    // Capture the current weigh-in as the locked anchor for the green line.
+    const updated = { ...settings, ...buildGoalUpdate(logs, goalWeight, goalDate) };
     const { error } = await withTimeout(
       supabase.from('profiles').update({ settings: updated }).eq('id', profile.id),
       'saveBodyweightGoal'
@@ -104,7 +100,7 @@ export default function BodyweightLogger() {
   const handleClearGoal = async () => {
     if (!profile) return;
     setGoalSaving(true);
-    const updated = { ...settings, goal_weight_kg: null, goal_date: null };
+    const updated = { ...settings, ...CLEARED_GOAL };
     const { error } = await withTimeout(
       supabase.from('profiles').update({ settings: updated }).eq('id', profile.id),
       'clearBodyweightGoal'

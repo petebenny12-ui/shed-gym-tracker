@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { supabase, withTimeout } from '../../lib/supabase';
-import { computeGoalProjection } from '../../lib/bodyweightGoal';
+import { computeGoalProjection, buildGoalUpdate, CLEARED_GOAL } from '../../lib/bodyweightGoal';
 import { C, CARD_DEPTH } from '../../config/constants';
 
 function formatGoalDate(value) {
@@ -48,17 +48,14 @@ export default function BodyweightGoalEditor({ logs }) {
   };
 
   const handleSave = () => {
-    const w = parseFloat(goalWeight);
-    saveSettings({
-      goal_weight_kg: isNaN(w) ? null : w,
-      goal_date: goalDate || null,
-    });
+    // Capture the current weigh-in as the locked anchor for the green line.
+    saveSettings(buildGoalUpdate(logs, goalWeight, goalDate));
   };
 
   const handleClear = () => {
     setGoalWeight('');
     setGoalDate('');
-    saveSettings({ goal_weight_kg: null, goal_date: null });
+    saveSettings({ ...CLEARED_GOAL });
   };
 
   let summary = null;

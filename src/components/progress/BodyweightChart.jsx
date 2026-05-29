@@ -2,10 +2,13 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { C, CARD_DEPTH } from '../../config/constants';
 import { computeGoalProjection } from '../../lib/bodyweightGoal';
 
-const TARGET_COLOR = '#22c55e';
+const ACTUAL_COLOR = C.amber;   // orange — your real bodyweight trend
+const LOCKED_COLOR = '#22c55e'; // green — goal line locked at save time
+const UPDATED_COLOR = C.user;   // blue  — goal line re-pathed from latest log
+const DAY_MS = 86400000;
 
 // Normalise any date-ish value to a local-midnight timestamp so points sit on a
-// real time axis (a goal months out projects proportionally into the future).
+// real time axis.
 function dayTs(value) {
   const m = String(value).match(/^(\d{4})-(\d{2})-(\d{2})/);
   const d = m ? new Date(+m[1], +m[2] - 1, +m[3]) : new Date(value);
@@ -17,7 +20,14 @@ function fmtDate(ts) {
 }
 
 function uniqSorted(arr) {
-  return [...new Set(arr)].sort((a, b) => a - b);
+  return [...new Set(arr.filter((n) => Number.isFinite(n)))].sort((a, b) => a - b);
+}
+
+// Place a value onto an existing same-day row, or insert a new row for it.
+function setSeriesPoint(data, ts, key, value) {
+  const row = data.find((p) => p.t === ts);
+  if (row) row[key] = value;
+  else data.push({ t: ts, weight: null, avg: null, [key]: value });
 }
 
 export default function BodyweightChart({ logs, settings }) {
@@ -31,38 +41,46 @@ export default function BodyweightChart({ logs, settings }) {
       t: dayTs(b.logged_at),
       weight: parseFloat(b.weight_kg),
       avg: parseFloat(avg.toFixed(1)),
-      target: null,
+      locked: null,
+      updated: null,
     };
   });
 
-  const logTimes = data.map((p) => p.t);
-  const firstTs = logTimes[0];
-  const lastLogTs = logTimes[logTimes.length - 1];
-  const midTs = logTimes[Math.floor((logTimes.length - 1) / 2)];
-
-  // Overlay the target line: a straight line from the most recent actual log to
-  // the fixed goal. Anchor its start on the last actual point (so the green
-  // line picks up exactly where the data ends) and add a point at the goal date.
   const projection = computeGoalProjection(logs, settings);
   const active = projection.status === 'active';
 
-  let ticks = uniqSorted([firstTs, midTs, lastLogTs]);
+  let domain;
+  let ticks;
+
   if (active) {
-    const lastTs = dayTs(projection.lastDate);
     const goalTs = dayTs(projection.goalDate);
-    const anchor = data.find((p) => p.t === lastTs) || data[data.length - 1];
-    anchor.target = projection.lastWeight;
-    data.push({ t: goalTs, weight: null, avg: null, target: projection.goalWeightKg });
-    ticks = uniqSorted([firstTs, lastTs, goalTs]);
+    const todayTs = dayTs(new Date());
+
+    // Blue: re-pathed line from the most recent actual weigh-in to the goal.
+    setSeriesPoint(data, dayTs(projection.lastDate), 'updated', projection.lastWeight);
+    setSeriesPoint(data, goalTs, 'updated', projection.goalWeightKg);
+
+    // Green: fixed line from the locked anchor (save-time weigh-in) to the goal.
+    if (projection.lockedLine) {
+      setSeriesPoint(data, dayTs(projection.anchorDate), 'locked', projection.anchorWeight);
+      setSeriesPoint(data, goalTs, 'locked', projection.goalWeightKg);
+    }
+
+    // Default view: the last 2 weeks of actuals, projected out to the goal date.
+    domain = [todayTs - 14 * DAY_MS, goalTs];
+    ticks = uniqSorted([todayTs - 14 * DAY_MS, todayTs, goalTs]);
+  } else {
+    const times = data.map((p) => p.t);
+    domain = [times[0], times[times.length - 1]];
+    ticks = uniqSorted([times[0], times[Math.floor((times.length - 1) / 2)], times[times.length - 1]]);
   }
 
   data.sort((a, b) => a.t - b.t);
-  const domain = [data[0].t, data[data.length - 1].t];
 
   return (
     <div className="mb-4 p-3 rounded-lg" style={{ background: C.card, border: `1px solid ${C.border}`, boxShadow: CARD_DEPTH }}>
       <h3 className="text-xs font-bold uppercase mb-2" style={{ color: C.amber }}>Bodyweight</h3>
-      <ResponsiveContainer width="100%" height={150}>
+      <ResponsiveContainer width="100%" height={170}>
         <LineChart data={data}>
           <CartesianGrid strokeDasharray="3 3" stroke={C.cardHi} />
           <XAxis
@@ -72,6 +90,7 @@ export default function BodyweightChart({ logs, settings }) {
             domain={domain}
             ticks={ticks}
             tickFormatter={fmtDate}
+            allowDataOverflow
             tick={{ fill: '#666', fontSize: 10 }}
           />
           <YAxis tick={{ fill: '#666', fontSize: 10 }} domain={['auto', 'auto']} />
@@ -80,19 +99,12 @@ export default function BodyweightChart({ logs, settings }) {
             contentStyle={{ background: C.cardHi, border: `1px solid ${C.border}`, color: C.text, fontSize: 12 }}
           />
           <Legend wrapperStyle={{ fontSize: 10 }} />
-          <Line type="monotone" dataKey="weight" stroke="#555" strokeWidth={1} dot={{ fill: '#555', r: 2 }} name="Daily" connectNulls={false} />
-          <Line type="monotone" dataKey="avg" stroke={C.amber} strokeWidth={2.5} dot={{ fill: C.amber, r: 3 }} name="5-day avg" connectNulls={false} />
+          <Line type="monotone" dataKey="avg" stroke={ACTUAL_COLOR} strokeWidth={2.5} dot={{ fill: ACTUAL_COLOR, r: 3 }} name="Actual" connectNulls={false} />
+          {active && projection.lockedLine && (
+            <Line type="linear" dataKey="locked" stroke={LOCKED_COLOR} strokeWidth={2} strokeDasharray="6 4" dot={{ fill: LOCKED_COLOR, r: 3 }} name="Goal (locked)" connectNulls />
+          )}
           {active && (
-            <Line
-              type="linear"
-              dataKey="target"
-              stroke={TARGET_COLOR}
-              strokeWidth={2}
-              strokeDasharray="6 4"
-              dot={{ fill: TARGET_COLOR, r: 3 }}
-              name="Target"
-              connectNulls
-            />
+            <Line type="linear" dataKey="updated" stroke={UPDATED_COLOR} strokeWidth={2} strokeDasharray="2 3" dot={{ fill: UPDATED_COLOR, r: 3 }} name="Goal (updated)" connectNulls />
           )}
         </LineChart>
       </ResponsiveContainer>
