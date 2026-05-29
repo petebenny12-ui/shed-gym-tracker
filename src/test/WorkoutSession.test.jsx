@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
 import WorkoutSession from '../components/workout/WorkoutSession';
 
 // ── Mocks ──
@@ -54,6 +54,15 @@ const mockDay = {
 
 const storageKey = 'workout-progress-user-123-1';
 
+// The set-weight/reps inputs (design-system SetInput) carry no placeholder and
+// no type, but are the only inputs with inputMode="decimal" — the date picker
+// is type="date". Order is [set1 kg, set1 reps, set2 kg, ...] per exercise.
+const getSetInputs = (container) => container.querySelectorAll('input[inputmode="decimal"]');
+
+// Persisted progress must carry a fresh `savedAt`, otherwise the component
+// treats it as a stale/expired session and discards it on mount.
+const withSavedAt = (state) => ({ savedAt: Date.now(), ...state });
+
 // ── Tests ──
 
 describe('WorkoutSession localStorage auto-save', () => {
@@ -62,11 +71,11 @@ describe('WorkoutSession localStorage auto-save', () => {
   });
 
   it('saves entries to localStorage when user inputs data', () => {
-    render(<WorkoutSession day={mockDay} onBack={vi.fn()} />);
+    const { container } = render(<WorkoutSession day={mockDay} onBack={vi.fn()} />);
 
-    const weightInputs = screen.getAllByPlaceholderText('-');
+    const setInputs = getSetInputs(container);
     // First input is weight for first set of first exercise
-    fireEvent.change(weightInputs[0], { target: { value: '80' } });
+    fireEvent.change(setInputs[0], { target: { value: '80' } });
 
     const stored = JSON.parse(localStorage.getItem(storageKey));
     expect(stored).toBeTruthy();
@@ -75,7 +84,7 @@ describe('WorkoutSession localStorage auto-save', () => {
   });
 
   it('restores entries from localStorage on mount', () => {
-    const savedState = {
+    const savedState = withSavedAt({
       entries: {
         A1: [
           { weight: '100', reps: '8' },
@@ -85,25 +94,25 @@ describe('WorkoutSession localStorage auto-save', () => {
       },
       sessionDate: '2026-04-07',
       startedAt: '2026-04-07T10:00:00.000Z',
-    };
+    });
     localStorage.setItem(storageKey, JSON.stringify(savedState));
 
-    render(<WorkoutSession day={mockDay} onBack={vi.fn()} />);
+    const { container } = render(<WorkoutSession day={mockDay} onBack={vi.fn()} />);
 
     // Should show resumed banner
     expect(screen.getByText('Resumed your session')).toBeInTheDocument();
 
     // Should restore the saved weight values
-    const weightInputs = screen.getAllByPlaceholderText('-');
-    expect(weightInputs[0].value).toBe('100');
+    const setInputs = getSetInputs(container);
+    expect(setInputs[0].value).toBe('100');
   });
 
   it('shows resumed banner that auto-dismisses', async () => {
-    const savedState = {
+    const savedState = withSavedAt({
       entries: { A1: [{ weight: '50', reps: '10' }] },
       sessionDate: '2026-04-07',
       startedAt: '2026-04-07T10:00:00.000Z',
-    };
+    });
     localStorage.setItem(storageKey, JSON.stringify(savedState));
 
     vi.useFakeTimers();
@@ -118,30 +127,30 @@ describe('WorkoutSession localStorage auto-save', () => {
   });
 
   it('clears localStorage after successful save', async () => {
-    render(<WorkoutSession day={mockDay} onBack={vi.fn()} />);
+    const { container } = render(<WorkoutSession day={mockDay} onBack={vi.fn()} />);
 
     // Enter data so save has something to submit
-    const weightInputs = screen.getAllByPlaceholderText('-');
-    fireEvent.change(weightInputs[0], { target: { value: '80' } });
+    const setInputs = getSetInputs(container);
+    fireEvent.change(setInputs[0], { target: { value: '80' } });
 
     // Verify data is stored
     expect(localStorage.getItem(storageKey)).toBeTruthy();
 
     // Click save
     const saveBtn = screen.getByText('LOG SESSION');
-    await act(async () => { fireEvent.click(saveBtn); });
+    fireEvent.click(saveBtn);
 
-    // localStorage should be cleared after successful save
-    expect(localStorage.getItem(storageKey)).toBeNull();
+    // localStorage should be cleared after the async save resolves
+    await waitFor(() => expect(localStorage.getItem(storageKey)).toBeNull());
   });
 
   it('preserves startedAt timestamp across restore', () => {
     const originalStart = '2026-04-07T09:30:00.000Z';
-    const savedState = {
+    const savedState = withSavedAt({
       entries: { A1: [{ weight: '60', reps: '8' }] },
       sessionDate: '2026-04-07',
       startedAt: originalStart,
-    };
+    });
     localStorage.setItem(storageKey, JSON.stringify(savedState));
 
     render(<WorkoutSession day={mockDay} onBack={vi.fn()} />);
