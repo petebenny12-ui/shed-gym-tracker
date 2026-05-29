@@ -121,8 +121,10 @@ export default function SplashScreen() {
         style={{
           ...layerStyle,
           display: 'flex',
-          alignItems: 'center',
+          alignItems: 'flex-start',
           justifyContent: 'center',
+          // Push the title to the top, clear of the notch/status bar.
+          paddingTop: 'calc(max(env(safe-area-inset-top), 1.5rem) + 1.5rem)',
         }}
       >
         <h1
