@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useWorkoutData } from '../../hooks/useWorkoutData';
 import { useBodyweight } from '../../hooks/useBodyweight';
+import { useAuth } from '../../context/AuthContext';
 import {
   C,
   FrequencyChart,
@@ -17,6 +18,7 @@ import BodyweightChart from './BodyweightChart';
 export default function ProgressView() {
   const { fetchSessions } = useWorkoutData();
   const { fetchAll } = useBodyweight();
+  const { profile } = useAuth();
   const [sessions, setSessions] = useState([]);
   const [bwLogs, setBwLogs] = useState([]);
   const [selectedExercise, setSelectedExercise] = useState(null);
@@ -134,7 +136,7 @@ export default function ProgressView() {
 
   return (
     <div style={{ padding: '0 12px 24px' }}>
-      <BodyweightChart logs={bwLogs} />
+      <BodyweightChart logs={bwLogs} settings={profile?.settings} />
 
       {/* Training frequency with gap alert */}
       <FrequencyChart weeks={weeklyFrequency} target={4} />

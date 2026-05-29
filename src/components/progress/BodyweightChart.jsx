@@ -1,7 +1,10 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { C, CARD_DEPTH } from '../../config/constants';
+import { computeGoalProjection } from '../../lib/bodyweightGoal';
 
-export default function BodyweightChart({ logs }) {
+const TARGET_COLOR = '#22c55e';
+
+export default function BodyweightChart({ logs, settings }) {
   if (!logs || logs.length < 2) return null;
 
   const data = logs.map((b, idx, arr) => {
@@ -12,8 +15,23 @@ export default function BodyweightChart({ logs }) {
       date: new Date(b.logged_at).toLocaleDateString(),
       weight: parseFloat(b.weight_kg),
       avg: parseFloat(avg.toFixed(1)),
+      target: null,
     };
   });
+
+  // Overlay the target line: a straight line from the most recent actual log to
+  // the fixed goal. Anchor the line's start on the last actual data point and
+  // append a single point at the goal date.
+  const projection = computeGoalProjection(logs, settings);
+  if (projection.status === 'active' && data.length > 0) {
+    data[data.length - 1].target = projection.lastWeight;
+    data.push({
+      date: new Date(projection.goalDate).toLocaleDateString(),
+      weight: null,
+      avg: null,
+      target: projection.goalWeightKg,
+    });
+  }
 
   return (
     <div className="mb-4 p-3 rounded-lg" style={{ background: C.card, border: `1px solid ${C.border}`, boxShadow: CARD_DEPTH }}>
@@ -27,8 +45,20 @@ export default function BodyweightChart({ logs }) {
             contentStyle={{ background: C.cardHi, border: `1px solid ${C.border}`, color: C.text, fontSize: 12 }}
           />
           <Legend wrapperStyle={{ fontSize: 10 }} />
-          <Line type="monotone" dataKey="weight" stroke="#555" strokeWidth={1} dot={{ fill: '#555', r: 2 }} name="Daily" />
-          <Line type="monotone" dataKey="avg" stroke={C.amber} strokeWidth={2.5} dot={{ fill: C.amber, r: 3 }} name="5-day avg" />
+          <Line type="monotone" dataKey="weight" stroke="#555" strokeWidth={1} dot={{ fill: '#555', r: 2 }} name="Daily" connectNulls={false} />
+          <Line type="monotone" dataKey="avg" stroke={C.amber} strokeWidth={2.5} dot={{ fill: C.amber, r: 3 }} name="5-day avg" connectNulls={false} />
+          {projection.status === 'active' && (
+            <Line
+              type="linear"
+              dataKey="target"
+              stroke={TARGET_COLOR}
+              strokeWidth={2}
+              strokeDasharray="5 4"
+              dot={{ fill: TARGET_COLOR, r: 3 }}
+              name="Target"
+              connectNulls
+            />
+          )}
         </LineChart>
       </ResponsiveContainer>
     </div>

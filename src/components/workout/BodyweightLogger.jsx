@@ -1,14 +1,32 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useBodyweight } from '../../hooks/useBodyweight';
+import { useAuth } from '../../context/AuthContext';
+import { supabase, withTimeout } from '../../lib/supabase';
 import { validateBodyweight } from '../../lib/validation';
+import { computeGoalProjection } from '../../lib/bodyweightGoal';
 import { C, cardBase } from '../../design';
+
+function formatGoalDate(value) {
+  const m = String(value).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  const d = m ? new Date(+m[1], +m[2] - 1, +m[3]) : new Date(value);
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+}
 
 export default function BodyweightLogger() {
   const { fetchAll, logWeight } = useBodyweight();
+  const { profile, refreshProfile } = useAuth();
   const [bodyweight, setBodyweight] = useState('');
   const [bwError, setBwError] = useState(null);
   const [logs, setLogs] = useState([]);
   const [saved, setSaved] = useState(false);
+  const userEdited = useRef(false);
+
+  // Goal editor state (seeded from saved settings).
+  const settings = profile?.settings || {};
+  const [editingGoal, setEditingGoal] = useState(false);
+  const [goalWeight, setGoalWeight] = useState(settings.goal_weight_kg ?? '');
+  const [goalDate, setGoalDate] = useState(settings.goal_date ?? '');
+  const [goalSaving, setGoalSaving] = useState(false);
 
   useEffect(() => {
     fetchAll().then(setLogs);
@@ -25,7 +43,22 @@ export default function BodyweightLogger() {
     : 999;
   const needsWeeklyWeighIn = daysSinceLast >= 7;
 
+  // Reactive goal projection — recomputes whenever logs or the goal change.
+  const projection = useMemo(
+    () => computeGoalProjection(logs, settings),
+    [logs, settings]
+  );
+
+  // Default the input box to today's target along the line (editable, not just
+  // a placeholder). Only while the user hasn't typed their own value.
+  useEffect(() => {
+    if (projection.status === 'active' && projection.targetToday != null && !userEdited.current) {
+      setBodyweight(String(projection.targetToday));
+    }
+  }, [projection.status, projection.targetToday]);
+
   const handleBodyweightChange = (e) => {
+    userEdited.current = true;
     const { value, error } = validateBodyweight(e.target.value);
     setBodyweight(value);
     setBwError(error);
@@ -40,15 +73,124 @@ export default function BodyweightLogger() {
     const { data, error } = await logWeight(parsed);
     if (!error && data) {
       setLogs([...logs, data]);
+      // Re-anchor: let the target-today default recompute off the new entry.
+      userEdited.current = false;
       setBodyweight('');
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     }
   };
 
+  const handleSaveGoal = async () => {
+    if (!profile) return;
+    setGoalSaving(true);
+    const w = parseFloat(goalWeight);
+    const updated = {
+      ...settings,
+      goal_weight_kg: isNaN(w) ? null : w,
+      goal_date: goalDate || null,
+    };
+    const { error } = await withTimeout(
+      supabase.from('profiles').update({ settings: updated }).eq('id', profile.id),
+      'saveBodyweightGoal'
+    );
+    setGoalSaving(false);
+    if (!error) {
+      await refreshProfile();
+      setEditingGoal(false);
+    }
+  };
+
+  const handleClearGoal = async () => {
+    if (!profile) return;
+    setGoalSaving(true);
+    const updated = { ...settings, goal_weight_kg: null, goal_date: null };
+    const { error } = await withTimeout(
+      supabase.from('profiles').update({ settings: updated }).eq('id', profile.id),
+      'clearBodyweightGoal'
+    );
+    setGoalSaving(false);
+    if (!error) {
+      setGoalWeight('');
+      setGoalDate('');
+      await refreshProfile();
+      setEditingGoal(false);
+    }
+  };
+
+  // One-line summary of where the goal stands.
+  let goalSummary = null;
+  if (projection.status === 'active') {
+    goalSummary = `${projection.requiredRatePerDay.toFixed(2)} kg/day to hit ${projection.goalWeightKg} kg by ${formatGoalDate(projection.goalDate)}`;
+  } else if (projection.status === 'goal_reached') {
+    goalSummary = 'Goal reached';
+  } else if (projection.status === 'date_passed') {
+    goalSummary = 'Target date passed';
+  }
+
   return (
     <div className="mt-6 p-4 rounded-lg" style={{ ...cardBase, padding: 16 }}>
-      <label className="text-xs uppercase tracking-wider block mb-2" style={{ color: C.muted }}>Log Bodyweight (kg)</label>
+      <div className="flex items-center justify-between mb-2">
+        <label className="text-xs uppercase tracking-wider" style={{ color: C.muted }}>Log Bodyweight (kg)</label>
+        <button
+          onClick={() => setEditingGoal((v) => !v)}
+          className="text-xs uppercase tracking-wider"
+          style={{ color: C.amber }}
+        >
+          {settings.goal_weight_kg != null && settings.goal_date ? 'Edit goal' : 'Set goal'}
+        </button>
+      </div>
+
+      {editingGoal && (
+        <div className="mb-3 p-2 rounded" style={{ background: C.cardHi, border: `1px solid ${C.border}` }}>
+          <div className="flex gap-2">
+            <div className="flex-1">
+              <div className="text-[10px] uppercase tracking-wider mb-1" style={{ color: C.dim }}>Goal weight (kg)</div>
+              <input
+                type="number"
+                value={goalWeight}
+                onChange={(e) => setGoalWeight(e.target.value)}
+                className="w-full p-2 rounded text-center font-bold"
+                style={{ background: C.card, border: `1px solid ${C.border}`, color: C.text }}
+                placeholder="110"
+                min="0"
+                max="500"
+                step="0.1"
+              />
+            </div>
+            <div className="flex-1">
+              <div className="text-[10px] uppercase tracking-wider mb-1" style={{ color: C.dim }}>Goal date</div>
+              <input
+                type="date"
+                value={goalDate}
+                onChange={(e) => setGoalDate(e.target.value)}
+                className="w-full p-2 rounded text-center font-bold"
+                style={{ background: C.card, border: `1px solid ${C.border}`, color: C.text }}
+              />
+            </div>
+          </div>
+          <div className="flex gap-2 mt-2">
+            <button
+              onClick={handleSaveGoal}
+              disabled={goalSaving}
+              className="flex-1 py-2 font-bold text-xs uppercase rounded"
+              style={{ background: C.amber, color: C.bg }}
+            >
+              {goalSaving ? 'Saving…' : 'Save goal'}
+            </button>
+            {(settings.goal_weight_kg != null && settings.goal_date) && (
+              <button
+                onClick={handleClearGoal}
+                disabled={goalSaving}
+                className="px-3 py-2 font-bold text-xs uppercase rounded"
+                style={{ background: 'transparent', border: `1px solid ${C.border}`, color: C.muted }}
+              >
+                Clear
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {needsWeeklyWeighIn && (
         <div
@@ -81,6 +223,12 @@ export default function BodyweightLogger() {
       </div>
 
       {bwError && <div className="text-xs mt-1" style={{ color: C.warn }}>{bwError}</div>}
+
+      {goalSummary && (
+        <div className="text-xs mt-2 font-bold" style={{ color: projection.status === 'active' ? C.amber : C.muted }}>
+          {goalSummary}
+        </div>
+      )}
 
       {rollingAvg && (
         <div className="flex justify-between mt-2">
