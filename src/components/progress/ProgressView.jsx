@@ -14,6 +14,7 @@ import {
   SPACE,
 } from '../../design';
 import BodyweightChart from './BodyweightChart';
+import BodyweightGoalEditor from './BodyweightGoalEditor';
 
 export default function ProgressView() {
   const { fetchSessions } = useWorkoutData();
@@ -137,6 +138,7 @@ export default function ProgressView() {
   return (
     <div style={{ padding: '0 12px 24px' }}>
       <BodyweightChart logs={bwLogs} settings={profile?.settings} />
+      <BodyweightGoalEditor logs={bwLogs} />
 
       {/* Training frequency with gap alert */}
       <FrequencyChart weeks={weeklyFrequency} target={4} />
