@@ -5,20 +5,20 @@
 // Replaces the old pattern of 4 stacked identical warn cards.
 
 import { useState } from "react";
-import { AlertTriangle, ChevronRight, ChevronDown } from "lucide-react";
+import { AlertTriangle, ChevronRight, ChevronDown, X } from "lucide-react";
 import { C, RADIUS, SPACE } from "../tokens";
 import { Card } from "../primitives";
 
 // plateaus: [{ exerciseName, weight, reps, sessions, suggestions: string[] }]
-export function PlateauBanner({ plateaus }) {
+// onDismiss: optional — when provided, an × appears to dismiss the banner.
+export function PlateauBanner({ plateaus, onDismiss }) {
   const [open, setOpen] = useState(false);
 
   if (!plateaus || plateaus.length === 0) return null;
 
   return (
     <div style={{ marginBottom: 16 }}>
-      <button
-        onClick={() => setOpen((v) => !v)}
+      <div
         style={{
           width: "100%",
           background: C.warnDim,
@@ -28,29 +28,58 @@ export function PlateauBanner({ plateaus }) {
           display: "flex",
           alignItems: "center",
           gap: 12,
-          cursor: "pointer",
-          textAlign: "left",
         }}
       >
-        <AlertTriangle size={22} color={C.warn} />
-        <div style={{ flex: 1 }}>
-          <div
+        <button
+          onClick={() => setOpen((v) => !v)}
+          style={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            background: "transparent",
+            border: "none",
+            padding: 0,
+            cursor: "pointer",
+            textAlign: "left",
+          }}
+        >
+          <AlertTriangle size={22} color={C.warn} />
+          <div style={{ flex: 1 }}>
+            <div
+              style={{
+                color: C.warn,
+                fontSize: 11,
+                fontWeight: 700,
+                letterSpacing: 1.4,
+                textTransform: "uppercase",
+              }}
+            >
+              {plateaus.length} {plateaus.length === 1 ? "plateau" : "plateaus"} detected
+            </div>
+            <div style={{ color: C.text, fontSize: 13, marginTop: 2 }}>
+              Tap to review stuck exercises
+            </div>
+          </div>
+          {open ? <ChevronDown size={18} color={C.muted} /> : <ChevronRight size={18} color={C.muted} />}
+        </button>
+        {onDismiss && (
+          <button
+            onClick={onDismiss}
+            aria-label="Dismiss plateau alert"
             style={{
-              color: C.warn,
-              fontSize: 11,
-              fontWeight: 700,
-              letterSpacing: 1.4,
-              textTransform: "uppercase",
+              background: "transparent",
+              border: "none",
+              padding: 4,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
             }}
           >
-            {plateaus.length} {plateaus.length === 1 ? "plateau" : "plateaus"} detected
-          </div>
-          <div style={{ color: C.text, fontSize: 13, marginTop: 2 }}>
-            Tap to review stuck exercises
-          </div>
-        </div>
-        {open ? <ChevronDown size={18} color={C.muted} /> : <ChevronRight size={18} color={C.muted} />}
-      </button>
+            <X size={18} color={C.muted} />
+          </button>
+        )}
+      </div>
 
       {open && (
         <div style={{ marginTop: 8, display: "grid", gap: 8 }}>

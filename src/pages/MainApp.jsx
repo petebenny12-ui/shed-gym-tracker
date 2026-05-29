@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { supabase, withTimeout } from '../lib/supabase';
 import NavBar from '../components/layout/NavBar';
 import WorkoutView from '../components/workout/WorkoutView';
 import HistoryList from '../components/history/HistoryList';
@@ -12,16 +13,34 @@ import RoutineInviteBanner from '../components/wizard/RoutineInviteBanner';
 import V2MigrationFlow from '../components/onboarding/V2MigrationFlow';
 import { useAuth } from '../context/AuthContext';
 import { useWorkoutData } from '../hooks/useWorkoutData';
-import { daysSinceLastSession, detectPlateaus } from '../lib/alerts';
+import { daysSinceLastSession, detectPlateaus, plateauSignature } from '../lib/alerts';
 import { C, PlateauBanner, defaultPlateauSuggestions } from '../design';
 
 export default function MainApp() {
-  const { profile } = useAuth();
+  const { profile, refreshProfile } = useAuth();
   const [view, setView] = useState('workout');
   const { fetchSessions } = useWorkoutData();
   const [daysSince, setDaysSince] = useState(0);
   const [plateaus, setPlateaus] = useState([]);
   const [v2Done, setV2Done] = useState(profile?.settings?.completed_v2_migration || false);
+
+  // Stable signature of the current plateaued set + the last dismissed one.
+  // Banner only shows when there are plateaus AND the current signature differs
+  // from what was dismissed — so a dismissed banner stays gone until a NEW
+  // exercise crosses the threshold (changing the signature).
+  const signature = useMemo(() => plateauSignature(plateaus), [plateaus]);
+  const dismissedSignature = profile?.settings?.dismissed_plateau_signature || '';
+  const showPlateauBanner = plateaus.length > 0 && signature !== dismissedSignature;
+
+  const dismissPlateauBanner = async () => {
+    if (!profile) return;
+    const updated = { ...(profile.settings || {}), dismissed_plateau_signature: signature };
+    const { error } = await withTimeout(
+      supabase.from('profiles').update({ settings: updated }).eq('id', profile.id),
+      'dismissPlateau'
+    );
+    if (!error) await refreshProfile();
+  };
 
   useEffect(() => {
     console.log('[MainApp] Mounted — fetching alert data...');
@@ -71,7 +90,7 @@ export default function MainApp() {
         <InstallPrompt />
         <RoutineInviteBanner />
         {view === 'workout' && <RestDayNudge daysSince={daysSince} />}
-        {view === 'workout' && (
+        {view === 'workout' && showPlateauBanner && (
           <PlateauBanner
             plateaus={plateaus.map((p) => ({
               exerciseName: p.exerciseName,
@@ -80,6 +99,7 @@ export default function MainApp() {
               sessions: p.sessions,
               suggestions: defaultPlateauSuggestions(),
             }))}
+            onDismiss={dismissPlateauBanner}
           />
         )}
         {view === 'workout' && profile?.settings?.supplements_enabled && <SupplementChecklist />}
