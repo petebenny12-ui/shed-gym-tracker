@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { supabase, withTimeout } from '../../lib/supabase';
-import { useAuth } from '../../context/AuthContext';
 import { useRoutine } from '../../hooks/useRoutine';
 import StepStructure from './StepStructure';
 import StepNameDays from './StepNameDays';
@@ -9,10 +8,19 @@ import StepOrderPairing from './StepOrderPairing';
 import StepReview from './StepReview';
 import WizardSuccess from './WizardSuccess';
 
-const LABELS = ['A','B','C','D','E','F','G','H','I','J'];
+// Generate a superset label for any index: A..Z, then AA, AB, … (no real limit).
+function labelForIndex(i) {
+  let n = i + 1;
+  let s = '';
+  while (n > 0) {
+    const r = (n - 1) % 26;
+    s = String.fromCharCode(65 + r) + s;
+    n = Math.floor((n - 1) / 26);
+  }
+  return s;
+}
 
 export default function WorkoutWizard({ onClose, editDayOnly }) {
-  const { user } = useAuth();
   const { refetch } = useRoutine();
   const [step, setStep] = useState(editDayOnly ? 2 : 0);
   const [saving, setSaving] = useState(false);
@@ -83,7 +91,7 @@ export default function WorkoutWizard({ onClose, editDayOnly }) {
         const pairs = [];
         for (let i = 0; i < exercises.length; i += 2) {
           pairs.push({
-            label: LABELS[pairs.length],
+            label: labelForIndex(pairs.length),
             ex1: exercises[i],
             ex2: exercises[i + 1] || null,
           });
@@ -91,7 +99,7 @@ export default function WorkoutWizard({ onClose, editDayOnly }) {
         return pairs;
       } else {
         return exercises.map((ex, i) => ({
-          label: LABELS[i],
+          label: labelForIndex(i),
           ex1: ex,
           ex2: null,
         }));
