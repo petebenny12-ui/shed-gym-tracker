@@ -20,7 +20,8 @@
       "Bash(node:*)",
       "Bash(ls:*)",
       "Bash(npm uninstall:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "mcp__bca3eff1-9c9c-4164-abf6-7d613048453c__list_migrations"
     ]
   }
 }
