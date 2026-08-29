@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { C3, INNER_HIGHLIGHT } from '../../design';
+import { sessionDayLabel, sessionTitle } from '../../lib/sessionTitle';
 
 function SessionDetail({ session, dayTitle, isOwn, onEdit, onDelete }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const dayLabel = sessionDayLabel(session);
 
   // Group sets by exercise
   const exerciseMap = {};
@@ -26,8 +28,12 @@ function SessionDetail({ session, dayTitle, isOwn, onEdit, onDelete }) {
       <div className="p-3">
         <div className="flex justify-between items-center mb-2">
           <div>
-            <span className="font-bold text-sm" style={{ color: C3.amber }}>DAY {session.day_number}</span>
-            <span className="text-sm ml-2" style={{ color: C3.soft }}>— {dayTitle}</span>
+            {dayLabel && (
+              <span className="font-bold text-sm" style={{ color: C3.amber }}>{dayLabel}</span>
+            )}
+            <span className="text-sm" style={{ color: C3.soft, marginLeft: dayLabel ? 8 : 0 }}>
+              {dayLabel ? `— ${dayTitle}` : dayTitle}
+            </span>
           </div>
           <div className="text-right">
             <div className="text-sm font-bold" style={{ color: C3.text }}>{Math.round(totalVol).toLocaleString()}kg</div>
@@ -101,7 +107,7 @@ export default function CalendarDayDetail({
   mySessions,
   partnerSessions,
   partnerName,
-  getDayTitle,
+  getTitle,
   onEdit,
   onDelete,
   onBack,
@@ -139,7 +145,7 @@ export default function CalendarDayDetail({
                 <SessionDetail
                   key={s.id}
                   session={s}
-                  dayTitle={getDayTitle(s.day_number)}
+                  dayTitle={getTitle(s)}
                   isOwn={true}
                   onEdit={onEdit}
                   onDelete={onDelete}
@@ -161,7 +167,7 @@ export default function CalendarDayDetail({
                 <SessionDetail
                   key={s.id}
                   session={s}
-                  dayTitle={`Day ${s.day_number}`}
+                  dayTitle={sessionTitle(s)}
                   isOwn={false}
                   onEdit={onEdit}
                   onDelete={onDelete}

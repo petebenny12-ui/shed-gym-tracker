@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { C3 } from '../../design';
+import { sessionDayLabel } from '../../lib/sessionTitle';
 
 export default function SessionCard({ session, dayTitle, onEdit, onDelete }) {
   const [expanded, setExpanded] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const dayLabel = sessionDayLabel(session);
 
   // Group sets by exercise
   const exerciseMap = {};
@@ -31,8 +33,10 @@ export default function SessionCard({ session, dayTitle, onEdit, onDelete }) {
         className="w-full text-left p-3 flex justify-between items-center"
       >
         <div>
-          <span className="text-amber-600 font-bold text-sm">DAY {session.day_number}</span>
-          <span className="text-gray-400 text-sm ml-2">— {dayTitle}</span>
+          {dayLabel && <span className="text-amber-600 font-bold text-sm">{dayLabel}</span>}
+          <span className="text-gray-400 text-sm" style={{ marginLeft: dayLabel ? 8 : 0 }}>
+            {dayLabel ? `— ${dayTitle}` : dayTitle}
+          </span>
           <div className="text-gray-600 text-xs mt-0.5">
             {new Date(session.started_at).toLocaleDateString()}
           </div>

@@ -4,11 +4,16 @@ import { useAuth } from '../../context/AuthContext';
 import { useWorkoutData } from '../../hooks/useWorkoutData';
 import { useRoutine } from '../../hooks/useRoutine';
 import { C3, CalendarGrid, CalendarHeader, CalendarLegend, MonthlySummary, RecentSessions, buildCalendarDays, formatVolume, sessionDurationMinutes, shortenDayLabel } from '../../design';
+import { sessionTitle } from '../../lib/sessionTitle';
 import SessionEditor from './SessionEditor';
 import CalendarDayDetail from './CalendarDayDetail';
 
+// Null-safe: a row with no start time can't sit on a calendar, so it gets no
+// key rather than throwing a RangeError and taking the Log tab down with it.
 function toDateKey(dateStr) {
-  return new Date(dateStr).toISOString().slice(0, 10);
+  if (!dateStr) return null;
+  const d = new Date(dateStr);
+  return Number.isNaN(d.getTime()) ? null : d.toISOString().slice(0, 10);
 }
 
 const MONTHS = [
@@ -76,13 +81,13 @@ export default function HistoryList() {
   // Index sessions by date
   const myByDate = useMemo(() => {
     const map = {};
-    for (const s of mySessions) { const k = toDateKey(s.started_at); if (!map[k]) map[k] = []; map[k].push(s); }
+    for (const s of mySessions) { const k = toDateKey(s.started_at); if (!k) continue; if (!map[k]) map[k] = []; map[k].push(s); }
     return map;
   }, [mySessions]);
 
   const partnerByDate = useMemo(() => {
     const map = {};
-    for (const s of partnerSessions) { const k = toDateKey(s.started_at); if (!map[k]) map[k] = []; map[k].push(s); }
+    for (const s of partnerSessions) { const k = toDateKey(s.started_at); if (!k) continue; if (!map[k]) map[k] = []; map[k].push(s); }
     return map;
   }, [partnerSessions]);
 
@@ -95,6 +100,8 @@ export default function HistoryList() {
       const partnerSess = partnerByDate[date] || [];
       const allSess = [...mySess, ...partnerSess];
       // Get label from routine day title
+      // Only a routine that still exists gets to label a calendar tile — a
+      // session whose routine was deleted just marks the day as trained.
       const labels = [...new Set(allSess.map(s => {
         const day = routineDays.find(d => d.day === s.day_number);
         return day?.title || null;
@@ -126,10 +133,8 @@ export default function HistoryList() {
   };
   const goToday = () => { const n = new Date(); setViewYear(n.getFullYear()); setViewMonth(n.getMonth()); };
 
-  const getDayTitle = (dayNumber) => {
-    const day = routineDays.find(d => d.day === dayNumber);
-    return day?.title || `Day ${dayNumber}`;
-  };
+  // A session outlives its routine — see src/lib/sessionTitle.js.
+  const getTitle = (session) => sessionTitle(session, routineDays);
 
   const handleDelete = async (sessionId) => {
     const { error } = await deleteSession(sessionId);
@@ -150,7 +155,7 @@ export default function HistoryList() {
   // Monthly summary stats
   const monthSessions = useMemo(() => {
     const prefix = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}`;
-    return mySessions.filter(s => toDateKey(s.started_at).startsWith(prefix));
+    return mySessions.filter(s => (toDateKey(s.started_at) || '').startsWith(prefix));
   }, [mySessions, viewYear, viewMonth]);
 
   const monthVolume = useMemo(() => {
@@ -161,8 +166,13 @@ export default function HistoryList() {
 
   const weekStreak = useMemo(() => {
     if (mySessions.length === 0) return 0;
-    const weekOf = (d) => { const dt = new Date(d); dt.setDate(dt.getDate() - dt.getDay()); return dt.toISOString().slice(0, 10); };
-    const weeks = new Set(mySessions.map(s => weekOf(s.started_at)));
+    const weekOf = (d) => {
+      const dt = new Date(d);
+      if (Number.isNaN(dt.getTime())) return null;
+      dt.setDate(dt.getDate() - dt.getDay());
+      return dt.toISOString().slice(0, 10);
+    };
+    const weeks = new Set(mySessions.map(s => weekOf(s.started_at)).filter(Boolean));
     let streak = 0;
     const cur = new Date();
     while (true) {
@@ -178,7 +188,7 @@ export default function HistoryList() {
       const partnerAlso = (partnerByDate[toDateKey(s.started_at)] || []).length > 0;
       return {
         dateLabel: new Date(s.started_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
-        title: getDayTitle(s.day_number),
+        title: getTitle(s),
         startIso: s.started_at,
         endIso: s.finished_at,
         who: partnerAlso ? 'both' : 'you',
@@ -192,7 +202,7 @@ export default function HistoryList() {
     return (
       <SessionEditor
         session={editingSession}
-        dayTitle={getDayTitle(editingSession.day_number)}
+        dayTitle={getTitle(editingSession)}
         onBack={() => setEditingSession(null)}
         onSaved={handleEditDone}
       />
@@ -206,7 +216,7 @@ export default function HistoryList() {
         mySessions={myByDate[selectedDate] || []}
         partnerSessions={partnerByDate[selectedDate] || []}
         partnerName={partner?.name}
-        getDayTitle={getDayTitle}
+        getTitle={getTitle}
         onEdit={setEditingSession}
         onDelete={handleDelete}
         onBack={() => setSelectedDate(null)}

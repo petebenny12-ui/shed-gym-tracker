@@ -1,13 +1,17 @@
 import { useState } from 'react';
 import { useWorkoutData } from '../../hooks/useWorkoutData';
 import { C3, INNER_HIGHLIGHT } from '../../design';
+import { sessionDayLabel } from '../../lib/sessionTitle';
 
 export default function SessionEditor({ session, dayTitle, onBack, onSaved }) {
   const { updateSession } = useWorkoutData();
   const [saving, setSaving] = useState(false);
-  const [sessionDate, setSessionDate] = useState(
-    new Date(session.started_at).toISOString().slice(0, 10)
-  );
+  const [sessionDate, setSessionDate] = useState(() => {
+    const d = session.started_at ? new Date(session.started_at) : null;
+    return d && !Number.isNaN(d.getTime())
+      ? d.toISOString().slice(0, 10)
+      : new Date().toISOString().slice(0, 10);
+  });
 
   // Build editable exercises from session_sets
   const buildExercises = () => {
@@ -94,7 +98,7 @@ export default function SessionEditor({ session, dayTitle, onBack, onSaved }) {
       <div className="flex items-center justify-between mb-3">
         <button onClick={onBack} className="text-sm" style={{ color: C3.muted }}>&larr; Back</button>
         <span className="font-bold text-sm uppercase" style={{ color: C3.amber }}>
-          Edit — Day {session.day_number} — {dayTitle}
+          {sessionDayLabel(session) ? `Edit — Day ${session.day_number} — ${dayTitle}` : `Edit — ${dayTitle}`}
         </span>
       </div>
 
