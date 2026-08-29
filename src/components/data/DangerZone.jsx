@@ -19,12 +19,12 @@ export default function DangerZone({ onStatus }) {
   };
 
   return (
-    <div className="p-3 rounded-lg" style={{ background: '#12121f', border: '1px solid #8b0000' }}>
+    <div className="p-3 rounded-lg" style={{ background: C3.raise2, border: `1px solid ${C3.warn}` }}>
       <div className="text-red-500 text-xs uppercase tracking-wider mb-2">Danger Zone</div>
       <button
         onClick={handleClear}
         className="w-full py-2 font-bold text-sm uppercase rounded"
-        style={{ background: 'transparent', color: '#8b0000', border: '1px solid #8b0000' }}
+        style={{ background: 'transparent', color: C3.warn, border: `1px solid ${C3.warn}` }}
       >
         Clear All Data for {profile?.display_name || 'User'}
       </button>

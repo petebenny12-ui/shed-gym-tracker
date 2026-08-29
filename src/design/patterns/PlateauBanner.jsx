@@ -4,10 +4,11 @@
 //
 // Replaces the old pattern of 4 stacked identical warn cards.
 
-import { useState } from "react";
-import { AlertTriangle, ChevronRight, ChevronDown, X } from "lucide-react";
-import { C, RADIUS, SPACE } from "../tokens";
-import { Card } from "../primitives";
+import { useState } from 'react';
+import { AlertTriangle, ChevronRight, ChevronDown, X } from 'lucide-react';
+import { RADIUS, SPACE } from '../tokens';
+import { Card } from '../primitives';
+import { C3 } from '..';
 
 // plateaus: [{ exerciseName, weight, reps, sessions, suggestions: string[] }]
 // onDismiss: optional — when provided, an × appears to dismiss the banner.
@@ -21,8 +22,8 @@ export function PlateauBanner({ plateaus, onDismiss }) {
       <div
         style={{
           width: "100%",
-          background: C.warnDim,
-          border: `1px solid ${C.warn}`,
+          background: C3.warnFaint,
+          border: `1px solid ${C3.warn}`,
           borderRadius: RADIUS.xl,
           padding: SPACE.lg,
           display: "flex",
@@ -44,24 +45,24 @@ export function PlateauBanner({ plateaus, onDismiss }) {
             textAlign: "left",
           }}
         >
-          <AlertTriangle size={22} color={C.warn} />
+          <AlertTriangle size={22} color={C3.warn} />
           <div style={{ flex: 1 }}>
             <div
               style={{
-                color: C.warn,
+                color: C3.warn,
                 fontSize: 11,
                 fontWeight: 700,
-                letterSpacing: 1.4,
+                letterSpacing: 1.2,
                 textTransform: "uppercase",
               }}
             >
               {plateaus.length} {plateaus.length === 1 ? "plateau" : "plateaus"} detected
             </div>
-            <div style={{ color: C.text, fontSize: 13, marginTop: 2 }}>
+            <div style={{ color: C3.text, fontSize: 13, marginTop: 2 }}>
               Tap to review stuck exercises
             </div>
           </div>
-          {open ? <ChevronDown size={18} color={C.muted} /> : <ChevronRight size={18} color={C.muted} />}
+          {open ? <ChevronDown size={18} color={C3.soft} /> : <ChevronRight size={18} color={C3.soft} />}
         </button>
         {onDismiss && (
           <button
@@ -76,7 +77,7 @@ export function PlateauBanner({ plateaus, onDismiss }) {
               alignItems: "center",
             }}
           >
-            <X size={18} color={C.muted} />
+            <X size={18} color={C3.soft} />
           </button>
         )}
       </div>
@@ -87,10 +88,10 @@ export function PlateauBanner({ plateaus, onDismiss }) {
             <Card
               key={i}
               padding={SPACE.md + 2}
-              style={{ borderLeft: `3px solid ${C.warn}` }}
+              style={{ borderLeft: `3px solid ${C3.warn}` }}
             >
-              <div style={{ color: C.text, fontSize: 14, fontWeight: 600 }}>{p.exerciseName}</div>
-              <div style={{ color: C.muted, fontSize: 12, marginTop: 4 }}>
+              <div style={{ color: C3.text, fontSize: 14, fontWeight: 600 }}>{p.exerciseName}</div>
+              <div style={{ color: C3.soft, fontSize: 12, marginTop: 4 }}>
                 Stuck at {p.weight}kg × {p.reps} for {p.sessions} sessions
               </div>
               {p.suggestions && p.suggestions.length > 0 && (
@@ -103,9 +104,9 @@ export function PlateauBanner({ plateaus, onDismiss }) {
                         fontWeight: 600,
                         padding: "4px 10px",
                         borderRadius: RADIUS.pill,
-                        background: C.cardHi,
-                        color: C.muted,
-                        border: `1px solid ${C.border}`,
+                        background: C3.raise2,
+                        color: C3.soft,
+                        border: `1px solid ${C3.line2}`,
                       }}
                     >
                       {s}

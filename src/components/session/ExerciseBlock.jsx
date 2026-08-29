@@ -1,16 +1,8 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Check, ChevronUp } from 'lucide-react';
-import SetRow, { SetColumnHeads } from './SetRow';
 import { C3, FONTS, ICON, TABULAR, TYPE } from '../../design';
-import {
-  formatCollapsedTarget,
-  formatDelta,
-  formatLastTime,
-  formatResult,
-  formatTally,
-  formatTarget,
-  loggedSets,
-} from '../../lib/sessionFormat';
+import { formatCollapsedTarget, formatDelta, formatLastTime, formatResult, formatTally, formatTarget, loggedSets } from '../../lib/sessionFormat';
+import SetRow, { SetColumnHeads } from './SetRow';
 
 /**
  * One exercise of the session — open, showing every set at once, or collapsed
@@ -159,7 +151,7 @@ export default function ExerciseBlock({
         </span>
         <span
           style={{
-            fontFamily: FONTS.mono,
+            fontFamily: FONTS.sans,
             fontSize: 11,
             color: done > 0 ? C3.muted : C3.faint,
             flexShrink: 0,
@@ -203,9 +195,9 @@ export default function ExerciseBlock({
         <span style={{ ...TYPE.exerciseOpen, flexGrow: 1, minWidth: 0 }}>{name}</span>
         <span
           style={{
-            fontFamily: FONTS.mono,
+            fontFamily: FONTS.sans,
             fontSize: 9.5,
-            letterSpacing: 2.4,
+            letterSpacing: 1.2,
             textTransform: 'uppercase',
             color: tier === 'crux' ? C3.amber : C3.faint,
             flexShrink: 0,

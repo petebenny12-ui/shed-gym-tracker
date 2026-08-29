@@ -1,13 +1,14 @@
+import { C3 } from "../../design";
 export default function StepReview({ structure, dayNames, dayPairings }) {
   return (
     <div>
       <h3 className="text-white text-lg font-bold uppercase tracking-wider mb-3"
-        style={{ fontFamily: "'Georgia', serif" }}>
+        style={{ fontFamily: FONTS.sans }}>
         Review Your Routine
       </h3>
 
       {/* Summary */}
-      <div className="p-3 rounded-lg mb-4" style={{ background: '#1a1a2e', border: '1px solid #2a2a3e' }}>
+      <div className="p-3 rounded-lg mb-4" style={{ background: C3.raise2, border: `1px solid ${C3.line2}` }}>
         <div className="text-gray-400 text-xs uppercase tracking-wider mb-1">Summary</div>
         <div className="text-white text-sm">
           {structure.numDays} days, {structure.exercisesPerDay} exercises/day,{' '}
@@ -27,7 +28,7 @@ export default function StepReview({ structure, dayNames, dayPairings }) {
           <div className="space-y-1">
             {pairings.map((pair) => (
               <div key={pair.label} className="p-2 rounded flex items-center gap-2"
-                style={{ background: '#12121f', border: '1px solid #1a1a2e' }}>
+                style={{ background: C3.raise2, border: `1px solid ${C3.raise2}` }}>
                 <span className="text-amber-600 text-xs font-bold w-4">{pair.label}</span>
                 <div className="flex-1">
                   <span className="text-white text-sm">{pair.ex1?.name}</span>
@@ -45,7 +46,7 @@ export default function StepReview({ structure, dayNames, dayPairings }) {
         </div>
       ))}
 
-      <div className="p-3 rounded-lg mt-4" style={{ background: '#1a2e1a', border: '1px solid #2a3e2a' }}>
+      <div className="p-3 rounded-lg mt-4" style={{ background: C3.raise2, border: `1px solid ${C3.line2}` }}>
         <div className="text-green-400 text-xs text-center">
           Your existing workout history will not be affected.
         </div>

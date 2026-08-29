@@ -9,10 +9,11 @@
 //   3. Exercise selector groups by MUSCLE_GROUP prop — not dumping into "OTHER".
 // ────────────────────────────────────────────────────────────
 
-import { useState } from "react";
-import { ChevronRight, ChevronDown } from "lucide-react";
-import { C, FONTS, RADIUS, SPACE } from "../tokens";
-import { Card, SectionLabel, Chip, LegendDot } from "../primitives";
+import { useState } from 'react';
+import { ChevronRight, ChevronDown } from 'lucide-react';
+import { FONTS, RADIUS, SPACE } from '../tokens';
+import { Card, SectionLabel, Chip, LegendDot } from '../primitives';
+import { C3 } from '..';
 
 // ═════════════════════════════════════════════════════════════
 // FrequencyChart — weekly sessions vs target
@@ -31,7 +32,7 @@ export function FrequencyChart({ weeks, target = 4 }) {
         }}
       >
         <SectionLabel>Training Frequency</SectionLabel>
-        <span style={{ color: C.dim, fontSize: 11 }}>target {target}/wk</span>
+        <span style={{ color: C3.muted, fontSize: 11 }}>target {target}/wk</span>
       </div>
 
       <div
@@ -61,11 +62,11 @@ export function FrequencyChart({ weeks, target = 4 }) {
                 style={{
                   flex: 1,
                   width: "100%",
-                  background: C.bg,
+                  background: C3.bg,
                   borderRadius: RADIUS.sm,
                   position: "relative",
                   overflow: "hidden",
-                  border: `1px solid ${C.border}`,
+                  border: `1px solid ${C3.line2}`,
                 }}
               >
                 <div
@@ -75,18 +76,18 @@ export function FrequencyChart({ weeks, target = 4 }) {
                     left: 0,
                     right: 0,
                     height: `${pct}%`,
-                    background: hit ? C.amber : C.user,
+                    background: hit ? C3.amber : C3.you,
                     opacity: hit ? 1 : 0.55,
                     transition: "height 300ms",
                   }}
                 />
               </div>
-              <div style={{ fontSize: 10, color: C.muted }}>{w.label}</div>
+              <div style={{ fontSize: 10, color: C3.soft }}>{w.label}</div>
               <div
                 style={{
                   fontSize: 13,
                   fontWeight: 700,
-                  color: hit ? C.amber : C.text,
+                  color: hit ? C3.amber : C3.text,
                   fontFamily: FONTS.sans,
                 }}
               >
@@ -146,14 +147,14 @@ export function GapAlert({ gappedGroups }) {
       style={{
         marginTop: 12,
         padding: "10px 14px",
-        background: C.warnDim,
-        borderLeft: `3px solid ${C.warn}`,
+        background: C3.warnFaint,
+        borderLeft: `3px solid ${C3.warn}`,
         borderRadius: RADIUS.md,
-        color: C.text,
+        color: C3.text,
         fontSize: 12,
       }}
     >
-      <b style={{ color: C.warn }}>Gap alert:</b> No {gappedGroups.join(", ")} in 2+ weeks
+      <b style={{ color: C3.warn }}>Gap alert:</b> No {gappedGroups.join(", ")} in 2+ weeks
     </div>
   );
 }
@@ -187,14 +188,14 @@ export function ExerciseSelector({ exercises, selectedId, onSelect, initialOpen 
               cursor: "pointer",
             }}
           >
-            <span style={{ color: C.text, fontSize: 13, fontWeight: 700, letterSpacing: 0.4 }}>
+            <span style={{ color: C3.text, fontSize: 13, fontWeight: 700, letterSpacing: 0.4 }}>
               {groupName}
-              <span style={{ color: C.dim, fontWeight: 400, marginLeft: 8 }}>{exs.length}</span>
+              <span style={{ color: C3.muted, fontWeight: 400, marginLeft: 8 }}>{exs.length}</span>
             </span>
             {openGroup === groupName ? (
-              <ChevronDown size={16} color={C.muted} />
+              <ChevronDown size={16} color={C3.soft} />
             ) : (
-              <ChevronRight size={16} color={C.muted} />
+              <ChevronRight size={16} color={C3.soft} />
             )}
           </button>
           {openGroup === groupName && (
@@ -259,7 +260,7 @@ export function ProgressChart({ points, maxBest = 30, maxVolume = 1000, title, s
   if (!points || points.length === 0) {
     return (
       <Card padding={SPACE.lg}>
-        <div style={{ color: C.dim, fontSize: 12, textAlign: "center", padding: 20 }}>
+        <div style={{ color: C3.muted, fontSize: 12, textAlign: "center", padding: 20 }}>
           No sessions yet
         </div>
       </Card>
@@ -285,7 +286,7 @@ export function ProgressChart({ points, maxBest = 30, maxVolume = 1000, title, s
       {(title || subtitle) && (
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
           {title && <SectionLabel>{title}</SectionLabel>}
-          {subtitle && <span style={{ color: C.dim, fontSize: 11 }}>{subtitle}</span>}
+          {subtitle && <span style={{ color: C3.muted, fontSize: 11 }}>{subtitle}</span>}
         </div>
       )}
 
@@ -298,27 +299,27 @@ export function ProgressChart({ points, maxBest = 30, maxVolume = 1000, title, s
             x2={W - pad}
             y1={pad + f * (H - pad * 2)}
             y2={pad + f * (H - pad * 2)}
-            stroke={C.border}
+            stroke={C3.line2}
             strokeDasharray="2 3"
           />
         ))}
         {/* Best set (amber) */}
         {points.length > 1 && (
-          <polyline points={bestPath} fill="none" stroke={C.amber} strokeWidth="2" />
+          <polyline points={bestPath} fill="none" stroke={C3.amber} strokeWidth="2" />
         )}
         {points.map((p, i) => (
-          <circle key={`b${i}`} cx={xs[i]} cy={ly(p.best, maxBest)} r="4" fill={C.amber} />
+          <circle key={`b${i}`} cx={xs[i]} cy={ly(p.best, maxBest)} r="4" fill={C3.amber} />
         ))}
         {/* Volume (blue) */}
         {points.length > 1 && (
-          <polyline points={volPath} fill="none" stroke={C.user} strokeWidth="2" />
+          <polyline points={volPath} fill="none" stroke={C3.you} strokeWidth="2" />
         )}
         {points.map((p, i) => (
-          <circle key={`v${i}`} cx={xs[i]} cy={ly(p.volume, maxVolume)} r="4" fill={C.user} />
+          <circle key={`v${i}`} cx={xs[i]} cy={ly(p.volume, maxVolume)} r="4" fill={C3.you} />
         ))}
         {/* X labels */}
         {points.map((p, i) => (
-          <text key={`l${i}`} x={xs[i]} y={H - 6} textAnchor="middle" fill={C.muted} fontSize="9">
+          <text key={`l${i}`} x={xs[i]} y={H - 6} textAnchor="middle" fill={C3.soft} fontSize="9">
             {p.date}
           </text>
         ))}
@@ -332,8 +333,8 @@ export function ProgressChart({ points, maxBest = 30, maxVolume = 1000, title, s
           marginTop: 10,
         }}
       >
-        <LegendDot color={C.amber} label="Best Set (kg)" />
-        <LegendDot color={C.user} label="Volume (kg)" />
+        <LegendDot color={C3.amber} label="Best Set (kg)" />
+        <LegendDot color={C3.you} label="Volume (kg)" />
       </div>
     </Card>
   );

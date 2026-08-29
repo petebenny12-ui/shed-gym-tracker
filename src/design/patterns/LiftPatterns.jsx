@@ -4,10 +4,11 @@
 //   - Exercise blocks show "Last: Xkg × Y" — no info icons.
 //   - Each exercise has a weight mode chip (Total / Per Side).
 
-import { useEffect, useRef, useState } from "react";
-import { ChevronDown } from "lucide-react";
-import { C, FONTS, RADIUS, SPACE, cardBase } from "../tokens";
-import { ModeChip } from "../primitives";
+import { useEffect, useRef, useState } from 'react';
+import { ChevronDown } from 'lucide-react';
+import { FONTS, RADIUS, SPACE, cardBase } from '../tokens';
+import { ModeChip } from '../primitives';
+import { C3 } from '..';
 
 // ─── CollapsibleBar ────────────────────────────────────────
 // Used for Warm-up / Cool-down sections.
@@ -25,15 +26,15 @@ export function CollapsibleBar({ label, children, defaultOpen = false }) {
           alignItems: "center",
           justifyContent: "space-between",
           cursor: "pointer",
-          border: `1px solid ${C.border}`,
+          border: `1px solid ${C3.line2}`,
         }}
       >
         <span
           style={{
-            color: C.amber,
+            color: C3.amber,
             fontSize: 12,
             fontWeight: 700,
-            letterSpacing: 1.4,
+            letterSpacing: 1.2,
             textTransform: "uppercase",
           }}
         >
@@ -41,7 +42,7 @@ export function CollapsibleBar({ label, children, defaultOpen = false }) {
         </span>
         <ChevronDown
           size={16}
-          color={C.muted}
+          color={C3.soft}
           style={{ transform: open ? "rotate(180deg)" : "rotate(0)", transition: "transform 160ms" }}
         />
       </button>
@@ -97,10 +98,10 @@ export function RestTimer({ durations = [60, 75, 90], onComplete }) {
       <div style={{ flex: 1 }}>
         <div
           style={{
-            color: C.muted,
+            color: C3.soft,
             fontSize: 10,
             fontWeight: 700,
-            letterSpacing: 1.4,
+            letterSpacing: 1.2,
             textTransform: "uppercase",
             marginBottom: 6,
           }}
@@ -116,9 +117,9 @@ export function RestTimer({ durations = [60, 75, 90], onComplete }) {
                 padding: "6px 12px",
                 fontSize: 12,
                 fontWeight: 700,
-                border: `1px solid ${selected === s && active ? C.amber : C.border}`,
-                background: selected === s && active ? C.amber : "transparent",
-                color: selected === s && active ? C.bg : C.text,
+                border: `1px solid ${selected === s && active ? C3.amber : C3.line2}`,
+                background: selected === s && active ? C3.amber : "transparent",
+                color: selected === s && active ? C3.bg : C3.text,
                 borderRadius: RADIUS.md,
                 cursor: "pointer",
                 fontFamily: FONTS.sans,
@@ -146,12 +147,12 @@ function RestRing({ total, remaining, active }) {
   return (
     <div style={{ position: "relative", width: size, height: size }}>
       <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
-        <circle cx={size / 2} cy={size / 2} r={r} stroke={C.border} strokeWidth={stroke} fill="none" />
+        <circle cx={size / 2} cy={size / 2} r={r} stroke={C3.line2} strokeWidth={stroke} fill="none" />
         <circle
           cx={size / 2}
           cy={size / 2}
           r={r}
-          stroke={C.amber}
+          stroke={C3.amber}
           strokeWidth={stroke}
           fill="none"
           strokeDasharray={circ}
@@ -167,7 +168,7 @@ function RestRing({ total, remaining, active }) {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          color: C.text,
+          color: C3.text,
           fontSize: 12,
           fontWeight: 700,
           fontFamily: FONTS.sans,
@@ -188,16 +189,16 @@ export function Superset({ letter, exercises }) {
       <div
         style={{
           padding: "10px 16px",
-          borderBottom: `1px solid ${C.border}`,
+          borderBottom: `1px solid ${C3.line2}`,
           background: "rgba(217,118,6,0.15)",
         }}
       >
         <span
           style={{
-            color: C.amber,
+            color: C3.amber,
             fontSize: 11,
             fontWeight: 700,
-            letterSpacing: 1.6,
+            letterSpacing: 1.2,
             textTransform: "uppercase",
           }}
         >
@@ -239,15 +240,15 @@ export function ExerciseBlock({
     <div
       style={{
         padding: 12,
-        borderRight: borderRight ? `1px solid ${C.border}` : "none",
+        borderRight: borderRight ? `1px solid ${C3.line2}` : "none",
       }}
     >
       {/* Exercise name — no info icon. TODO: in future, wrap in anchor to form video URL */}
-      <div style={{ color: C.text, fontSize: 13, fontWeight: 600 }}>{name}</div>
+      <div style={{ color: C3.text, fontSize: 13, fontWeight: 600 }}>{name}</div>
 
       <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4, marginBottom: 10 }}>
         {lastKg != null && lastReps != null && (
-          <span style={{ color: C.dim, fontSize: 11 }}>
+          <span style={{ color: C3.muted, fontSize: 11 }}>
             Last: {lastKg}kg × {lastReps}
           </span>
         )}
@@ -260,7 +261,7 @@ export function ExerciseBlock({
           gridTemplateColumns: "1fr 1fr",
           gap: 4,
           fontSize: 10,
-          color: C.muted,
+          color: C3.soft,
           fontWeight: 600,
           letterSpacing: 1,
           marginBottom: 4,
@@ -281,7 +282,7 @@ export function ExerciseBlock({
       <button
         onClick={onAddSet}
         style={{
-          color: C.dim,
+          color: C3.muted,
           fontSize: 11,
           marginTop: 6,
           background: "transparent",
@@ -304,12 +305,12 @@ function SetInput({ value, onChange }) {
       value={value ?? ""}
       onChange={(e) => onChange?.(e.target.value)}
       style={{
-        background: C.bg,
-        border: `1px solid ${C.border}`,
+        background: C3.bg,
+        border: `1px solid ${C3.line2}`,
         borderRadius: 5,
         padding: "8px 0",
         textAlign: "center",
-        color: C.text,
+        color: C3.text,
         fontSize: 13,
         fontWeight: 600,
         width: "100%",
@@ -341,8 +342,8 @@ export function DayChooserRow({ dayNumber, dayName, sessionsLogged, lastDate, on
         <div style={{ display: "flex", alignItems: "baseline", gap: 10, flexWrap: "wrap" }}>
           <span
             style={{
-              fontFamily: FONTS.serif,
-              color: C.amber,
+              fontFamily: FONTS.sans,
+              color: C3.amber,
               fontSize: 16,
               fontWeight: 700,
               letterSpacing: 0.8,
@@ -350,9 +351,9 @@ export function DayChooserRow({ dayNumber, dayName, sessionsLogged, lastDate, on
           >
             DAY {dayNumber}
           </span>
-          <span style={{ color: C.text, fontSize: 15, fontWeight: 500 }}>— {dayName}</span>
+          <span style={{ color: C3.text, fontSize: 15, fontWeight: 500 }}>— {dayName}</span>
         </div>
-        <div style={{ color: C.dim, fontSize: 12, marginTop: 4 }}>
+        <div style={{ color: C3.muted, fontSize: 12, marginTop: 4 }}>
           {lastDate ? `Last: ${lastDate} · ` : ""}{sessionsLogged} sessions logged
         </div>
       </div>

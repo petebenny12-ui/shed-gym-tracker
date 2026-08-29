@@ -1,4 +1,5 @@
 import demos from '../../demos/day1Animations.jsx';
+import { C3 } from "../../design";
 
 export default function ExerciseDemo({ name, onClose }) {
   const demo = demos[name];
@@ -19,9 +20,9 @@ export default function ExerciseDemo({ name, onClose }) {
     >
       <div
         style={{
-          background: '#12121f',
-          border: '1px solid #2a2a3e',
-          borderRadius: 12,
+          background: C3.raise2,
+          border: `1px solid ${C3.line2}`,
+          borderRadius: C3.radius,
           padding: 16,
           maxWidth: 320,
           width: '90%',
@@ -32,7 +33,7 @@ export default function ExerciseDemo({ name, onClose }) {
           <span className="text-white font-bold text-sm">{name}</span>
           <button onClick={onClose} className="text-gray-500 text-lg">&times;</button>
         </div>
-        <div style={{ background: '#0a0a0f', borderRadius: 8, padding: 8, marginBottom: 12 }}>
+        <div style={{ background: C3.bg, borderRadius: C3.radius, padding: 8, marginBottom: 12 }}>
           {demo.render()}
         </div>
         <div className="space-y-1">

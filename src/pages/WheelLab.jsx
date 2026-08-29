@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
-import NumberWheel from '../components/session/NumberWheel';
 import { buildLadder } from '../lib/ladder';
 import { C3, FONTS, TABULAR, TYPE } from '../design';
+import NumberWheel from '../components/session/NumberWheel';
 
 /**
  * Scratch route — /lab/wheel
@@ -93,9 +93,9 @@ export default function WheelLab() {
             border: `${C3.hair}px solid ${C3.line2}`,
             borderRadius: C3.radius,
             color: logged ? C3.amber : C3.soft,
-            fontFamily: FONTS.mono,
+            fontFamily: FONTS.sans,
             fontSize: 11,
-            letterSpacing: 1.6,
+            letterSpacing: 1.2,
             padding: '10px 14px',
             minHeight: 44,
             width: '100%',

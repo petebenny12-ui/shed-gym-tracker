@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { supabase, withTimeout } from '../../lib/supabase';
 import { validateBodyweight } from '../../lib/validation';
 import { computeGoalProjection, buildGoalUpdate, CLEARED_GOAL } from '../../lib/bodyweightGoal';
-import { C, cardBase } from '../../design';
+import { C3, cardBase } from '../../design';
 
 function formatGoalDate(value) {
   const m = String(value).match(/^(\d{4})-(\d{2})-(\d{2})/);
@@ -127,27 +127,27 @@ export default function BodyweightLogger() {
   return (
     <div className="mt-6 p-4 rounded-lg" style={{ ...cardBase, padding: 16 }}>
       <div className="flex items-center justify-between mb-2">
-        <label className="text-xs uppercase tracking-wider" style={{ color: C.muted }}>Log Bodyweight (kg)</label>
+        <label className="text-xs uppercase tracking-wider" style={{ color: C3.soft }}>Log Bodyweight (kg)</label>
         <button
           onClick={() => setEditingGoal((v) => !v)}
           className="text-xs uppercase tracking-wider"
-          style={{ color: C.amber }}
+          style={{ color: C3.amber }}
         >
           {settings.goal_weight_kg != null && settings.goal_date ? 'Edit goal' : 'Set goal'}
         </button>
       </div>
 
       {editingGoal && (
-        <div className="mb-3 p-2 rounded" style={{ background: C.cardHi, border: `1px solid ${C.border}` }}>
+        <div className="mb-3 p-2 rounded" style={{ background: C3.raise2, border: `1px solid ${C3.line2}` }}>
           <div className="flex gap-2">
             <div className="flex-1">
-              <div className="text-[10px] uppercase tracking-wider mb-1" style={{ color: C.dim }}>Goal weight (kg)</div>
+              <div className="text-[10px] uppercase tracking-wider mb-1" style={{ color: C3.muted }}>Goal weight (kg)</div>
               <input
                 type="number"
                 value={goalWeight}
                 onChange={(e) => setGoalWeight(e.target.value)}
                 className="w-full p-2 rounded text-center font-bold"
-                style={{ background: C.card, border: `1px solid ${C.border}`, color: C.text }}
+                style={{ background: C3.raise2, border: `1px solid ${C3.line2}`, color: C3.text }}
                 placeholder="110"
                 min="0"
                 max="500"
@@ -155,13 +155,13 @@ export default function BodyweightLogger() {
               />
             </div>
             <div className="flex-1">
-              <div className="text-[10px] uppercase tracking-wider mb-1" style={{ color: C.dim }}>Goal date</div>
+              <div className="text-[10px] uppercase tracking-wider mb-1" style={{ color: C3.muted }}>Goal date</div>
               <input
                 type="date"
                 value={goalDate}
                 onChange={(e) => setGoalDate(e.target.value)}
                 className="w-full p-2 rounded text-center font-bold"
-                style={{ background: C.card, border: `1px solid ${C.border}`, color: C.text }}
+                style={{ background: C3.raise2, border: `1px solid ${C3.line2}`, color: C3.text }}
               />
             </div>
           </div>
@@ -170,7 +170,7 @@ export default function BodyweightLogger() {
               onClick={handleSaveGoal}
               disabled={goalSaving}
               className="flex-1 py-2 font-bold text-xs uppercase rounded"
-              style={{ background: C.amber, color: C.bg }}
+              style={{ background: C3.amber, color: C3.bg }}
             >
               {goalSaving ? 'Saving…' : 'Save goal'}
             </button>
@@ -179,7 +179,7 @@ export default function BodyweightLogger() {
                 onClick={handleClearGoal}
                 disabled={goalSaving}
                 className="px-3 py-2 font-bold text-xs uppercase rounded"
-                style={{ background: 'transparent', border: `1px solid ${C.border}`, color: C.muted }}
+                style={{ background: 'transparent', border: `1px solid ${C3.line2}`, color: C3.soft }}
               >
                 Clear
               </button>
@@ -191,7 +191,7 @@ export default function BodyweightLogger() {
       {needsWeeklyWeighIn && (
         <div
           className="mb-2 p-2 rounded text-center text-xs font-bold"
-          style={{ background: C.warnDim, border: `1px solid ${C.warn}`, color: C.warn }}
+          style={{ background: C3.warnFaint, border: `1px solid ${C3.warn}`, color: C3.warn }}
         >
           &#9888; WEEKLY WEIGH-IN DUE — last logged {daysSinceLast === 999 ? 'never' : `${daysSinceLast} days ago`}
         </div>
@@ -203,7 +203,7 @@ export default function BodyweightLogger() {
           value={bodyweight}
           onChange={handleBodyweightChange}
           className="flex-1 p-2 rounded text-center font-bold"
-          style={{ background: C.cardHi, border: bwError ? `1px solid ${C.warn}` : `1px solid ${C.border}`, color: C.text }}
+          style={{ background: C3.raise2, border: bwError ? `1px solid ${C3.warn}` : `1px solid ${C3.line2}`, color: C3.text }}
           placeholder="120"
           min="0"
           max="500"
@@ -212,30 +212,30 @@ export default function BodyweightLogger() {
         <button
           onClick={handleLog}
           className="px-4 py-2 font-bold text-sm uppercase rounded"
-          style={{ background: C.amber, color: C.bg }}
+          style={{ background: C3.amber, color: C3.bg }}
         >
           Log
         </button>
       </div>
 
-      {bwError && <div className="text-xs mt-1" style={{ color: C.warn }}>{bwError}</div>}
+      {bwError && <div className="text-xs mt-1" style={{ color: C3.warn }}>{bwError}</div>}
 
       {goalSummary && (
-        <div className="text-xs mt-2 font-bold" style={{ color: projection.status === 'active' ? C.amber : C.muted }}>
+        <div className="text-xs mt-2 font-bold" style={{ color: projection.status === 'active' ? C3.amber : C3.soft }}>
           {goalSummary}
         </div>
       )}
 
       {rollingAvg && (
         <div className="flex justify-between mt-2">
-          <div className="text-xs" style={{ color: C.dim }}>
+          <div className="text-xs" style={{ color: C3.muted }}>
             Latest: {lastEntry.weight_kg}kg ({new Date(lastEntry.logged_at).toLocaleDateString()})
           </div>
-          <div className="text-xs font-bold" style={{ color: C.amber }}>5-day avg: {rollingAvg}kg</div>
+          <div className="text-xs font-bold" style={{ color: C3.amber }}>5-day avg: {rollingAvg}kg</div>
         </div>
       )}
 
-      {saved && <div className="text-center text-sm font-bold mt-2" style={{ color: '#22c55e' }}>Saved!</div>}
+      {saved && <div className="text-center text-sm font-bold mt-2" style={{ color: C3.pr }}>Saved!</div>}
     </div>
   );
 }

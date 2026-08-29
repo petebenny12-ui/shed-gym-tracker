@@ -3,20 +3,13 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { useWorkoutData } from '../../hooks/useWorkoutData';
 import { useExerciseSettings } from '../../hooks/useExerciseSettings';
+import { Button, C3, FONTS, RestTimer as DesignRestTimer, SPACE, Superset } from '../../design';
+import { TIMER_PRESETS } from '../../config/constants';
 import SessionDuration from './SessionDuration';
 import ExerciseDemo from '../exercises/ExerciseDemo';
 import PRCelebration from '../alerts/PRCelebration';
 import WarmUpSection from '../warmup/WarmUpSection';
 import CoolDownSection from '../warmup/CoolDownSection';
-import {
-  C,
-  FONTS,
-  SPACE,
-  Button,
-  RestTimer as DesignRestTimer,
-  Superset,
-} from '../../design';
-import { TIMER_PRESETS } from '../../config/constants';
 
 function getStorageKey(userId, dayNumber) {
   return `workout-progress-${userId}-${dayNumber}`;
@@ -230,27 +223,27 @@ export default function WorkoutSession({ day, onBack }) {
   return (
     <div style={{ padding: SPACE.md }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: SPACE.md }}>
-        <button onClick={onBack} style={{ color: C.muted, fontSize: 14, background: 'none', border: 'none', cursor: 'pointer' }}>
+        <button onClick={onBack} style={{ color: C3.soft, fontSize: 14, background: 'none', border: 'none', cursor: 'pointer' }}>
           &larr; Back
         </button>
-        <span style={{ color: C.amber, fontWeight: 700, fontSize: 14, textTransform: 'uppercase', fontFamily: FONTS.sans }}>
+        <span style={{ color: C3.amber, fontWeight: 700, fontSize: 14, textTransform: 'uppercase', fontFamily: FONTS.sans }}>
           Day {day.day} — {day.title}
         </span>
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 8 }}>
         <SessionDuration startedAt={startedAtRef.current} />
-        <span style={{ color: C.dim }}>|</span>
+        <span style={{ color: C3.muted }}>|</span>
         <input
           type="date"
           value={sessionDate}
           onChange={(e) => setSessionDate(e.target.value)}
           style={{
             fontSize: 12,
-            color: C.muted,
+            color: C3.soft,
             background: 'transparent',
             border: 'none',
-            borderBottom: `1px solid ${C.border}`,
+            borderBottom: `1px solid ${C3.line2}`,
             outline: 'none',
             padding: '2px 4px',
             colorScheme: 'dark',
@@ -264,12 +257,12 @@ export default function WorkoutSession({ day, onBack }) {
           textAlign: 'center',
           marginBottom: 8,
           padding: '6px 0',
-          borderRadius: 6,
+          borderRadius: C3.radius,
           fontWeight: 700,
           textTransform: 'uppercase',
           letterSpacing: 1.2,
           background: 'rgba(34,197,94,0.1)',
-          color: '#22c55e',
+          color: C3.pr,
           border: '1px solid rgba(34,197,94,0.2)',
         }}>
           Resumed your session
@@ -277,7 +270,7 @@ export default function WorkoutSession({ day, onBack }) {
       )}
 
       {hasPrefill && !saved && !resumed && (
-        <div style={{ color: C.dim, fontSize: 12, textAlign: 'center', marginBottom: 8, fontStyle: 'italic' }}>
+        <div style={{ color: C3.muted, fontSize: 12, textAlign: 'center', marginBottom: 8, fontStyle: 'italic' }}>
           Prefilled from your last session — adjust and go
         </div>
       )}
@@ -312,7 +305,7 @@ export default function WorkoutSession({ day, onBack }) {
           padding: '14px 0',
           fontSize: 16,
           marginTop: 8,
-          ...(saved ? { background: '#22c55e', color: C.bg, borderColor: '#22c55e' } : {}),
+          ...(saved ? { background: C3.pr, color: C3.bg, borderColor: C3.pr } : {}),
         }}
       >
         {saved ? 'SAVED \u2713' : 'LOG SESSION'}

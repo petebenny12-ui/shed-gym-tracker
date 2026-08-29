@@ -119,7 +119,7 @@ export default function KeypadSheet({
     border: `${C3.hair}px solid ${C3.line2}`,
     borderRadius: C3.radius,
     color: C3.text,
-    fontFamily: FONTS.mono,
+    fontFamily: FONTS.sans,
     fontSize: 20,
     minHeight: 56,
     display: 'flex',
@@ -133,9 +133,9 @@ export default function KeypadSheet({
     flex: 1,
     borderRadius: C3.radius,
     padding: 16,
-    fontFamily: FONTS.mono,
+    fontFamily: FONTS.sans,
     fontSize: 12,
-    letterSpacing: 2.4,
+    letterSpacing: 1.2,
     textTransform: 'uppercase',
     cursor: 'pointer',
   };
@@ -178,7 +178,7 @@ export default function KeypadSheet({
         <div style={{ display: 'flex', alignItems: 'center', gap: 4, minHeight: 66 }}>
           <span
             style={{
-              fontFamily: FONTS.serif,
+              fontFamily: FONTS.sans,
               fontSize: 56,
               lineHeight: '62px',
               color: C3.text,

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { C3 } from '../../design';
 
 export default function SessionCard({ session, dayTitle, onEdit, onDelete }) {
   const [expanded, setExpanded] = useState(false);
@@ -24,7 +25,7 @@ export default function SessionCard({ session, dayTitle, onEdit, onDelete }) {
   );
 
   return (
-    <div className="rounded-lg overflow-hidden" style={{ background: '#12121f', border: '1px solid #2a2a3e' }}>
+    <div className="rounded-lg overflow-hidden" style={{ background: C3.raise2, border: `1px solid ${C3.line2}` }}>
       <button
         onClick={() => setExpanded(!expanded)}
         className="w-full text-left p-3 flex justify-between items-center"
@@ -42,7 +43,7 @@ export default function SessionCard({ session, dayTitle, onEdit, onDelete }) {
         </div>
       </button>
       {expanded && (
-        <div className="px-3 pb-3 space-y-2" style={{ borderTop: '1px solid #1a1a2e' }}>
+        <div className="px-3 pb-3 space-y-2" style={{ borderTop: `1px solid ${C3.raise2}` }}>
           {exercises.map((ex, eidx) => (
             <div key={eidx} className="pt-2">
               <div className="flex items-center gap-2">
@@ -60,11 +61,11 @@ export default function SessionCard({ session, dayTitle, onEdit, onDelete }) {
           ))}
 
           {/* Edit / Delete actions */}
-          <div className="flex gap-2 pt-2" style={{ borderTop: '1px solid #1a1a2e' }}>
+          <div className="flex gap-2 pt-2" style={{ borderTop: `1px solid ${C3.raise2}` }}>
             <button
               onClick={(e) => { e.stopPropagation(); onEdit(); }}
               className="flex-1 py-1.5 text-xs font-bold uppercase rounded"
-              style={{ background: '#1a1a2e', color: '#d97706', border: '1px solid #2a2a3e' }}
+              style={{ background: C3.raise2, color: C3.amber, border: `1px solid ${C3.line2}` }}
             >
               Edit
             </button>
@@ -72,7 +73,7 @@ export default function SessionCard({ session, dayTitle, onEdit, onDelete }) {
               <button
                 onClick={(e) => { e.stopPropagation(); setConfirmDelete(true); }}
                 className="flex-1 py-1.5 text-xs font-bold uppercase rounded"
-                style={{ background: '#1a1a2e', color: '#ef4444', border: '1px solid #2a2a3e' }}
+                style={{ background: C3.raise2, color: C3.warn, border: `1px solid ${C3.line2}` }}
               >
                 Delete
               </button>
@@ -81,14 +82,14 @@ export default function SessionCard({ session, dayTitle, onEdit, onDelete }) {
                 <button
                   onClick={(e) => { e.stopPropagation(); onDelete(); }}
                   className="flex-1 py-1.5 text-xs font-bold uppercase rounded"
-                  style={{ background: '#ef4444', color: '#fff' }}
+                  style={{ background: C3.warn, color: '#fff' }}
                 >
                   Confirm
                 </button>
                 <button
                   onClick={(e) => { e.stopPropagation(); setConfirmDelete(false); }}
                   className="flex-1 py-1.5 text-xs font-bold uppercase rounded"
-                  style={{ background: '#1a1a2e', color: '#9ca3af', border: '1px solid #2a2a3e' }}
+                  style={{ background: C3.raise2, color: C3.soft, border: `1px solid ${C3.line2}` }}
                 >
                   Cancel
                 </button>

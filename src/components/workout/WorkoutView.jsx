@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react';
 import { useRoutine } from '../../hooks/useRoutine';
 import { useAuth } from '../../context/AuthContext';
 import { supabase, withTimeout } from '../../lib/supabase';
+import { usesTieredSession } from '../../lib/sessionModel';
+import { Button, C3 } from '../../design';
 import DaySelector from './DaySelector';
 import WorkoutSession from './WorkoutSession';
 import SessionScreen from '../session/SessionScreen';
-import { usesTieredSession } from '../../lib/sessionModel';
-import { C, Button } from '../../design';
 
 export default function WorkoutView() {
   const { days, loading, error: routineError } = useRoutine();
@@ -26,7 +26,7 @@ export default function WorkoutView() {
 
   if (loading) {
     return (
-      <div style={{ padding: 24, textAlign: 'center', color: C.amber, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2 }}>
+      <div style={{ padding: 24, textAlign: 'center', color: C3.amber, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1.2 }}>
         Loading...
       </div>
     );
@@ -35,8 +35,8 @@ export default function WorkoutView() {
   if (routineError) {
     return (
       <div style={{ padding: 24, textAlign: 'center' }}>
-        <div style={{ color: C.warn, fontWeight: 700, marginBottom: 8 }}>Failed to load routine</div>
-        <div style={{ color: C.dim, fontSize: 14, marginBottom: 16 }}>{routineError}</div>
+        <div style={{ color: C3.warn, fontWeight: 700, marginBottom: 8 }}>Failed to load routine</div>
+        <div style={{ color: C3.muted, fontSize: 14, marginBottom: 16 }}>{routineError}</div>
         <Button variant="primary" onClick={() => window.location.reload()}>
           Refresh
         </Button>
@@ -46,7 +46,7 @@ export default function WorkoutView() {
 
   if (days.length === 0) {
     return (
-      <div style={{ padding: 24, textAlign: 'center', color: C.dim }}>
+      <div style={{ padding: 24, textAlign: 'center', color: C3.muted }}>
         No routine set up yet. Redirecting to setup...
       </div>
     );

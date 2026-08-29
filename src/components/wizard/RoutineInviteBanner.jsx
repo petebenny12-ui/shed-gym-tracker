@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase, withTimeout } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { useRoutine } from '../../hooks/useRoutine';
+import { C3 } from '../../design';
 
 export default function RoutineInviteBanner() {
   const { user } = useAuth();
@@ -107,7 +108,7 @@ export default function RoutineInviteBanner() {
   };
 
   return (
-    <div className="mx-3 mt-2 p-3 rounded-lg" style={{ background: '#1a1a2e', border: '1px solid #d97706' }}>
+    <div className="mx-3 mt-2 p-3 rounded-lg" style={{ background: C3.raise2, border: `1px solid ${C3.amber}` }}>
       <div className="text-amber-600 text-xs font-bold uppercase tracking-wider mb-1">
         New Routine from {fromName}
       </div>
@@ -120,14 +121,14 @@ export default function RoutineInviteBanner() {
           <button
             onClick={() => setShowPreview(true)}
             className="flex-1 py-2 rounded text-xs font-bold uppercase"
-            style={{ background: '#d97706', color: '#0a0a0f' }}
+            style={{ background: C3.amber, color: C3.bg }}
           >
             Preview & Accept
           </button>
           <button
             onClick={handleDismiss}
             className="px-3 py-2 rounded text-xs font-bold uppercase"
-            style={{ background: '#2a2a3e', color: '#888' }}
+            style={{ background: C3.line2, color: '#888' }}
           >
             Dismiss
           </button>
@@ -155,14 +156,14 @@ export default function RoutineInviteBanner() {
               onClick={handleAccept}
               disabled={accepting}
               className="flex-1 py-2 rounded text-xs font-bold uppercase"
-              style={{ background: '#22c55e', color: '#0a0a0f' }}
+              style={{ background: C3.pr, color: C3.bg }}
             >
               {accepting ? 'APPLYING...' : 'ACCEPT & REPLACE'}
             </button>
             <button
               onClick={handleDismiss}
               className="px-3 py-2 rounded text-xs font-bold uppercase"
-              style={{ background: '#2a2a3e', color: '#888' }}
+              style={{ background: C3.line2, color: '#888' }}
             >
               Dismiss
             </button>

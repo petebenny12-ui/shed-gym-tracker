@@ -8,7 +8,7 @@ export default function RoutinePreview({ routine }) {
         <div
           key={day.day}
           className="p-3 rounded-lg"
-          style={{ background: '#12121f', border: '1px solid #2a2a3e' }}
+          style={{ background: C3.raise2, border: `1px solid ${C3.line2}` }}
         >
           <div className="text-amber-600 font-bold text-sm mb-2">
             DAY {day.day} — {day.title}

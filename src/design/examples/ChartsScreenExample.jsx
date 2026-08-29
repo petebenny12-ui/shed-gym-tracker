@@ -1,19 +1,8 @@
 // EXAMPLE: Charts screen composition.
 // Demonstrates CORRECT usage of gap alert + grouped exercise selector + chronological chart.
 
-import { useState } from "react";
-import {
-  Screen,
-  BottomNav,
-  FrequencyChart,
-  GapAlert,
-  computeGappedGroups,
-  ExerciseSelector,
-  ProgressChart,
-  SectionLabel,
-  Card,
-  SPACE,
-} from "../index";
+import { useState } from 'react';
+import { Screen, BottomNav, FrequencyChart, GapAlert, computeGappedGroups, ExerciseSelector, ProgressChart, SectionLabel, Card, SPACE } from '../index';
 
 // PROPS EXPECTED:
 // {

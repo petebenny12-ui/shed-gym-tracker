@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { signUp } from '../lib/auth';
 import { validateDisplayName, sanitizeText } from '../lib/validation';
+import { C3 } from '../design';
 
 export default function SignUpPage() {
   const [displayName, setDisplayName] = useState('');
@@ -48,12 +49,12 @@ export default function SignUpPage() {
   return (
     <div
       className="min-h-screen flex flex-col items-center justify-center p-6"
-      style={{ background: 'linear-gradient(160deg, #0a0a0f 0%, #1a1a2e 50%, #0f1923 100%)' }}
+      style={{ background: AUTH_GRADIENT }}
     >
       <div className="text-center mb-10">
         <h1
           className="text-3xl font-bold text-white mb-2"
-          style={{ fontFamily: "'Georgia', serif", letterSpacing: '0.05em' }}
+          style={{ fontFamily: FONTS.sans, letterSpacing: 1.2 }}
         >
           JOIN THE SHED
         </h1>
@@ -69,7 +70,7 @@ export default function SignUpPage() {
           required
           maxLength={30}
           className="w-full p-3 rounded text-white text-sm"
-          style={{ background: '#1a1a2e', border: '1px solid #2a2a3e' }}
+          style={{ background: C3.raise2, border: `1px solid ${C3.line2}` }}
         />
         <input
           type="email"
@@ -78,7 +79,7 @@ export default function SignUpPage() {
           placeholder="Email"
           required
           className="w-full p-3 rounded text-white text-sm"
-          style={{ background: '#1a1a2e', border: '1px solid #2a2a3e' }}
+          style={{ background: C3.raise2, border: `1px solid ${C3.line2}` }}
         />
         <input
           type="password"
@@ -87,7 +88,7 @@ export default function SignUpPage() {
           placeholder="Password (min 6 characters)"
           required
           className="w-full p-3 rounded text-white text-sm"
-          style={{ background: '#1a1a2e', border: '1px solid #2a2a3e' }}
+          style={{ background: C3.raise2, border: `1px solid ${C3.line2}` }}
         />
 
         {error && <div className="text-red-500 text-xs text-center">{error}</div>}
@@ -97,10 +98,10 @@ export default function SignUpPage() {
           disabled={loading}
           className="w-full py-4 text-lg font-bold uppercase tracking-wider border-2 transition-all duration-300"
           style={{
-            background: '#d97706',
-            borderColor: '#d97706',
-            color: '#0a0a0f',
-            fontFamily: "'Georgia', serif",
+            background: C3.amber,
+            borderColor: C3.amber,
+            color: C3.bg,
+            fontFamily: FONTS.sans,
             opacity: loading ? 0.7 : 1,
           }}
         >

@@ -1,18 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  completionShape,
-  formatCollapsedTarget,
-  formatDelta,
-  formatLastTime,
-  formatResult,
-  formatTally,
-  formatTarget,
-  formatWeight,
-  isRepBased,
-  topWeight,
-  unitLabel,
-  weightSpread,
-} from '../lib/sessionFormat';
+import { completionShape, formatCollapsedTarget, formatDelta, formatLastTime, formatResult, formatTally, formatTarget, formatWeight, isRepBased, topWeight, unitLabel, weightSpread } from '../lib/sessionFormat';
 
 const set = (weight, reps, logged = true) => ({ weight, reps, logged });
 

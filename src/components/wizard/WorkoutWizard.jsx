@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase, withTimeout } from '../../lib/supabase';
 import { useRoutine } from '../../hooks/useRoutine';
+import { C3 } from '../../design';
 import StepStructure from './StepStructure';
 import StepNameDays from './StepNameDays';
 import StepPickExercises from './StepPickExercises';
@@ -267,12 +268,12 @@ export default function WorkoutWizard({ onClose, editDayOnly }) {
   const currentStepIdx = editDayOnly ? step - 2 : step;
 
   return (
-    <div className="min-h-screen" style={{ background: '#0a0a0f' }}>
+    <div className="min-h-screen" style={{ background: C3.bg }}>
       {/* Header */}
-      <div className="p-3 flex items-center justify-between" style={{ borderBottom: '1px solid #2a2a3e' }}>
+      <div className="p-3 flex items-center justify-between" style={{ borderBottom: `1px solid ${C3.line2}` }}>
         <button onClick={handleBack} className="text-gray-500 text-sm">&larr; Back</button>
         <span className="text-white text-sm font-bold uppercase tracking-wider"
-          style={{ fontFamily: "'Georgia', serif" }}>
+          style={{ fontFamily: FONTS.sans }}>
           {editDayOnly ? 'Edit Day' : 'Workout Builder'}
         </span>
         <button onClick={handleClose} className="text-gray-500 text-sm">&times; Close</button>
@@ -285,7 +286,7 @@ export default function WorkoutWizard({ onClose, editDayOnly }) {
             <div
               key={i}
               className="flex-1 h-1 rounded"
-              style={{ background: i <= currentStepIdx ? '#d97706' : '#2a2a3e', maxWidth: 60 }}
+              style={{ background: i <= currentStepIdx ? C3.amber : C3.line2, maxWidth: 60 }}
             />
           ))}
         </div>
@@ -339,9 +340,9 @@ export default function WorkoutWizard({ onClose, editDayOnly }) {
             disabled={!canProceed()}
             className="w-full py-3 font-bold text-lg uppercase rounded-lg transition-all"
             style={{
-              background: canProceed() ? '#d97706' : '#2a2a3e',
-              color: canProceed() ? '#0a0a0f' : '#555',
-              letterSpacing: '0.1em',
+              background: canProceed() ? C3.amber : C3.line2,
+              color: canProceed() ? C3.bg : '#555',
+              letterSpacing: 1.2,
             }}
           >
             NEXT
@@ -352,9 +353,9 @@ export default function WorkoutWizard({ onClose, editDayOnly }) {
             disabled={saving}
             className="w-full py-3 font-bold text-lg uppercase rounded-lg transition-all"
             style={{
-              background: saving ? '#92400e' : '#22c55e',
-              color: '#0a0a0f',
-              letterSpacing: '0.1em',
+              background: saving ? C3.partial : C3.pr,
+              color: C3.bg,
+              letterSpacing: 1.2,
             }}
           >
             {saving ? 'SAVING...' : 'CONFIRM & SAVE'}

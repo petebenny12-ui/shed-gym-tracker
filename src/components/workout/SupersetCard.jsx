@@ -1,5 +1,5 @@
 import ExerciseColumn from './ExerciseColumn';
-import { C, CARD_DEPTH } from '../../config/constants';
+import { C3, INNER_HIGHLIGHT } from '../../design';
 
 export default function SupersetCard({ superset, entries, lastSets, exerciseSettings, onUpdateSet, onAddSet, onToggleWeightMode }) {
   const ex1Key = `${superset.label}1`;
@@ -14,13 +14,13 @@ export default function SupersetCard({ superset, entries, lastSets, exerciseSett
   };
 
   return (
-    <div className="mb-3 rounded-lg overflow-hidden" style={{ border: `1px solid ${C.border}`, boxShadow: CARD_DEPTH }}>
-      <div className="px-3 py-1" style={{ background: C.cardHi }}>
-        <span className="text-xs font-bold" style={{ color: C.amber }}>
+    <div className="mb-3 rounded-lg overflow-hidden" style={{ border: `1px solid ${C3.line2}`, boxShadow: INNER_HIGHLIGHT }}>
+      <div className="px-3 py-1" style={{ background: C3.raise2 }}>
+        <span className="text-xs font-bold" style={{ color: C3.amber }}>
           {hasEx2 ? `SUPERSET ${superset.label}` : superset.label}
         </span>
       </div>
-      <div style={{ display: 'flex', width: '100%', background: C.navBg }}>
+      <div style={{ display: 'flex', width: '100%', background: C3.raise }}>
         <ExerciseColumn
           exercise={superset.ex1}
           sets={entries[ex1Key] || [{ weight: '', reps: '' }, { weight: '', reps: '' }, { weight: '', reps: '' }]}

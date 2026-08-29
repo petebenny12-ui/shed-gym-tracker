@@ -1,10 +1,10 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { C, CARD_DEPTH } from '../../config/constants';
+import { C3, INNER_HIGHLIGHT } from '../../design';
 import { computeGoalProjection } from '../../lib/bodyweightGoal';
 
-const ACTUAL_COLOR = C.amber;   // orange — your real bodyweight trend
-const LOCKED_COLOR = '#22c55e'; // green — goal line locked at save time
-const UPDATED_COLOR = C.user;   // blue  — goal line re-pathed from latest log
+const ACTUAL_COLOR = C3.amber;   // orange — your real bodyweight trend
+const LOCKED_COLOR = C3.pr; // green — goal line locked at save time
+const UPDATED_COLOR = C3.you;   // blue  — goal line re-pathed from latest log
 const DAY_MS = 86400000;
 
 // Normalise any date-ish value to a local-midnight timestamp so points sit on a
@@ -78,11 +78,11 @@ export default function BodyweightChart({ logs, settings }) {
   data.sort((a, b) => a.t - b.t);
 
   return (
-    <div className="mb-4 p-3 rounded-lg" style={{ background: C.card, border: `1px solid ${C.border}`, boxShadow: CARD_DEPTH }}>
-      <h3 className="text-xs font-bold uppercase mb-2" style={{ color: C.amber }}>Bodyweight</h3>
+    <div className="mb-4 p-3 rounded-lg" style={{ background: C3.raise2, border: `1px solid ${C3.line2}`, boxShadow: INNER_HIGHLIGHT }}>
+      <h3 className="text-xs font-bold uppercase mb-2" style={{ color: C3.amber }}>Bodyweight</h3>
       <ResponsiveContainer width="100%" height={170}>
         <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" stroke={C.cardHi} />
+          <CartesianGrid strokeDasharray="3 3" stroke={C3.raise2} />
           <XAxis
             dataKey="t"
             type="number"
@@ -96,7 +96,7 @@ export default function BodyweightChart({ logs, settings }) {
           <YAxis tick={{ fill: '#666', fontSize: 10 }} domain={['auto', 'auto']} />
           <Tooltip
             labelFormatter={fmtDate}
-            contentStyle={{ background: C.cardHi, border: `1px solid ${C.border}`, color: C.text, fontSize: 12 }}
+            contentStyle={{ background: C3.raise2, border: `1px solid ${C3.line2}`, color: C3.text, fontSize: 12 }}
           />
           <Legend wrapperStyle={{ fontSize: 10 }} />
           <Line type="monotone" dataKey="avg" stroke={ACTUAL_COLOR} strokeWidth={2.5} dot={{ fill: ACTUAL_COLOR, r: 3 }} name="Actual" connectNulls={false} />

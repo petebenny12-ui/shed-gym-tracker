@@ -15,9 +15,10 @@
 //   onSkip() — called if user skips entirely
 // ────────────────────────────────────────────────────────────
 
-import { useState } from "react";
-import { C, FONTS, RADIUS, SPACE, cardBase, PHONE_MAX_WIDTH } from "../tokens";
-import { Button, Card, SectionLabel } from "../primitives";
+import { useState } from 'react';
+import { FONTS, RADIUS, SPACE, cardBase, PHONE_MAX_WIDTH } from '../tokens';
+import { Button, Card, SectionLabel } from '../primitives';
+import { C3 } from '..';
 
 // Smart-default classifier. Use this to pre-fill defaultMode if not already set.
 // RULE: names containing "DB" or "dumbbell" default to per_side.
@@ -75,36 +76,36 @@ function IntroStep({ onStart, onSkip }) {
       <div style={{ textAlign: "center", marginBottom: 36 }}>
         <div
           style={{
-            fontFamily: FONTS.serif,
-            color: C.amber,
+            fontFamily: FONTS.sans,
+            color: C3.amber,
             fontSize: 34,
             fontWeight: 700,
-            letterSpacing: 2,
+            letterSpacing: 1.2,
             textTransform: "uppercase",
             marginBottom: 14,
           }}
         >
           Welcome to v2
         </div>
-        <div style={{ color: C.muted, fontSize: 14, lineHeight: 1.6, maxWidth: 320, margin: "0 auto" }}>
+        <div style={{ color: C3.soft, fontSize: 14, lineHeight: 1.6, maxWidth: 320, margin: "0 auto" }}>
           A few quick questions before you get back to gyming.
         </div>
       </div>
 
       <Card padding={SPACE.xl} style={{ marginBottom: 24 }}>
         <SectionLabel>What's new</SectionLabel>
-        <div style={{ color: C.text, fontSize: 14, lineHeight: 1.6 }}>
+        <div style={{ color: C3.text, fontSize: 14, lineHeight: 1.6 }}>
           We've added a per-exercise <b>weight mode</b> so VS comparisons are fair.
         </div>
-        <div style={{ color: C.muted, fontSize: 13, lineHeight: 1.6, marginTop: 10 }}>
+        <div style={{ color: C3.soft, fontSize: 13, lineHeight: 1.6, marginTop: 10 }}>
           <div style={{ marginBottom: 4 }}>
-            <b style={{ color: C.user }}>Total</b> — bar weight (bench press 80kg)
+            <b style={{ color: C3.you }}>Total</b> — bar weight (bench press 80kg)
           </div>
           <div>
-            <b style={{ color: C.amber }}>Per side</b> — weight per hand (dumbbell curls 12kg each)
+            <b style={{ color: C3.amber }}>Per side</b> — weight per hand (dumbbell curls 12kg each)
           </div>
         </div>
-        <div style={{ color: C.dim, fontSize: 12, lineHeight: 1.6, marginTop: 14 }}>
+        <div style={{ color: C3.muted, fontSize: 12, lineHeight: 1.6, marginTop: 14 }}>
           Takes about 30 seconds. You can change any of these later in Settings.
         </div>
       </Card>
@@ -118,7 +119,7 @@ function IntroStep({ onStart, onSkip }) {
           style={{
             background: "transparent",
             border: "none",
-            color: C.muted,
+            color: C3.soft,
             fontSize: 13,
             padding: 10,
             cursor: "pointer",
@@ -138,14 +139,14 @@ function ClassifyStep({ exercise, mode, progress, onBack, onChange, onNext }) {
       <ProgressDots current={progress.current} total={progress.total} />
 
       <div style={{ marginBottom: 20 }}>
-        <div style={{ color: C.dim, fontSize: 11, letterSpacing: 1.4, textTransform: "uppercase", marginBottom: 4 }}>
+        <div style={{ color: C3.muted, fontSize: 11, letterSpacing: 1.2, textTransform: "uppercase", marginBottom: 4 }}>
           {progress.current} of {progress.total}
         </div>
-        <div style={{ fontFamily: FONTS.serif, color: C.text, fontSize: 26, fontWeight: 700, letterSpacing: 0.5 }}>
+        <div style={{ fontFamily: FONTS.sans, color: C3.text, fontSize: 26, fontWeight: 700, letterSpacing: 0.5 }}>
           {exercise.name}
         </div>
         {exercise.lastWeight != null && (
-          <div style={{ color: C.muted, fontSize: 12, marginTop: 6 }}>
+          <div style={{ color: C3.soft, fontSize: 12, marginTop: 6 }}>
             Most recent: {exercise.lastWeight}kg × {exercise.lastReps}
             {exercise.lastDate && ` (${exercise.lastDate})`}
           </div>
@@ -153,7 +154,7 @@ function ClassifyStep({ exercise, mode, progress, onBack, onChange, onNext }) {
       </div>
 
       <Card padding={SPACE.lg} style={{ marginBottom: 24 }}>
-        <div style={{ color: C.muted, fontSize: 12, marginBottom: 14 }}>
+        <div style={{ color: C3.soft, fontSize: 12, marginBottom: 14 }}>
           How have you been recording this?
         </div>
 
@@ -162,7 +163,7 @@ function ClassifyStep({ exercise, mode, progress, onBack, onChange, onNext }) {
           label="Total weight"
           sub="One number (the whole lift, e.g. bar weight)"
           selected={mode === "total"}
-          color={C.user}
+          color={C3.you}
           onClick={() => onChange("total")}
         />
         <div style={{ height: 8 }} />
@@ -171,7 +172,7 @@ function ClassifyStep({ exercise, mode, progress, onBack, onChange, onNext }) {
           label="Per side"
           sub="Weight per hand (each dumbbell)"
           selected={mode === "per_side"}
-          color={C.amber}
+          color={C3.amber}
           onClick={() => onChange("per_side")}
         />
       </Card>
@@ -197,10 +198,10 @@ function ConfirmStep({ exercises, modes, onBack, onConfirm }) {
       <ProgressDots current={exercises.length + 1} total={exercises.length + 1} />
 
       <div style={{ marginBottom: 20 }}>
-        <div style={{ fontFamily: FONTS.serif, color: C.text, fontSize: 26, fontWeight: 700, letterSpacing: 0.5 }}>
+        <div style={{ fontFamily: FONTS.sans, color: C3.text, fontSize: 26, fontWeight: 700, letterSpacing: 0.5 }}>
           Looks right?
         </div>
-        <div style={{ color: C.muted, fontSize: 13, marginTop: 6 }}>
+        <div style={{ color: C3.soft, fontSize: 13, marginTop: 6 }}>
           You can change any of these later in Settings.
         </div>
       </div>
@@ -214,19 +215,19 @@ function ConfirmStep({ exercises, modes, onBack, onConfirm }) {
               alignItems: "center",
               justifyContent: "space-between",
               padding: "10px 4px",
-              borderBottom: `1px solid ${C.border}`,
+              borderBottom: `1px solid ${C3.line2}`,
             }}
           >
-            <span style={{ color: C.text, fontSize: 13 }}>{ex.name}</span>
+            <span style={{ color: C3.text, fontSize: 13 }}>{ex.name}</span>
             <span
               style={{
                 fontSize: 10,
                 fontWeight: 700,
                 letterSpacing: 1,
                 textTransform: "uppercase",
-                color: modes[ex.id] === "total" ? C.user : C.amber,
+                color: modes[ex.id] === "total" ? C3.you : C3.amber,
                 padding: "2px 6px",
-                border: `1px solid ${modes[ex.id] === "total" ? C.user : C.amber}`,
+                border: `1px solid ${modes[ex.id] === "total" ? C3.you : C3.amber}`,
                 borderRadius: RADIUS.sm,
               }}
             >
@@ -254,9 +255,9 @@ function MigrationShell({ children }) {
     <div
       style={{
         fontFamily: FONTS.sans,
-        background: C.bg,
+        background: C3.bg,
         minHeight: "100vh",
-        color: C.text,
+        color: C3.text,
         padding: "40px 20px 32px",
       }}
     >
@@ -273,7 +274,7 @@ function ProgressDots({ current, total }) {
         <div
           style={{
             height: 3,
-            background: C.cardHi,
+            background: C3.raise2,
             borderRadius: 2,
             overflow: "hidden",
           }}
@@ -282,7 +283,7 @@ function ProgressDots({ current, total }) {
             style={{
               height: "100%",
               width: `${(current / total) * 100}%`,
-              background: C.amber,
+              background: C3.amber,
               transition: "width 240ms",
             }}
           />
@@ -299,7 +300,7 @@ function ProgressDots({ current, total }) {
           style={{
             flex: 1,
             height: 3,
-            background: i < current ? C.amber : C.cardHi,
+            background: i < current ? C3.amber : C3.raise2,
             borderRadius: 2,
             transition: "background 240ms",
           }}
@@ -316,7 +317,7 @@ function RadioOption({ label, sub, selected, color, onClick }) {
       style={{
         width: "100%",
         background: selected ? `${color}15` : "transparent",
-        border: `1px solid ${selected ? color : C.border}`,
+        border: `1px solid ${selected ? color : C3.line2}`,
         borderRadius: RADIUS.lg,
         padding: 14,
         textAlign: "left",
@@ -332,7 +333,7 @@ function RadioOption({ label, sub, selected, color, onClick }) {
           width: 18,
           height: 18,
           borderRadius: RADIUS.pill,
-          border: `2px solid ${selected ? color : C.border}`,
+          border: `2px solid ${selected ? color : C3.line2}`,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -344,8 +345,8 @@ function RadioOption({ label, sub, selected, color, onClick }) {
         )}
       </div>
       <div style={{ flex: 1 }}>
-        <div style={{ color: C.text, fontSize: 14, fontWeight: 600 }}>{label}</div>
-        <div style={{ color: C.muted, fontSize: 12, marginTop: 2 }}>{sub}</div>
+        <div style={{ color: C3.text, fontSize: 14, fontWeight: 600 }}>{label}</div>
+        <div style={{ color: C3.soft, fontSize: 12, marginTop: 2 }}>{sub}</div>
       </div>
     </button>
   );

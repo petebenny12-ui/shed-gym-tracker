@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
-import { ChevronDown } from 'lucide-react';
-import { C, SERIF, CARD_DEPTH } from '../../config/constants';
+import { ChevronDown, ChevronRight } from 'lucide-react';
+import { C3, FONTS, INNER_HIGHLIGHT } from '../../design';
 
 const GROUP_ORDER = ['chest', 'back', 'shoulders', 'arms', 'biceps', 'triceps', 'legs', 'core'];
 
@@ -46,43 +46,47 @@ export default function ExerciseSelector({ exercises, sessions, selected, onSele
   const toggleGroup = (g) => setOpenGroup(openGroup === g ? null : g);
 
   return (
-    <div className="mb-3 rounded-lg" style={{ background: C.card, border: `1px solid ${C.border}`, boxShadow: CARD_DEPTH }}>
-      <h3 className="text-xs font-bold uppercase px-3 pt-3 pb-2" style={{ fontFamily: SERIF, color: C.amber }}>
-        Exercise Charts
-      </h3>
+    <div style={{ display: 'grid', gap: 8, marginBottom: 14 }}>
       {grouped.map(({ group, items }) => (
-        <div key={group}>
+        <div key={group} style={{ background: C3.raise2, border: `1px solid ${C3.line2}`, borderRadius: C3.radius, boxShadow: INNER_HIGHLIGHT, overflow: 'hidden' }}>
           <button
             onClick={() => toggleGroup(group)}
-            className="w-full flex items-center justify-between px-3 py-2 text-left"
-            style={{ borderTop: `1px solid ${C.border}` }}
+            style={{
+              width: '100%',
+              background: 'transparent',
+              border: 'none',
+              padding: '12px 14px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              cursor: 'pointer',
+            }}
           >
-            <span className="text-xs font-bold uppercase" style={{ color: C.muted }}>
+            <span style={{ color: C3.text, fontSize: 13, fontWeight: 700, letterSpacing: 0.4 }}>
               {group}
+              <span style={{ color: C3.muted, fontWeight: 400, marginLeft: 8 }}>{items.length}</span>
             </span>
-            <div className="flex items-center gap-2">
-              <span className="text-[10px]" style={{ color: C.dim }}>{items.length}</span>
-              <ChevronDown
-                size={14}
-                color={C.dim}
-                style={{
-                  transform: openGroup === group ? 'rotate(180deg)' : 'rotate(0deg)',
-                  transition: 'transform 0.2s',
-                }}
-              />
-            </div>
+            {openGroup === group ? (
+              <ChevronDown size={16} color={C3.soft} />
+            ) : (
+              <ChevronRight size={16} color={C3.soft} />
+            )}
           </button>
           {openGroup === group && (
-            <div className="px-3 pb-2 flex flex-wrap gap-1.5">
+            <div style={{ padding: '0 10px 12px', display: 'flex', flexWrap: 'wrap', gap: 6 }}>
               {items.map((name) => (
                 <button
                   key={name}
                   onClick={() => onSelect(name === selected ? null : name)}
-                  className="px-2 py-1 text-xs rounded font-bold transition-all"
                   style={{
-                    background: selected === name ? C.amber : C.cardHi,
-                    color: selected === name ? C.bg : C.muted,
-                    border: `1px solid ${selected === name ? C.amber : C.border}`,
+                    padding: '6px 12px',
+                    fontSize: 11,
+                    fontWeight: 600,
+                    borderRadius: 999,
+                    border: `1px solid ${selected === name ? C3.amber : C3.line2}`,
+                    background: selected === name ? C3.amber : 'transparent',
+                    color: selected === name ? C3.bg : C3.text,
+                    cursor: 'pointer',
                   }}
                 >
                   {name}

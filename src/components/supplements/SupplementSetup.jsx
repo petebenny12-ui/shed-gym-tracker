@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { C3 } from '../../design';
 import { SUPPLEMENT_OPTIONS, TIMING_OPTIONS } from '../../config/constants';
 import { useSupplements } from '../../hooks/useSupplements';
 import { validateSupplementName } from '../../lib/validation';
@@ -37,7 +38,7 @@ export default function SupplementSetup({ onAdded }) {
   };
 
   return (
-    <div className="p-3 rounded-lg" style={{ background: '#12121f', border: '1px solid #2a2a3e' }}>
+    <div className="p-3 rounded-lg" style={{ background: C3.raise2, border: `1px solid ${C3.line2}` }}>
       <div className="text-gray-400 text-xs uppercase tracking-wider mb-3">Add Supplement</div>
 
       <div className="flex flex-wrap gap-1.5 mb-3">
@@ -47,9 +48,9 @@ export default function SupplementSetup({ onAdded }) {
             onClick={() => setName(opt)}
             className="px-2 py-1 text-xs rounded font-bold"
             style={{
-              background: name === opt ? '#d97706' : '#1a1a2e',
-              color: name === opt ? '#0a0a0f' : '#888',
-              border: '1px solid #2a2a3e',
+              background: name === opt ? C3.amber : C3.raise2,
+              color: name === opt ? C3.bg : '#888',
+              border: `1px solid ${C3.line2}`,
             }}
           >
             {opt}
@@ -59,9 +60,9 @@ export default function SupplementSetup({ onAdded }) {
           onClick={() => setName('custom')}
           className="px-2 py-1 text-xs rounded font-bold"
           style={{
-            background: name === 'custom' ? '#d97706' : '#1a1a2e',
-            color: name === 'custom' ? '#0a0a0f' : '#888',
-            border: '1px solid #2a2a3e',
+            background: name === 'custom' ? C3.amber : C3.raise2,
+            color: name === 'custom' ? C3.bg : '#888',
+            border: `1px solid ${C3.line2}`,
           }}
         >
           Custom
@@ -77,7 +78,7 @@ export default function SupplementSetup({ onAdded }) {
             placeholder="Supplement name"
             maxLength={50}
             className="w-full p-2 rounded text-white text-sm"
-            style={{ background: '#1a1a2e', border: '1px solid #2a2a3e' }}
+            style={{ background: C3.raise2, border: `1px solid ${C3.line2}` }}
           />
           {nameError && <div className="text-red-500 text-xs mt-1">{nameError}</div>}
         </div>
@@ -90,9 +91,9 @@ export default function SupplementSetup({ onAdded }) {
             onClick={() => setTiming(t.value)}
             className="flex-1 px-1 py-1.5 text-xs rounded font-bold"
             style={{
-              background: timing === t.value ? '#d97706' : '#1a1a2e',
-              color: timing === t.value ? '#0a0a0f' : '#888',
-              border: '1px solid #2a2a3e',
+              background: timing === t.value ? C3.amber : C3.raise2,
+              color: timing === t.value ? C3.bg : '#888',
+              border: `1px solid ${C3.line2}`,
             }}
           >
             {t.label}
@@ -105,8 +106,8 @@ export default function SupplementSetup({ onAdded }) {
         disabled={saving || (!name || (name === 'custom' && !customName.trim()))}
         className="w-full py-2 font-bold text-sm uppercase rounded"
         style={{
-          background: name ? '#d97706' : '#1a1a2e',
-          color: name ? '#0a0a0f' : '#555',
+          background: name ? C3.amber : C3.raise2,
+          color: name ? C3.bg : '#555',
           opacity: saving ? 0.7 : 1,
         }}
       >

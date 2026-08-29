@@ -2,14 +2,15 @@
 // VS screen patterns
 // ────────────────────────────────────────────────────────────
 // RULES:
-//   - You = blue (C.user). Opponent = teal (C.vs). ALWAYS role-based.
+//   - You = blue (C3.you). Opponent = teal (C3.crew). ALWAYS role-based.
 //   - Both colours are EQUAL saturation. Never grey the "losing" user.
 //   - BEAST hero stays. Winner gets a crown.
 //   - Head-to-head cards use big amber "VS" as visual hero.
 
-import { Crown } from "lucide-react";
-import { C, FONTS, RADIUS, SPACE, cardBase } from "../tokens";
-import { Card, SectionLabel } from "../primitives";
+import { Crown } from 'lucide-react';
+import { FONTS, RADIUS, SPACE, cardBase } from '../tokens';
+import { Card, SectionLabel } from '../primitives';
+import { C3 } from '..';
 
 // ═════════════════════════════════════════════════════════════
 // VsHero — BEAST title + You vs Them score cards
@@ -25,21 +26,21 @@ export function VsHero({ youScore, themScore, opponentName = "Them", youWins }) 
       <div style={{ textAlign: "center", marginBottom: 18 }}>
         <div
           style={{
-            fontFamily: FONTS.serif,
-            color: C.amber,
+            fontFamily: FONTS.sans,
+            color: C3.amber,
             fontSize: 40,
             fontWeight: 700,
-            letterSpacing: 10,
+            letterSpacing: 1.2,
           }}
         >
           BEAST
         </div>
         <div
           style={{
-            color: C.muted,
+            color: C3.soft,
             fontSize: 10,
             fontWeight: 600,
-            letterSpacing: 2,
+            letterSpacing: 1.2,
             textTransform: "uppercase",
             marginTop: 2,
           }}
@@ -56,20 +57,20 @@ export function VsHero({ youScore, themScore, opponentName = "Them", youWins }) 
           alignItems: "center",
         }}
       >
-        <ScoreCard label="You" score={youScore} color={C.user} winner={inferredYouWins} />
+        <ScoreCard label="You" score={youScore} color={C3.you} winner={inferredYouWins} />
         <div
           style={{
-            fontFamily: FONTS.serif,
-            color: C.amber,
+            fontFamily: FONTS.sans,
+            color: C3.amber,
             fontSize: 28,
             fontWeight: 700,
-            letterSpacing: 2,
+            letterSpacing: 1.2,
             textAlign: "center",
           }}
         >
           VS
         </div>
-        <ScoreCard label={opponentName} score={themScore} color={C.vs} winner={!inferredYouWins} />
+        <ScoreCard label={opponentName} score={themScore} color={C3.crew} winner={!inferredYouWins} />
       </div>
     </Card>
   );
@@ -80,8 +81,8 @@ export function ScoreCard({ label, score, color, winner }) {
   return (
     <div
       style={{
-        background: C.bg,
-        border: `1px solid ${winner ? color : C.border}`,
+        background: C3.bg,
+        border: `1px solid ${winner ? color : C3.line2}`,
         borderRadius: RADIUS.lg,
         padding: "14px 10px",
         textAlign: "center",
@@ -93,10 +94,10 @@ export function ScoreCard({ label, score, color, winner }) {
       )}
       <div
         style={{
-          color: C.muted,
+          color: C3.soft,
           fontSize: 10,
           fontWeight: 700,
-          letterSpacing: 1.6,
+          letterSpacing: 1.2,
           textTransform: "uppercase",
           marginBottom: 4,
         }}
@@ -105,7 +106,7 @@ export function ScoreCard({ label, score, color, winner }) {
       </div>
       <div
         style={{
-          fontFamily: FONTS.serif,
+          fontFamily: FONTS.sans,
           color,
           fontSize: 38,
           fontWeight: 700,
@@ -114,7 +115,7 @@ export function ScoreCard({ label, score, color, winner }) {
       >
         {score}
       </div>
-      <div style={{ color: C.dim, fontSize: 10, marginTop: 2 }}>/ 100</div>
+      <div style={{ color: C3.muted, fontSize: 10, marginTop: 2 }}>/ 100</div>
     </div>
   );
 }
@@ -129,7 +130,7 @@ export function VsMetric({ label, youValue, themValue, youPct, themPct }) {
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
         <span
           style={{
-            color: C.text,
+            color: C3.text,
             fontSize: 11,
             fontWeight: 700,
             letterSpacing: 0.6,
@@ -138,15 +139,15 @@ export function VsMetric({ label, youValue, themValue, youPct, themPct }) {
         >
           {label}
         </span>
-        <span style={{ color: C.muted, fontSize: 11 }}>
-          <span style={{ color: C.user, fontFamily: FONTS.sans }}>{youValue}</span>
+        <span style={{ color: C3.soft, fontSize: 11 }}>
+          <span style={{ color: C3.you, fontFamily: FONTS.sans }}>{youValue}</span>
           {" vs "}
-          <span style={{ color: C.vs, fontFamily: FONTS.sans }}>{themValue}</span>
+          <span style={{ color: C3.crew, fontFamily: FONTS.sans }}>{themValue}</span>
         </span>
       </div>
       <div style={{ display: "grid", gap: 3 }}>
-        <VsBar width={youPct} color={C.user} />
-        <VsBar width={themPct} color={C.vs} />
+        <VsBar width={youPct} color={C3.you} />
+        <VsBar width={themPct} color={C3.crew} />
       </div>
     </div>
   );
@@ -157,10 +158,10 @@ function VsBar({ width, color }) {
     <div
       style={{
         height: 7,
-        background: C.bg,
+        background: C3.bg,
         borderRadius: 4,
         overflow: "hidden",
-        border: `1px solid ${C.border}`,
+        border: `1px solid ${C3.line2}`,
       }}
     >
       <div
@@ -183,7 +184,7 @@ function VsBar({ width, color }) {
 export function HeadToHead({ exerciseName, youLabel, themLabel, youName = "You", themName = "Them", youWins }) {
   return (
     <Card padding={SPACE.md + 2}>
-      <div style={{ color: C.text, fontSize: 13, fontWeight: 600, marginBottom: 8 }}>
+      <div style={{ color: C3.text, fontSize: 13, fontWeight: 600, marginBottom: 8 }}>
         {exerciseName}
       </div>
       <div
@@ -194,20 +195,20 @@ export function HeadToHead({ exerciseName, youLabel, themLabel, youName = "You",
           alignItems: "center",
         }}
       >
-        <SideValue label={youName} value={youLabel} highlight={youWins} color={C.user} />
+        <SideValue label={youName} value={youLabel} highlight={youWins} color={C3.you} />
         <div
           style={{
-            fontFamily: FONTS.serif,
-            color: C.amber,
+            fontFamily: FONTS.sans,
+            color: C3.amber,
             fontSize: 14,
             fontWeight: 700,
-            letterSpacing: 1.4,
+            letterSpacing: 1.2,
             textAlign: "center",
           }}
         >
           VS
         </div>
-        <SideValue label={themName} value={themLabel} highlight={!youWins} color={C.vs} />
+        <SideValue label={themName} value={themLabel} highlight={!youWins} color={C3.crew} />
       </div>
     </Card>
   );
@@ -218,17 +219,17 @@ function SideValue({ label, value, highlight, color }) {
     <div style={{ textAlign: "center" }}>
       <div
         style={{
-          color: highlight ? color : C.muted,
+          color: highlight ? color : C3.soft,
           fontSize: 18,
           fontWeight: 700,
-          fontFamily: FONTS.serif,
+          fontFamily: FONTS.sans,
         }}
       >
         {value}
       </div>
       <div
         style={{
-          color: C.dim,
+          color: C3.muted,
           fontSize: 9,
           textTransform: "uppercase",
           letterSpacing: 1,
@@ -249,8 +250,8 @@ export function VolumeCompare({ youKg, themKg, youName = "You", themName = "Them
     <Card padding={SPACE.lg} style={{ marginBottom: 14 }}>
       <SectionLabel>Total Volume (all time)</SectionLabel>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, textAlign: "center" }}>
-        <VolumeStat value={formatVolumeCompact(youKg)} label={youName} color={C.user} />
-        <VolumeStat value={formatVolumeCompact(themKg)} label={themName} color={C.vs} />
+        <VolumeStat value={formatVolumeCompact(youKg)} label={youName} color={C3.you} />
+        <VolumeStat value={formatVolumeCompact(themKg)} label={themName} color={C3.crew} />
       </div>
     </Card>
   );
@@ -259,8 +260,8 @@ export function VolumeCompare({ youKg, themKg, youName = "You", themName = "Them
 function VolumeStat({ value, label, color }) {
   return (
     <div>
-      <div style={{ fontFamily: FONTS.serif, color, fontSize: 22, fontWeight: 700 }}>{value}</div>
-      <div style={{ color: C.muted, fontSize: 11, marginTop: 2 }}>{label}</div>
+      <div style={{ fontFamily: FONTS.sans, color, fontSize: 22, fontWeight: 700 }}>{value}</div>
+      <div style={{ color: C3.soft, fontSize: 11, marginTop: 2 }}>{label}</div>
     </div>
   );
 }
@@ -295,13 +296,13 @@ export function RecentPRs({ prs }) {
                 width: 8,
                 height: 8,
                 borderRadius: 2,
-                background: p.who === "you" ? C.user : C.vs,
+                background: p.who === "you" ? C3.you : C3.crew,
               }}
             />
-            <div style={{ color: C.text, fontSize: 13 }}>{p.exerciseName}</div>
+            <div style={{ color: C3.text, fontSize: 13 }}>{p.exerciseName}</div>
             <div
               style={{
-                color: p.who === "you" ? C.user : C.vs,
+                color: p.who === "you" ? C3.you : C3.crew,
                 fontSize: 13,
                 fontWeight: 600,
                 fontFamily: FONTS.sans,
@@ -309,7 +310,7 @@ export function RecentPRs({ prs }) {
             >
               {p.weight}kg × {p.reps}
             </div>
-            <div style={{ color: C.dim, fontSize: 10 }}>{p.date}</div>
+            <div style={{ color: C3.muted, fontSize: 10 }}>{p.date}</div>
           </div>
         ))}
       </div>

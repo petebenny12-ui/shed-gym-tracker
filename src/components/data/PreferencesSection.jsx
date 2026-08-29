@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { triggerInstall, resetInstallDismissal, getIOSBrowser } from '../layout/InstallPrompt';
+import { C3 } from '../../design';
 
 export default function PreferencesSection({ onStatus }) {
   const { profile, refreshProfile } = useAuth();
@@ -48,7 +49,7 @@ export default function PreferencesSection({ onStatus }) {
   };
 
   return (
-    <div className="p-3 rounded-lg" style={{ background: '#12121f', border: '1px solid #2a2a3e' }}>
+    <div className="p-3 rounded-lg" style={{ background: C3.raise2, border: `1px solid ${C3.line2}` }}>
       <div className="text-gray-400 text-xs uppercase tracking-wider mb-3">Preferences</div>
       <div className="space-y-3">
         {options.map((opt) => (
@@ -62,7 +63,7 @@ export default function PreferencesSection({ onStatus }) {
               disabled={saving}
               className="w-10 h-5 rounded-full relative transition-colors"
               style={{
-                background: settings[opt.key] ? '#d97706' : '#2a2a3e',
+                background: settings[opt.key] ? C3.amber : C3.line2,
               }}
             >
               <div
@@ -76,7 +77,7 @@ export default function PreferencesSection({ onStatus }) {
           </div>
         ))}
         {!isStandalone && (
-          <div className="pt-2" style={{ borderTop: '1px solid #1a1a2e' }}>
+          <div className="pt-2" style={{ borderTop: `1px solid ${C3.raise2}` }}>
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-white text-sm">Install App</div>
@@ -85,13 +86,13 @@ export default function PreferencesSection({ onStatus }) {
               <button
                 onClick={handleInstallApp}
                 className="px-3 py-1 text-xs font-bold uppercase rounded"
-                style={{ background: '#d97706', color: '#0a0a0f' }}
+                style={{ background: C3.amber, color: C3.bg }}
               >
                 Install
               </button>
             </div>
             {showIOSTip && (
-              <div className="mt-2 p-2 rounded text-xs text-gray-400" style={{ background: '#0a0a0f' }}>
+              <div className="mt-2 p-2 rounded text-xs text-gray-400" style={{ background: C3.bg }}>
                 {getIOSBrowser() === 'safari' ? (
                   <>Tap <span className="text-white font-bold">Share</span> (↑) then <span className="text-white font-bold">Add to Home Screen</span></>
                 ) : (

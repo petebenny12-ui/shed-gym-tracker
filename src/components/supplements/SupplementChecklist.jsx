@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSupplements } from '../../hooks/useSupplements';
+import { C3 } from '../../design';
 import SupplementSetup from './SupplementSetup';
 import StreakDisplay from './StreakDisplay';
 
@@ -49,7 +50,7 @@ export default function SupplementChecklist() {
 
   if (supplements.length === 0 && !showSetup) {
     return (
-      <div className="mx-3 mt-3 p-3 rounded-lg" style={{ background: '#12121f', border: '1px solid #2a2a3e' }}>
+      <div className="mx-3 mt-3 p-3 rounded-lg" style={{ background: C3.raise2, border: `1px solid ${C3.line2}` }}>
         <div className="flex justify-between items-center">
           <span className="text-gray-500 text-xs">No supplements tracked</span>
           <button
@@ -66,7 +67,7 @@ export default function SupplementChecklist() {
   return (
     <div className="mx-3 mt-3">
       {supplements.length > 0 && (
-        <div className="p-3 rounded-lg mb-2" style={{ background: '#12121f', border: '1px solid #2a2a3e' }}>
+        <div className="p-3 rounded-lg mb-2" style={{ background: C3.raise2, border: `1px solid ${C3.line2}` }}>
           <div className="flex justify-between items-center mb-2">
             <span className="text-gray-400 text-xs uppercase tracking-wider">Supplements</span>
             <button
@@ -84,9 +85,9 @@ export default function SupplementChecklist() {
                     onClick={() => handleToggle(s.id)}
                     className="w-5 h-5 rounded border flex items-center justify-center text-xs"
                     style={{
-                      background: checkedIds.has(s.id) ? '#d97706' : 'transparent',
-                      borderColor: checkedIds.has(s.id) ? '#d97706' : '#2a2a3e',
-                      color: '#0a0a0f',
+                      background: checkedIds.has(s.id) ? C3.amber : 'transparent',
+                      borderColor: checkedIds.has(s.id) ? C3.amber : C3.line2,
+                      color: C3.bg,
                     }}
                   >
                     {checkedIds.has(s.id) ? '\u2713' : ''}

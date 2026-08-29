@@ -1,8 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
-import ExerciseBlock from './ExerciseBlock';
-import KeypadSheet from './KeypadSheet';
-import TierRule from './TierRule';
 import { C3, FONTS, ICON, TABULAR, TYPE } from '../../design';
 import { useAuth } from '../../context/AuthContext';
 import { useSetLogger } from '../../hooks/useSetLogger';
@@ -11,6 +8,9 @@ import { useWorkoutData } from '../../hooks/useWorkoutData';
 import { isOffLadder, withExtra } from '../../lib/ladder';
 import { completionShape, loggedSets } from '../../lib/sessionFormat';
 import { firstIncomplete, missionName, toSessionExercises } from '../../lib/sessionModel';
+import ExerciseBlock from './ExerciseBlock';
+import KeypadSheet from './KeypadSheet';
+import TierRule from './TierRule';
 
 /**
  * The session screen — an accordion of the day's exercises.
@@ -79,7 +79,7 @@ function RestRing({ count, duration, running, onStart }) {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontFamily: FONTS.mono,
+          fontFamily: FONTS.sans,
           fontSize: 11,
           color: running ? C3.text : C3.faint,
           ...TABULAR,
@@ -434,9 +434,9 @@ export default function SessionScreen({ day, onBack }) {
             border: 'none',
             borderRadius: C3.radius,
             padding: 18,
-            fontFamily: FONTS.mono,
+            fontFamily: FONTS.sans,
             fontSize: 12,
-            letterSpacing: 2.4,
+            letterSpacing: 1.2,
             textTransform: 'uppercase',
             cursor: 'pointer',
           }}
@@ -536,9 +536,9 @@ export default function SessionScreen({ day, onBack }) {
               border: `${C3.hair}px solid ${C3.line2}`,
               borderRadius: C3.radius,
               color: C3.soft,
-              fontFamily: FONTS.mono,
+              fontFamily: FONTS.sans,
               fontSize: 11,
-              letterSpacing: 1.6,
+              letterSpacing: 1.2,
               padding: '8px 12px',
               minHeight: 36,
               cursor: 'pointer',
@@ -561,9 +561,9 @@ export default function SessionScreen({ day, onBack }) {
             border: 'none',
             borderRadius: C3.radius,
             padding: 18,
-            fontFamily: FONTS.mono,
+            fontFamily: FONTS.sans,
             fontSize: 12,
-            letterSpacing: 2.4,
+            letterSpacing: 1.2,
             textTransform: 'uppercase',
             cursor: anythingLogged ? 'pointer' : 'default',
           }}
@@ -631,9 +631,9 @@ export default function SessionScreen({ day, onBack }) {
                 border: 'none',
                 borderRadius: C3.radius,
                 padding: 18,
-                fontFamily: FONTS.mono,
+                fontFamily: FONTS.sans,
                 fontSize: 12,
-                letterSpacing: 2.4,
+                letterSpacing: 1.2,
                 textTransform: 'uppercase',
                 cursor: 'pointer',
                 marginBottom: 10,
@@ -651,9 +651,9 @@ export default function SessionScreen({ day, onBack }) {
                 border: `${C3.hair}px solid ${C3.line2}`,
                 borderRadius: C3.radius,
                 padding: 18,
-                fontFamily: FONTS.mono,
+                fontFamily: FONTS.sans,
                 fontSize: 12,
-                letterSpacing: 2.4,
+                letterSpacing: 1.2,
                 textTransform: 'uppercase',
                 cursor: 'pointer',
               }}

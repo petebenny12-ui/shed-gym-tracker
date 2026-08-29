@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { C3 } from './design';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
@@ -13,7 +14,7 @@ import SplashScreen from './components/layout/SplashScreen';
 
 function ErrorScreen({ message }) {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center gap-4 px-6" style={{ background: '#0a0a0f' }}>
+    <div className="min-h-screen flex flex-col items-center justify-center gap-4 px-6" style={{ background: C3.bg }}>
       <div className="text-red-500 font-bold uppercase tracking-wider text-center">{message}</div>
       <button
         onClick={() => window.location.reload()}
@@ -30,7 +31,7 @@ function AppRoutes() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0a0a0f' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: C3.bg }}>
         <div className="text-amber-600 font-bold uppercase tracking-wider animate-pulse">Loading...</div>
       </div>
     );

@@ -2,17 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useWorkoutData } from '../../hooks/useWorkoutData';
 import { useBodyweight } from '../../hooks/useBodyweight';
 import { useAuth } from '../../context/AuthContext';
-import {
-  C,
-  FrequencyChart,
-  GapAlert,
-  computeGappedGroups,
-  ExerciseSelector,
-  ProgressChart,
-  SectionLabel,
-  Card,
-  SPACE,
-} from '../../design';
+import { C3, Card, ExerciseSelector, FrequencyChart, GapAlert, ProgressChart, SPACE, SectionLabel, computeGappedGroups } from '../../design';
 import BodyweightChart from './BodyweightChart';
 import BodyweightGoalEditor from './BodyweightGoalEditor';
 
@@ -134,7 +124,7 @@ export default function ProgressView() {
 
   if (loading) {
     return (
-      <div style={{ padding: 24, textAlign: 'center', color: C.amber, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2 }}>
+      <div style={{ padding: 24, textAlign: 'center', color: C3.amber, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1.2 }}>
         Loading...
       </div>
     );
@@ -171,7 +161,7 @@ export default function ProgressView() {
       )}
 
       {exercises.length === 0 && (
-        <div style={{ color: C.dim, textAlign: 'center', padding: '32px 0', fontSize: 13 }}>
+        <div style={{ color: C3.muted, textAlign: 'center', padding: '32px 0', fontSize: 13 }}>
           Log some sessions first. Charts don't draw themselves.
         </div>
       )}

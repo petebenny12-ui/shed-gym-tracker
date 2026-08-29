@@ -1,51 +1,12 @@
-// Shed Gym v2 Design Tokens
+// Shed Gym v3 Design Tokens
 // ─────────────────────────────────────────────────────────────
 // This is the SINGLE SOURCE OF TRUTH for visual identity.
-// Never hardcode colours anywhere else. Import from here.
-
-export const C = {
-  // Surface
-  bg:       "#0a0a0f",   // app background
-  card:     "#141422",   // default card
-  cardHi:   "#1a1a2e",   // slightly lighter card (nested elements)
-  border:   "#2a2a3e",   // default border
-
-  // Brand + action
-  // RULE: amber is reserved for brand identity, active nav tab, and PRIMARY CTAs.
-  // Never use amber to represent data, users, or categories.
-  amber:    "#d97706",
-  amberDim: "rgba(217,118,6,0.15)",
-
-  // Identity — ROLE-BASED, not person-based
-  // RULE: user = the currently logged-in user (always blue on their own device).
-  //       vs   = the opponent (always teal).
-  // When Howie logs in, he sees himself as blue and Pete as teal.
-  user:     "#3b82f6",
-  vs:       "#14b8a6",
-
-  // Feedback
-  // RULE: warnings, destructive actions, and gap/plateau alerts use warn red.
-  //       Must stay visually distinct from amber so users don't confuse CTAs with warnings.
-  warn:     "#f43f5e",
-  warnDim:  "rgba(244,63,94,0.08)",
-
-  // Text
-  text:     "#f5f5f5",
-  muted:    "#9ca3af",
-  dim:      "#6b7280",
-};
-
-// ─────────────────────────────────────────────────────────────
-// v3 palette — the Instrument session screen
-// ─────────────────────────────────────────────────────────────
-// A single neutral ink ramp plus a small reserved accent set.
+// Never hardcode a colour anywhere else. Import from here.
 //
-// Why a second object rather than new keys on `C`: three of the v3 names
-// (bg, text, muted) collide with v2 keys that hold different values, and
-// `C.muted` in particular is much lighter in v2. Overwriting them would
-// silently restyle every existing screen. So v3 lives in `C3` until every
-// consumer has moved across; at that point `C` is deleted and `C3` takes
-// its name. Same rule applies: never hardcode a hex outside this file.
+// One palette (C3), one font family, one radius. The v2 `C` palette, the
+// Georgia serif and the monospace are gone — three families and heavy
+// uppercase tracking read as costume, not as a tool used in a cold shed.
+
 export const C3 = {
   // Surfaces — darkest to lightest
   bg:        "#0a0a0c",   // app ground
@@ -84,103 +45,140 @@ export const C3 = {
 
   // Moments
   pr:   "#34d399",   // a personal record, and nothing else
-  warn: "#f43f5e",   // destructive and genuine errors only
+  warn: "#f43f5e",   // destructive confirms and genuine errors ONLY.
+  warnFaint: "rgba(244,63,94,0.08)",
 
   // Geometry
   radius: 4,   // everything. no 6, no 8, no 12.
   hair:   1,
 };
 
-export const FONTS = {
-  // RULE: serif for navigation/identity (screen titles, section labels, hero numbers).
-  //       sans for data (weights, reps, durations, anything quantitative).
-  serif: "Georgia, 'Times New Roman', serif",
-  sans:  "-apple-system, BlinkMacSystemFont, system-ui, 'Segoe UI', Roboto, sans-serif",
-  mono:  "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace",
+// Categorical hues for muscle groups. The only place in the app where colour
+// carries a category — amber, warn, pr and the identity pair are all reserved,
+// so these are their own set and are used nowhere else.
+export const MUSCLE = {
+  chest:     "#e0605e",
+  back:      "#4f8ef7",
+  shoulders: "#9a7cf0",
+  biceps:    "#2fb37f",
+  triceps:   "#d08a3a",
+  legs:      "#d96aa0",
+  core:      "#6d74d8",
+  other:     "#6e6e7a",
 };
 
-// Every numeral on the session screen. Without it the wheel columns
-// shimmer as they scroll — this is not optional.
+// The signed-out pages sit on a slow gradient rather than flat ground.
+export const AUTH_GRADIENT =
+  `linear-gradient(160deg, ${C3.bg} 0%, ${C3.raise2} 55%, ${C3.raise} 100%)`;
+
+export const FONTS = {
+  // One family. Tabular numerals give aligned figures without a typewriter.
+  sans: "-apple-system, BlinkMacSystemFont, system-ui, 'Segoe UI', Roboto, sans-serif",
+};
+
+// Every numeral that stacks — wheels, tallies, tables, charts.
 export const TABULAR = { fontVariantNumeric: "tabular-nums" };
 
 // ─────────────────────────────────────────────────────────────
-// v3 type ramp — spread these into style objects.
+// Type ramp — one family, sized and weighted for hierarchy.
 // ─────────────────────────────────────────────────────────────
+// Uppercase survives in exactly two places: the mission name in the header,
+// and small caps labels (CRUX / FOUNDATION / ARMOUR / KG / REPS). Nowhere else
+// — no uppercase buttons, no uppercase nav, no uppercase section headings.
+// Letter-spacing never exceeds 1.2px, and only on those small caps labels.
 export const TYPE = {
-  // Screen title — "I · THE ANVIL"
-  screenTitle: {
-    fontFamily: FONTS.serif,
+  // "THE ANVIL" in the session header
+  missionName: {
+    fontFamily: FONTS.sans,
     fontSize: 15,
-    letterSpacing: 2.4,
+    fontWeight: 600,
+    letterSpacing: 1.2,
     textTransform: "uppercase",
     color: C3.text,
   },
-  // Exercise name in the open block
-  exerciseOpen: {
-    fontFamily: FONTS.serif,
+  // Charts, Crew, Settings — sentence case
+  screenTitle: {
+    fontFamily: FONTS.sans,
     fontSize: 20,
-    letterSpacing: 0.2,
+    fontWeight: 600,
+    letterSpacing: 0,
     color: C3.text,
   },
-  // Exercise name in a collapsed row
+  exerciseOpen: {
+    fontFamily: FONTS.sans,
+    fontSize: 19,
+    fontWeight: 600,
+    letterSpacing: 0,
+    color: C3.text,
+  },
   exerciseCollapsed: {
-    fontFamily: FONTS.serif,
+    fontFamily: FONTS.sans,
     fontSize: 16,
+    fontWeight: 500,
     color: C3.strong,
   },
-  // Collapsed armour-tier row — one step quieter
   exerciseCollapsedArmour: {
-    fontFamily: FONTS.serif,
-    fontSize: 15,
+    fontFamily: FONTS.sans,
+    fontSize: 16,
+    fontWeight: 500,
     color: C3.armour,
   },
-  // FOUNDATION / ARMOUR / KG / REPS
+  // CRUX / FOUNDATION / ARMOUR / KG / REPS
   sectionLabel: {
-    fontFamily: FONTS.mono,
-    fontSize: 9.5,
-    letterSpacing: 2.4,
+    fontFamily: FONTS.sans,
+    fontSize: 10,
+    fontWeight: 600,
+    letterSpacing: 1.2,
     textTransform: "uppercase",
     color: C3.faint,
     ...TABULAR,
   },
-  // Wheel value at the centre — the number you chose
   wheelValue: {
-    fontFamily: FONTS.mono,
+    fontFamily: FONTS.sans,
     fontSize: 20,
-    letterSpacing: -0.3,
+    fontWeight: 500,
+    letterSpacing: -0.2,
     color: C3.text,
     ...TABULAR,
   },
-  // Wheel value one step out
   wheelNear: {
-    fontFamily: FONTS.mono,
+    fontFamily: FONTS.sans,
     fontSize: 14,
+    fontWeight: 400,
     color: C3.faint,
     ...TABULAR,
   },
-  // Wheel value two steps out and beyond
   wheelFar: {
-    fontFamily: FONTS.mono,
+    fontFamily: FONTS.sans,
     fontSize: 12,
+    fontWeight: 400,
     color: C3.ghost,
     ...TABULAR,
   },
-  // Meta lines, timers, targets
+  // Meta, targets, timers
   meta: {
-    fontFamily: FONTS.mono,
+    fontFamily: FONTS.sans,
     fontSize: 11,
+    fontWeight: 400,
     color: C3.muted,
     ...TABULAR,
   },
-  // Body copy
   body: {
     fontFamily: FONTS.sans,
-    fontSize: 12.5,
+    fontSize: 13,
+    fontWeight: 400,
     color: C3.soft,
+  },
+  // Sentence case. "Crux done", never "CRUX DONE".
+  button: {
+    fontFamily: FONTS.sans,
+    fontSize: 14,
+    fontWeight: 600,
+    letterSpacing: 0.4,
   },
 };
 
-// Icon spec for the session screen — 1.8px stroke, never emoji.
+// Icon spec — 1.8px stroke, never emoji.
 export const ICON = {
   stroke: 1.8,
   nav: 19,
@@ -188,11 +186,13 @@ export const ICON = {
   chevron: 13,
 };
 
+// Radius: 4 for every box. `pill` stays for genuinely circular things —
+// avatars, dots, rings — which are not boxes with rounded corners.
 export const RADIUS = {
-  sm:   4,
-  md:   6,
-  lg:   8,
-  xl:   12,
+  sm:   C3.radius,
+  md:   C3.radius,
+  lg:   C3.radius,
+  xl:   C3.radius,
   pill: 999,
 };
 
@@ -205,21 +205,26 @@ export const SPACE = {
   xxl: 24,
 };
 
-// Inner-top highlight — applied to EVERY card to give subtle depth.
-// Reads as light hitting the top edge of a raised surface.
+// Inner-top highlight — reads as light hitting the top edge of a raised surface.
 export const INNER_HIGHLIGHT = "inset 0 1px 0 rgba(255,255,255,0.04)";
 
-// Standard card style — spread this into any card component.
+// Standard raised surface — spread into any card-like block.
 export const cardBase = {
-  background: C.card,
-  border: `1px solid ${C.border}`,
-  borderRadius: RADIUS.xl,
+  background: C3.raise,
+  border: `${C3.hair}px solid ${C3.line}`,
+  borderRadius: C3.radius,
   boxShadow: INNER_HIGHLIGHT,
+};
+
+// A hairline-separated row, which is what most "cards" should now be.
+export const rowBase = {
+  background: "transparent",
+  borderBottom: `${C3.hair}px solid ${C3.lineFaint}`,
 };
 
 // Screen max-width for mobile phone layout.
 export const PHONE_MAX_WIDTH = 430;
 
-// Role-based colour helper — use this instead of hardcoding user/vs colours.
+// Role-based colour helper — use this instead of hardcoding identity colours.
 // `mine` indicates whether the entity belongs to the currently logged-in user.
-export const identityColor = (mine) => (mine ? C.user : C.vs);
+export const identityColor = (mine) => (mine ? C3.you : C3.crew);

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
+import { C3 } from '../../design';
 import ExercisePicker from './ExercisePicker';
 
 export default function InjurySwap({ exercise, supersetId, onSwapped, onClose }) {
@@ -55,9 +56,9 @@ export default function InjurySwap({ exercise, supersetId, onSwapped, onClose })
     >
       <div
         style={{
-          background: '#12121f',
-          border: '1px solid #2a2a3e',
-          borderRadius: 12,
+          background: C3.raise2,
+          border: `1px solid ${C3.line2}`,
+          borderRadius: C3.radius,
           padding: 16,
           maxWidth: 320,
           width: '90%',
@@ -73,7 +74,7 @@ export default function InjurySwap({ exercise, supersetId, onSwapped, onClose })
         <button
           onClick={() => setShowPicker(true)}
           className="w-full py-3 font-bold text-sm uppercase rounded"
-          style={{ background: '#d97706', color: '#0a0a0f' }}
+          style={{ background: C3.amber, color: C3.bg }}
           disabled={saving}
         >
           {saving ? 'Swapping...' : 'Choose Alternative'}

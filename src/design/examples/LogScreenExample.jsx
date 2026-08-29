@@ -1,16 +1,7 @@
 // EXAMPLE: Log / Calendar screen composition.
 
-import { useState } from "react";
-import {
-  Screen,
-  BottomNav,
-  CalendarHeader,
-  CalendarLegend,
-  CalendarGrid,
-  buildCalendarDays,
-  MonthlySummary,
-  RecentSessions,
-} from "../index";
+import { useState } from 'react';
+import { Screen, BottomNav, CalendarHeader, CalendarLegend, CalendarGrid, buildCalendarDays, MonthlySummary, RecentSessions } from '../index';
 
 // PROPS EXPECTED:
 // {

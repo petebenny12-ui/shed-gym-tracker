@@ -1,17 +1,33 @@
-import { C, CARD_DEPTH } from '../../config/constants';
+import { C3, FONTS, INNER_HIGHLIGHT } from '../../design';
 
 export default function VolumeComparison({ myTotal, theirTotal, myName, theirName }) {
   return (
-    <div className="mt-4 p-4 rounded-lg text-center" style={{ background: C.card, border: `1px solid ${C.border}`, boxShadow: CARD_DEPTH }}>
-      <div className="text-xs uppercase tracking-wider mb-2" style={{ color: C.muted }}>Total Volume (All Time)</div>
-      <div className="flex justify-around">
+    <div style={{ background: C3.raise2, border: `1px solid ${C3.line2}`, borderRadius: C3.radius, padding: 16, boxShadow: INNER_HIGHLIGHT, marginTop: 14 }}>
+      <div
+        style={{
+          fontFamily: FONTS.sans,
+          fontSize: 11,
+          fontWeight: 700,
+          color: C3.amber,
+          letterSpacing: 1.2,
+          textTransform: 'uppercase',
+          marginBottom: 12,
+        }}
+      >
+        Total Volume (all time)
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, textAlign: 'center' }}>
         <div>
-          <div className="text-xl font-bold" style={{ color: C.user }}>{Math.round(myTotal).toLocaleString()}kg</div>
-          <div className="text-xs" style={{ color: C.user }}>{myName}</div>
+          <div style={{ fontFamily: FONTS.sans, color: C3.you, fontSize: 22, fontWeight: 700 }}>
+            {Math.round(myTotal).toLocaleString()}kg
+          </div>
+          <div style={{ color: C3.soft, fontSize: 11, marginTop: 2 }}>You</div>
         </div>
         <div>
-          <div className="text-xl font-bold" style={{ color: C.vs }}>{Math.round(theirTotal).toLocaleString()}kg</div>
-          <div className="text-xs" style={{ color: C.vs }}>{theirName}</div>
+          <div style={{ fontFamily: FONTS.sans, color: C3.crew, fontSize: 22, fontWeight: 700 }}>
+            {Math.round(theirTotal).toLocaleString()}kg
+          </div>
+          <div style={{ color: C3.soft, fontSize: 11, marginTop: 2 }}>{theirName}</div>
         </div>
       </div>
     </div>

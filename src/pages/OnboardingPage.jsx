@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { buildRoutine } from '../lib/routineBuilder';
+import { C3 } from '../design';
 import GoalStep from '../components/onboarding/GoalStep';
 import EquipmentStep from '../components/onboarding/EquipmentStep';
 import ExperienceStep from '../components/onboarding/ExperienceStep';
@@ -73,7 +74,7 @@ export default function OnboardingPage() {
         onClick={handleFinish}
         disabled={saving}
         className="w-full py-4 mt-6 font-bold text-lg uppercase tracking-wider rounded-lg transition-all"
-        style={{ background: '#d97706', color: '#0a0a0f', opacity: saving ? 0.7 : 1 }}
+        style={{ background: C3.amber, color: C3.bg, opacity: saving ? 0.7 : 1 }}
       >
         {saving ? 'Setting up...' : 'LET\'S GO'}
       </button>
@@ -83,13 +84,13 @@ export default function OnboardingPage() {
   return (
     <div
       className="min-h-screen flex flex-col items-center justify-center p-6"
-      style={{ background: 'linear-gradient(160deg, #0a0a0f 0%, #1a1a2e 50%, #0f1923 100%)' }}
+      style={{ background: AUTH_GRADIENT }}
     >
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <h1
             className="text-2xl font-bold text-white mb-2"
-            style={{ fontFamily: "'Georgia', serif", letterSpacing: '0.05em' }}
+            style={{ fontFamily: FONTS.sans, letterSpacing: 1.2 }}
           >
             SET UP YOUR SHED
           </h1>
@@ -99,7 +100,7 @@ export default function OnboardingPage() {
               <div
                 key={i}
                 className="w-8 h-1 rounded"
-                style={{ background: i <= step ? '#d97706' : '#2a2a3e' }}
+                style={{ background: i <= step ? C3.amber : C3.line2 }}
               />
             ))}
           </div>

@@ -1,5 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import { supabase, withTimeout } from '../lib/supabase';
+import { useAuth } from '../context/AuthContext';
+import { useWorkoutData } from '../hooks/useWorkoutData';
+import { daysSinceLastSession, detectPlateaus, plateauSignature } from '../lib/alerts';
+import { C3, PlateauBanner, defaultPlateauSuggestions } from '../design';
 import NavBar from '../components/layout/NavBar';
 import WorkoutView from '../components/workout/WorkoutView';
 import HistoryList from '../components/history/HistoryList';
@@ -11,10 +15,6 @@ import SupplementChecklist from '../components/supplements/SupplementChecklist';
 import InstallPrompt from '../components/layout/InstallPrompt';
 import RoutineInviteBanner from '../components/wizard/RoutineInviteBanner';
 import V2MigrationFlow from '../components/onboarding/V2MigrationFlow';
-import { useAuth } from '../context/AuthContext';
-import { useWorkoutData } from '../hooks/useWorkoutData';
-import { daysSinceLastSession, detectPlateaus, plateauSignature } from '../lib/alerts';
-import { C, PlateauBanner, defaultPlateauSuggestions } from '../design';
 
 export default function MainApp() {
   const { profile, refreshProfile } = useAuth();
@@ -78,7 +78,7 @@ export default function MainApp() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: C.bg }}>
+    <div className="min-h-screen" style={{ background: C3.bg }}>
       {/* Content area — pad top for safe area, pad bottom for tab bar */}
       <div
         style={{

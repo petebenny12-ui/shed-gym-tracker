@@ -1,8 +1,9 @@
 // Bottom tab bar. 5 tabs. Replaces the top nav strip.
 // Respects iPhone home indicator safe area with padding-bottom.
 
-import { Dumbbell, Calendar, TrendingUp, Swords, Settings } from "lucide-react";
-import { C, FONTS } from "../tokens";
+import { Dumbbell, Calendar, TrendingUp, Swords, Settings } from 'lucide-react';
+import { FONTS } from '../tokens';
+import { C3 } from '..';
 
 const TABS = [
   { id: "lift",     label: "Lift",     icon: Dumbbell },
@@ -23,7 +24,7 @@ export function BottomNav({ active, onChange }) {
         background: "rgba(10,10,15,0.92)",
         backdropFilter: "blur(12px)",
         WebkitBackdropFilter: "blur(12px)",
-        borderTop: `1px solid ${C.border}`,
+        borderTop: `1px solid ${C3.line2}`,
         display: "grid",
         gridTemplateColumns: "repeat(5, 1fr)",
         padding: "8px 4px",
@@ -42,7 +43,7 @@ export function BottomNav({ active, onChange }) {
             style={{
               background: "transparent",
               border: "none",
-              color: on ? C.amber : C.muted,
+              color: on ? C3.amber : C3.soft,
               display: "flex",
               flexDirection: "column",
               alignItems: "center",

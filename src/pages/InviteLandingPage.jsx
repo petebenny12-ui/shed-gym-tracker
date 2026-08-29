@@ -4,6 +4,7 @@ import { supabase, withTimeout } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { signUp } from '../lib/auth';
 import { validateDisplayName, sanitizeText } from '../lib/validation';
+import { C3 } from '../design';
 
 export default function InviteLandingPage() {
   const { code } = useParams();
@@ -169,7 +170,7 @@ export default function InviteLandingPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0a0a0f' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: C3.bg }}>
         <div className="text-amber-600 font-bold uppercase tracking-wider animate-pulse">Loading invite...</div>
       </div>
     );
@@ -177,7 +178,7 @@ export default function InviteLandingPage() {
 
   if (error && !invite) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-6" style={{ background: '#0a0a0f' }}>
+      <div className="min-h-screen flex flex-col items-center justify-center p-6" style={{ background: C3.bg }}>
         <div className="text-red-500 text-sm mb-4">{error}</div>
         <Link to="/login" className="text-amber-600 text-sm font-bold uppercase">Go to Sign In</Link>
       </div>
@@ -187,13 +188,13 @@ export default function InviteLandingPage() {
   return (
     <div
       className="min-h-screen flex flex-col items-center justify-center p-6"
-      style={{ background: 'linear-gradient(160deg, #0a0a0f 0%, #1a1a2e 50%, #0f1923 100%)' }}
+      style={{ background: AUTH_GRADIENT }}
     >
       <div className="w-full max-w-xs">
         <div className="text-center mb-8">
           <h1
             className="text-2xl font-bold text-white mb-2"
-            style={{ fontFamily: "'Georgia', serif" }}
+            style={{ fontFamily: FONTS.sans }}
           >
             SHED GYM
           </h1>
@@ -209,7 +210,7 @@ export default function InviteLandingPage() {
             onClick={handleAccept}
             disabled={signUpLoading}
             className="w-full py-4 font-bold text-lg uppercase tracking-wider rounded-lg"
-            style={{ background: '#d97706', color: '#0a0a0f', opacity: signUpLoading ? 0.7 : 1 }}
+            style={{ background: C3.amber, color: C3.bg, opacity: signUpLoading ? 0.7 : 1 }}
           >
             {signUpLoading ? 'Setting up...' : 'Accept & Start Training'}
           </button>
@@ -221,25 +222,25 @@ export default function InviteLandingPage() {
               type="text" value={displayName} onChange={handleDisplayNameChange}
               placeholder="Display Name" required maxLength={30}
               className="w-full p-3 rounded text-white text-sm"
-              style={{ background: '#1a1a2e', border: '1px solid #2a2a3e' }}
+              style={{ background: C3.raise2, border: `1px solid ${C3.line2}` }}
             />
             <input
               type="email" value={email} onChange={(e) => setEmail(e.target.value)}
               placeholder="Email" required
               className="w-full p-3 rounded text-white text-sm"
-              style={{ background: '#1a1a2e', border: '1px solid #2a2a3e' }}
+              style={{ background: C3.raise2, border: `1px solid ${C3.line2}` }}
             />
             <input
               type="password" value={password} onChange={(e) => setPassword(e.target.value)}
               placeholder="Password (min 6 characters)" required
               className="w-full p-3 rounded text-white text-sm"
-              style={{ background: '#1a1a2e', border: '1px solid #2a2a3e' }}
+              style={{ background: C3.raise2, border: `1px solid ${C3.line2}` }}
             />
             {error && <div className="text-red-500 text-xs text-center">{error}</div>}
             <button
               type="submit" disabled={signUpLoading}
               className="w-full py-4 font-bold text-lg uppercase tracking-wider rounded-lg"
-              style={{ background: '#d97706', color: '#0a0a0f', opacity: signUpLoading ? 0.7 : 1 }}
+              style={{ background: C3.amber, color: C3.bg, opacity: signUpLoading ? 0.7 : 1 }}
             >
               {signUpLoading ? 'Creating account...' : 'Sign Up & Join'}
             </button>

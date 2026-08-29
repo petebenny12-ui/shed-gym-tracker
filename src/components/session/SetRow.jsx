@@ -1,7 +1,7 @@
 import { Check } from 'lucide-react';
-import NumberWheel, { WHEEL_H } from './NumberWheel';
 import { C3, FONTS, ICON, TABULAR } from '../../design';
 import { unitLabel } from '../../lib/sessionFormat';
+import NumberWheel, { WHEEL_H } from './NumberWheel';
 
 /**
  * One set: its number, a weight wheel, a reps wheel, and a tick.
@@ -46,7 +46,7 @@ export default function SetRow({
         style={{
           width: GUTTER,
           flexShrink: 0,
-          fontFamily: FONTS.mono,
+          fontFamily: FONTS.sans,
           fontSize: 11,
           color: isNext && !logged ? C3.amber : C3.muted,
           ...TABULAR,
@@ -126,9 +126,9 @@ export default function SetRow({
 /** The KG / REPS heads, on the same grid as the rows above. */
 export function SetColumnHeads({ bodyweight = false, repUnit = 'reps' }) {
   const head = {
-    fontFamily: FONTS.mono,
+    fontFamily: FONTS.sans,
     fontSize: 9.5,
-    letterSpacing: 2.4,
+    letterSpacing: 1.2,
     textTransform: 'uppercase',
     color: C3.faint,
     textAlign: 'center',

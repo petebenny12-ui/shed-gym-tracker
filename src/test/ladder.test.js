@@ -1,14 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  buildLadder,
-  buildLadderForExercise,
-  isBodyweight,
-  isOffLadder,
-  ladderOptsFor,
-  nearest,
-  stepFrom,
-  withExtra,
-} from '../lib/ladder';
+import { buildLadder, buildLadderForExercise, isBodyweight, isOffLadder, ladderOptsFor, nearest, stepFrom, withExtra } from '../lib/ladder';
 
 describe('buildLadder', () => {
   it('steps up from the bar in the given increment', () => {

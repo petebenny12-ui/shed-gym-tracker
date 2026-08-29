@@ -1,7 +1,8 @@
 // Base primitives. Import-only — no internal state except UI toggles.
 // All accept `style` + `className` props so Tailwind/CSS Modules can layer on top.
 
-import { C, FONTS, RADIUS, SPACE, cardBase } from "../tokens";
+import { FONTS, RADIUS, SPACE, cardBase } from '../tokens';
+import { C3 } from '..';
 
 // ─── Screen ──────────────────────────────────────────────────
 // Wraps a full screen. Shows H1 in serif uppercase.
@@ -11,9 +12,9 @@ export function Screen({ title, children, style, className }) {
       className={className}
       style={{
         fontFamily: FONTS.sans,
-        background: C.bg,
+        background: C3.bg,
         minHeight: "100vh",
-        color: C.text,
+        color: C3.text,
         paddingBottom: 80, // leave room for bottom nav
         ...style,
       }}
@@ -28,10 +29,10 @@ export function ScreenTitle({ children }) {
   return (
     <h1
       style={{
-        fontFamily: FONTS.serif,
+        fontFamily: FONTS.sans,
         fontSize: 28,
         fontWeight: 700,
-        color: C.text,
+        color: C3.text,
         letterSpacing: 0.5,
         margin: "8px 20px 18px",
         textTransform: "uppercase",
@@ -62,15 +63,15 @@ export function Card({ children, padding = SPACE.lg, style, className, onClick }
 
 // ─── SectionLabel ────────────────────────────────────────────
 // "TRAINING FREQUENCY" style — small uppercase serif in amber.
-export function SectionLabel({ children, color = C.amber, style }) {
+export function SectionLabel({ children, color = C3.amber, style }) {
   return (
     <div
       style={{
-        fontFamily: FONTS.serif,
+        fontFamily: FONTS.sans,
         fontSize: 11,
         fontWeight: 700,
         color,
-        letterSpacing: 1.6,
+        letterSpacing: 1.2,
         textTransform: "uppercase",
         marginBottom: 12,
         ...style,
@@ -89,19 +90,19 @@ export function SectionLabel({ children, color = C.amber, style }) {
 export function Button({ variant = "primary", onClick, children, style, className, disabled }) {
   const variants = {
     primary: {
-      background: C.amber,
-      color: C.bg,
+      background: C3.amber,
+      color: C3.bg,
       border: "none",
     },
     secondary: {
       background: "transparent",
-      color: C.text,
-      border: `1px solid ${C.border}`,
+      color: C3.text,
+      border: `1px solid ${C3.line2}`,
     },
     destructive: {
       background: "transparent",
-      color: C.warn,
-      border: `1px solid ${C.warn}`,
+      color: C3.warn,
+      border: `1px solid ${C3.warn}`,
     },
   };
 
@@ -131,7 +132,7 @@ export function Button({ variant = "primary", onClick, children, style, classNam
 
 // ─── Chip ────────────────────────────────────────────────────
 // Generic pill. active=true = filled. Color controls the accent.
-export function Chip({ active, onClick, color = C.amber, children, style }) {
+export function Chip({ active, onClick, color = C3.amber, children, style }) {
   return (
     <button
       onClick={onClick}
@@ -140,9 +141,9 @@ export function Chip({ active, onClick, color = C.amber, children, style }) {
         fontSize: 11,
         fontWeight: 600,
         borderRadius: RADIUS.pill,
-        border: `1px solid ${active ? color : C.border}`,
+        border: `1px solid ${active ? color : C3.line2}`,
         background: active ? color : "transparent",
-        color: active ? C.bg : C.text,
+        color: active ? C3.bg : C3.text,
         cursor: onClick ? "pointer" : "default",
         transition: "all 160ms",
         ...style,
@@ -157,7 +158,7 @@ export function Chip({ active, onClick, color = C.amber, children, style }) {
 // Total / Per Side badge on exercise cards.
 // Accepts mode = "total" | "per_side".
 export function ModeChip({ mode, onClick }) {
-  const color = mode === "total" ? C.user : C.amber;
+  const color = mode === "total" ? C3.you : C3.amber;
   return (
     <button
       onClick={onClick}
@@ -187,7 +188,7 @@ export function LegendDot({ color, splitColors, label, style }) {
   const dot = splitColors
     ? {
         background: `linear-gradient(135deg, ${splitColors[0]}99 0%, ${splitColors[0]}99 50%, ${splitColors[1]}99 50%, ${splitColors[1]}99 100%)`,
-        border: `1px solid ${C.border}`,
+        border: `1px solid ${C3.line2}`,
       }
     : {
         background: `${color}99`,
@@ -195,7 +196,7 @@ export function LegendDot({ color, splitColors, label, style }) {
       };
 
   return (
-    <div style={{ display: "flex", gap: 6, alignItems: "center", fontSize: 11, color: C.muted, ...style }}>
+    <div style={{ display: "flex", gap: 6, alignItems: "center", fontSize: 11, color: C3.soft, ...style }}>
       <div style={{ width: 10, height: 10, borderRadius: 3, ...dot }} />
       <span>{label}</span>
     </div>
@@ -204,7 +205,7 @@ export function LegendDot({ color, splitColors, label, style }) {
 
 // ─── Toggle ──────────────────────────────────────────────────
 // iOS-style on/off toggle.
-export function Toggle({ value, onChange, color = C.amber }) {
+export function Toggle({ value, onChange, color = C3.amber }) {
   return (
     <button
       onClick={() => onChange(!value)}
@@ -212,7 +213,7 @@ export function Toggle({ value, onChange, color = C.amber }) {
         width: 40,
         height: 22,
         borderRadius: RADIUS.pill,
-        background: value ? color : C.border,
+        background: value ? color : C3.line2,
         border: "none",
         position: "relative",
         cursor: "pointer",
@@ -237,15 +238,15 @@ export function Toggle({ value, onChange, color = C.amber }) {
 
 // ─── Stat ────────────────────────────────────────────────────
 // Big number + label + optional sub. Used in monthly summary, VS score cards, etc.
-export function Stat({ value, label, sub, color = C.amber, align = "center" }) {
+export function Stat({ value, label, sub, color = C3.amber, align = "center" }) {
   return (
     <div style={{ textAlign: align }}>
-      <div style={{ fontFamily: FONTS.serif, color, fontSize: 28, fontWeight: 700, lineHeight: 1 }}>
+      <div style={{ fontFamily: FONTS.sans, color, fontSize: 28, fontWeight: 700, lineHeight: 1 }}>
         {value}
       </div>
       <div
         style={{
-          color: C.muted,
+          color: C3.soft,
           fontSize: 11,
           fontWeight: 600,
           letterSpacing: 0.6,
@@ -255,7 +256,7 @@ export function Stat({ value, label, sub, color = C.amber, align = "center" }) {
       >
         {label}
       </div>
-      {sub && <div style={{ color: C.dim, fontSize: 10, marginTop: 2 }}>{sub}</div>}
+      {sub && <div style={{ color: C3.muted, fontSize: 10, marginTop: 2 }}>{sub}</div>}
     </div>
   );
 }
@@ -264,7 +265,7 @@ export function Stat({ value, label, sub, color = C.amber, align = "center" }) {
 // [Total | Per Side] style split button used in settings.
 export function SegmentedToggle({ options, value, onChange }) {
   return (
-    <div style={{ display: "flex", background: C.cardHi, borderRadius: RADIUS.md, padding: 2 }}>
+    <div style={{ display: "flex", background: C3.raise2, borderRadius: RADIUS.md, padding: 2 }}>
       {options.map((opt) => {
         const active = value === opt.value;
         return (
@@ -273,8 +274,8 @@ export function SegmentedToggle({ options, value, onChange }) {
             onClick={() => onChange(opt.value)}
             style={{
               padding: "6px 12px",
-              background: active ? opt.color || C.amber : "transparent",
-              color: active ? C.bg : C.muted,
+              background: active ? opt.color || C3.amber : "transparent",
+              color: active ? C3.bg : C3.soft,
               border: "none",
               borderRadius: RADIUS.sm,
               fontSize: 11,

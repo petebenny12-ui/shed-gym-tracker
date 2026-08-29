@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
+import { C3 } from '../../design';
 
 export default function ExportSection({ onStatus }) {
   const { user, profile } = useAuth();
@@ -55,20 +56,20 @@ export default function ExportSection({ onStatus }) {
   };
 
   return (
-    <div className="p-3 rounded-lg" style={{ background: '#12121f', border: '1px solid #2a2a3e' }}>
+    <div className="p-3 rounded-lg" style={{ background: C3.raise2, border: `1px solid ${C3.line2}` }}>
       <div className="text-gray-400 text-xs uppercase tracking-wider mb-2">Export</div>
       <div className="flex gap-2">
         <button
           onClick={handleDownload}
           className="flex-1 py-2 font-bold text-sm uppercase rounded"
-          style={{ background: '#d97706', color: '#0a0a0f' }}
+          style={{ background: C3.amber, color: C3.bg }}
         >
           Download JSON
         </button>
         <button
           onClick={handleCopy}
           className="flex-1 py-2 font-bold text-sm uppercase rounded"
-          style={{ background: '#1a1a2e', color: '#d97706', border: '1px solid #d97706' }}
+          style={{ background: C3.raise2, color: C3.amber, border: `1px solid ${C3.amber}` }}
         >
           Copy to Clipboard
         </button>

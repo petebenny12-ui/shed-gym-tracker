@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { C3 } from '../../design';
 
 const DISMISS_KEY = 'pwa-install-dismissed';
 const RESHOW_DAYS = 7;
@@ -88,7 +89,7 @@ export default function InstallPrompt() {
   return (
     <div
       className="mx-3 mt-2 p-3 rounded-lg"
-      style={{ background: '#12121f', border: '1px solid #2a2a3e' }}
+      style={{ background: C3.raise2, border: `1px solid ${C3.line2}` }}
     >
       {iosBrowser ? (
         <IOSInstallGuide browser={iosBrowser} onDismiss={handleDismiss} />
@@ -102,14 +103,14 @@ export default function InstallPrompt() {
             <button
               onClick={handleInstall}
               className="flex-1 py-1.5 text-xs font-bold uppercase rounded"
-              style={{ background: '#d97706', color: '#0a0a0f' }}
+              style={{ background: C3.amber, color: C3.bg }}
             >
               Install
             </button>
             <button
               onClick={handleDismiss}
               className="flex-1 py-1.5 text-xs font-bold uppercase rounded"
-              style={{ background: '#1a1a2e', color: '#9ca3af', border: '1px solid #2a2a3e' }}
+              style={{ background: C3.raise2, color: C3.soft, border: `1px solid ${C3.line2}` }}
             >
               Dismiss
             </button>
@@ -140,7 +141,7 @@ function IOSInstallGuide({ browser, onDismiss }) {
           <div>
             On iOS, apps can only be installed from Safari:
           </div>
-          <div className="pl-2 space-y-1" style={{ borderLeft: '2px solid #2a2a3e' }}>
+          <div className="pl-2 space-y-1" style={{ borderLeft: `2px solid ${C3.line2}` }}>
             <div><span className="text-white">1.</span> Open this page in <span className="text-white font-bold">Safari</span></div>
             <div><span className="text-white">2.</span> Tap{' '}
               <span className="inline-flex items-center">
@@ -155,7 +156,7 @@ function IOSInstallGuide({ browser, onDismiss }) {
       <button
         onClick={onDismiss}
         className="w-full py-1.5 text-xs font-bold uppercase rounded"
-        style={{ background: '#1a1a2e', color: '#9ca3af', border: '1px solid #2a2a3e' }}
+        style={{ background: C3.raise2, color: C3.soft, border: `1px solid ${C3.line2}` }}
       >
         Got it
       </button>
@@ -166,7 +167,7 @@ function IOSInstallGuide({ browser, onDismiss }) {
 // Minimal iOS share icon (square with up arrow)
 function ShareIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="inline-block mx-0.5" style={{ marginBottom: '-1px' }}>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C3.amber} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="inline-block mx-0.5" style={{ marginBottom: '-1px' }}>
       <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8" />
       <polyline points="16 6 12 2 8 6" />
       <line x1="12" y1="2" x2="12" y2="15" />

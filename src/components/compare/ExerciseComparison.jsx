@@ -1,4 +1,4 @@
-import { C, CARD_DEPTH } from '../../config/constants';
+import { C3, FONTS, INNER_HIGHLIGHT } from '../../design';
 
 export default function ExerciseComparison({ exerciseName, myBest, theirBest, myName, theirName }) {
   const myW = myBest?.weight || 0;
@@ -6,24 +6,78 @@ export default function ExerciseComparison({ exerciseName, myBest, theirBest, my
   const iWin = myW > theirW;
   const theyWin = theirW > myW;
 
+  const myText = myBest ? `${myBest.weight}kg×${myBest.reps}` : '\u2014';
+  const theirText = theirBest ? `${theirBest.weight}kg×${theirBest.reps}` : '\u2014';
+
   return (
-    <div className="p-3 rounded-lg" style={{ background: C.card, border: `1px solid ${C.border}`, boxShadow: CARD_DEPTH }}>
-      <div className="text-xs font-bold mb-2" style={{ color: C.text }}>{exerciseName}</div>
-      <div className="flex justify-between items-center">
-        <div className="text-center flex-1">
-          <div className="text-lg font-bold" style={{ color: iWin ? C.user : C.muted }}>
-            {myBest ? `${myBest.weight}kg` : '\u2014'}
+    <div style={{ background: C3.raise2, border: `1px solid ${C3.line2}`, borderRadius: C3.radius, padding: 14, boxShadow: INNER_HIGHLIGHT }}>
+      <div style={{ color: C3.text, fontSize: 13, fontWeight: 600, marginBottom: 8 }}>
+        {exerciseName}
+      </div>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr auto 1fr',
+          gap: 10,
+          alignItems: 'center',
+        }}
+      >
+        <div style={{ textAlign: 'center' }}>
+          <div
+            style={{
+              color: iWin ? C3.you : C3.soft,
+              fontSize: 18,
+              fontWeight: 700,
+              fontFamily: FONTS.sans,
+            }}
+          >
+            {myText}
           </div>
-          <div className="text-xs" style={{ color: C.dim }}>{myBest ? `\u00D7 ${myBest.reps}` : ''}</div>
-          <div className="text-xs mt-0.5" style={{ color: C.user }}>{myName}</div>
+          <div
+            style={{
+              color: C3.muted,
+              fontSize: 9,
+              textTransform: 'uppercase',
+              letterSpacing: 1,
+              marginTop: 2,
+            }}
+          >
+            You
+          </div>
         </div>
-        <div className="text-lg font-bold px-3" style={{ color: C.amber }}>vs</div>
-        <div className="text-center flex-1">
-          <div className="text-lg font-bold" style={{ color: theyWin ? C.vs : C.muted }}>
-            {theirBest ? `${theirBest.weight}kg` : '\u2014'}
+        <div
+          style={{
+            fontFamily: FONTS.sans,
+            color: C3.amber,
+            fontSize: 14,
+            fontWeight: 700,
+            letterSpacing: 1.2,
+          }}
+        >
+          VS
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <div
+            style={{
+              color: theyWin ? C3.crew : C3.soft,
+              fontSize: 18,
+              fontWeight: 700,
+              fontFamily: FONTS.sans,
+            }}
+          >
+            {theirText}
           </div>
-          <div className="text-xs" style={{ color: C.dim }}>{theirBest ? `\u00D7 ${theirBest.reps}` : ''}</div>
-          <div className="text-xs mt-0.5" style={{ color: C.vs }}>{theirName}</div>
+          <div
+            style={{
+              color: C3.muted,
+              fontSize: 9,
+              textTransform: 'uppercase',
+              letterSpacing: 1,
+              marginTop: 2,
+            }}
+          >
+            {theirName}
+          </div>
         </div>
       </div>
     </div>

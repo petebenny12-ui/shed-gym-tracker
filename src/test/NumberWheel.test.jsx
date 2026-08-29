@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { useState } from 'react';
-import NumberWheel, { ITEM_H } from '../components/session/NumberWheel';
 import { buildLadder } from '../lib/ladder';
+import NumberWheel, { ITEM_H } from '../components/session/NumberWheel';
 
 const ladder = buildLadder({ increment: 2.5, min: 20, max: 100 });
 

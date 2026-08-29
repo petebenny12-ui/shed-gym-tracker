@@ -1,14 +1,14 @@
 import { useMemo } from 'react';
-import { C, CARD_DEPTH, SERIF } from '../../config/constants';
+import { C3, FONTS, INNER_HIGHLIGHT } from '../../design';
 
 const MUSCLE_COLORS = {
-  chest: '#ef4444',
-  back: '#3b82f6',
-  shoulders: '#8b5cf6',
-  biceps: '#10b981',
-  triceps: '#f59e0b',
-  legs: '#ec4899',
-  core: '#6366f1',
+  chest: C3.warn,
+  back: C3.you,
+  shoulders: MUSCLE.shoulders,
+  biceps: MUSCLE.biceps,
+  triceps: C3.amber,
+  legs: MUSCLE.legs,
+  core: MUSCLE.core,
 };
 
 export default function TrainingCalendar({ sessions }) {
@@ -73,13 +73,13 @@ export default function TrainingCalendar({ sessions }) {
   }, [sessions]);
 
   return (
-    <div className="mb-4 p-3 rounded-lg" style={{ background: C.card, border: `1px solid ${C.border}`, boxShadow: CARD_DEPTH }}>
-      <h3 className="text-xs font-bold uppercase mb-3" style={{ fontFamily: SERIF, color: C.amber }}>Training Split</h3>
+    <div className="mb-4 p-3 rounded-lg" style={{ background: C3.raise2, border: `1px solid ${C3.line2}`, boxShadow: INNER_HIGHLIGHT }}>
+      <h3 className="text-xs font-bold uppercase mb-3" style={{ fontFamily: FONTS.sans, color: C3.amber }}>Training Split</h3>
 
       <div className="space-y-2">
         {weekData.map((week, i) => (
           <div key={i} className="flex items-center gap-2">
-            <span className="text-xs w-16 shrink-0" style={{ color: C.dim }}>{week.label}</span>
+            <span className="text-xs w-16 shrink-0" style={{ color: C3.muted }}>{week.label}</span>
             <div className="flex gap-1 flex-wrap flex-1">
               {week.muscles.length > 0 ? (
                 week.muscles.map((m) => (
@@ -92,18 +92,18 @@ export default function TrainingCalendar({ sessions }) {
                   </span>
                 ))
               ) : (
-                <span className="text-xs" style={{ color: C.dim }}>rest week</span>
+                <span className="text-xs" style={{ color: C3.muted }}>rest week</span>
               )}
             </div>
-            <span className="text-xs" style={{ color: C.dim }}>{week.sessionCount}x</span>
+            <span className="text-xs" style={{ color: C3.muted }}>{week.sessionCount}x</span>
           </div>
         ))}
       </div>
 
       {gaps.length > 0 && (
-        <div className="mt-3 p-2 rounded text-xs" style={{ background: 'rgba(244,63,94,0.08)', border: `1px solid ${C.warn}` }}>
-          <span className="font-bold" style={{ color: C.warn }}>Gap alert:</span>
-          <span className="ml-1" style={{ color: C.muted }}>
+        <div className="mt-3 p-2 rounded text-xs" style={{ background: 'rgba(244,63,94,0.08)', border: `1px solid ${C3.warn}` }}>
+          <span className="font-bold" style={{ color: C3.warn }}>Gap alert:</span>
+          <span className="ml-1" style={{ color: C3.soft }}>
             No {gaps.join(', ')} in 2 weeks
           </span>
         </div>

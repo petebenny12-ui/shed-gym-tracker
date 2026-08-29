@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
-import { C, CARD_DEPTH } from '../../config/constants';
+import { C3, FONTS, INNER_HIGHLIGHT } from '../../design';
 
 export default function PRFeed({ partnerId, partnerName }) {
   const { user } = useAuth();
@@ -10,7 +10,6 @@ export default function PRFeed({ partnerId, partnerName }) {
   useEffect(() => {
     if (!partnerId || !user) return;
 
-    // Fetch PRs from both users, merge and sort by date
     Promise.all([
       supabase
         .from('personal_records')
@@ -35,25 +34,49 @@ export default function PRFeed({ partnerId, partnerName }) {
   if (prs.length === 0) return null;
 
   return (
-    <div className="mt-4 p-3 rounded-lg" style={{ background: C.card, border: `1px solid ${C.border}`, boxShadow: CARD_DEPTH }}>
-      <div className="text-xs uppercase tracking-wider mb-2" style={{ color: C.muted }}>
+    <div style={{ background: C3.raise2, border: `1px solid ${C3.line2}`, borderRadius: C3.radius, padding: 16, boxShadow: INNER_HIGHLIGHT, marginTop: 14 }}>
+      <div
+        style={{
+          fontFamily: FONTS.sans,
+          fontSize: 11,
+          fontWeight: 700,
+          color: C3.amber,
+          letterSpacing: 1.2,
+          textTransform: 'uppercase',
+          marginBottom: 12,
+        }}
+      >
         Recent PRs
       </div>
-      <div className="space-y-2">
+      <div style={{ display: 'grid', gap: 8 }}>
         {prs.map((pr, i) => {
           const isMe = pr.user_id === user?.id;
-          const dotColor = isMe ? C.user : C.vs;
-          const valueColor = isMe ? C.user : C.vs;
           return (
-            <div key={i} className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: dotColor }} />
-              <span className="text-xs font-bold flex-1" style={{ color: C.text }}>{pr.exercises?.name}</span>
-              <span className="text-xs font-bold" style={{ color: valueColor }}>
-                {pr.weight_kg}kg &times; {pr.reps}
-              </span>
-              <span className="text-xs" style={{ color: C.dim }}>
-                {new Date(pr.achieved_at).toLocaleDateString()}
-              </span>
+            <div
+              key={i}
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'auto 1fr auto auto',
+                gap: 10,
+                alignItems: 'center',
+                padding: '6px 0',
+              }}
+            >
+              <div
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: 2,
+                  background: isMe ? C3.you : C3.crew,
+                }}
+              />
+              <div style={{ color: C3.text, fontSize: 13 }}>{pr.exercises?.name}</div>
+              <div style={{ color: isMe ? C3.you : C3.crew, fontSize: 13, fontWeight: 600 }}>
+                {pr.weight_kg}kg × {pr.reps}
+              </div>
+              <div style={{ color: C3.muted, fontSize: 10 }}>
+                {new Date(pr.achieved_at).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+              </div>
             </div>
           );
         })}

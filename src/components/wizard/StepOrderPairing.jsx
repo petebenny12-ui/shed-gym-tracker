@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { C3 } from '../../design';
 
 const LABELS = ['A','B','C','D','E','F','G','H','I','J'];
 
@@ -48,7 +49,7 @@ export default function StepOrderPairing({ dayNames, dayPairings, onChange, supe
   return (
     <div>
       <h3 className="text-white text-lg font-bold uppercase tracking-wider mb-1"
-        style={{ fontFamily: "'Georgia', serif" }}>
+        style={{ fontFamily: FONTS.sans }}>
         {supersetting ? 'Order & Pair' : 'Exercise Order'}
       </h3>
       {supersetting && (
@@ -70,9 +71,9 @@ export default function StepOrderPairing({ dayNames, dayPairings, onChange, supe
             onClick={() => { setActiveDay(i); setSwapSource(null); }}
             className="px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded whitespace-nowrap"
             style={{
-              background: i === activeDay ? '#d97706' : '#12121f',
-              color: i === activeDay ? '#0a0a0f' : '#888',
-              border: `1px solid ${i === activeDay ? '#d97706' : '#2a2a3e'}`,
+              background: i === activeDay ? C3.amber : C3.raise2,
+              color: i === activeDay ? C3.bg : '#888',
+              border: `1px solid ${i === activeDay ? C3.amber : C3.line2}`,
             }}
           >
             {day.name}
@@ -88,10 +89,10 @@ export default function StepOrderPairing({ dayNames, dayPairings, onChange, supe
 
           return (
             <div key={idx} className="rounded-lg overflow-hidden"
-              style={{ border: '1px solid #2a2a3e' }}>
+              style={{ border: `1px solid ${C3.line2}` }}>
               {/* Header with label + arrows */}
               <div className="px-3 py-1.5 flex items-center justify-between"
-                style={{ background: '#1a1a2e' }}>
+                style={{ background: C3.raise2 }}>
                 <span className="text-amber-600 font-bold text-xs">
                   {supersetting ? `SUPERSET ${pair.label}` : pair.label}
                 </span>
@@ -116,14 +117,14 @@ export default function StepOrderPairing({ dayNames, dayPairings, onChange, supe
               </div>
 
               {/* Exercises */}
-              <div className="p-2" style={{ background: '#0f0f18' }}>
+              <div className="p-2" style={{ background: C3.raise }}>
                 <button
                   onClick={() => handleExerciseTap(idx, 'ex1')}
                   className="w-full text-left px-2 py-1.5 rounded text-sm transition-all mb-1"
                   style={{
                     background: isSwapSrc1 ? 'rgba(217, 119, 6, 0.2)' : 'transparent',
-                    color: isSwapSrc1 ? '#d97706' : '#ccc',
-                    border: isSwapSrc1 ? '1px solid #d97706' : '1px solid transparent',
+                    color: isSwapSrc1 ? C3.amber : '#ccc',
+                    border: isSwapSrc1 ? `1px solid ${C3.amber}` : '1px solid transparent',
                   }}
                 >
                   {pair.ex1?.name || '—'}
@@ -138,8 +139,8 @@ export default function StepOrderPairing({ dayNames, dayPairings, onChange, supe
                       className="w-full text-left px-2 py-1.5 rounded text-sm transition-all"
                       style={{
                         background: isSwapSrc2 ? 'rgba(217, 119, 6, 0.2)' : 'transparent',
-                        color: isSwapSrc2 ? '#d97706' : '#ccc',
-                        border: isSwapSrc2 ? '1px solid #d97706' : '1px solid transparent',
+                        color: isSwapSrc2 ? C3.amber : '#ccc',
+                        border: isSwapSrc2 ? `1px solid ${C3.amber}` : '1px solid transparent',
                       }}
                     >
                       {pair.ex2?.name || '—'}

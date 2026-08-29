@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { C3 } from '../../design';
 
 const MUSCLE_GROUPS = ['chest', 'back', 'shoulders', 'biceps', 'triceps', 'legs', 'core'];
 
@@ -65,7 +66,7 @@ export default function StepPickExercises({ dayNames, dayExercises, onChange, al
   return (
     <div>
       <h3 className="text-white text-lg font-bold uppercase tracking-wider mb-3"
-        style={{ fontFamily: "'Georgia', serif" }}>
+        style={{ fontFamily: FONTS.sans }}>
         Pick Exercises
       </h3>
 
@@ -79,9 +80,9 @@ export default function StepPickExercises({ dayNames, dayExercises, onChange, al
               onClick={() => { setActiveDay(i); setMode(null); }}
               className="px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded whitespace-nowrap transition-all"
               style={{
-                background: i === activeDay ? '#d97706' : '#12121f',
-                color: i === activeDay ? '#0a0a0f' : complete ? '#22c55e' : '#888',
-                border: `1px solid ${i === activeDay ? '#d97706' : '#2a2a3e'}`,
+                background: i === activeDay ? C3.amber : C3.raise2,
+                color: i === activeDay ? C3.bg : complete ? C3.pr : '#888',
+                border: `1px solid ${i === activeDay ? C3.amber : C3.line2}`,
               }}
             >
               {day.name}{complete ? ' \u2713' : ''}
@@ -100,9 +101,9 @@ export default function StepPickExercises({ dayNames, dayExercises, onChange, al
           <button
             onClick={() => setMode('auto')}
             className="flex-1 p-4 rounded-lg text-center transition-all"
-            style={{ background: '#12121f', border: '1px solid #2a2a3e' }}
-            onMouseEnter={e => e.currentTarget.style.borderColor = '#d97706'}
-            onMouseLeave={e => e.currentTarget.style.borderColor = '#2a2a3e'}
+            style={{ background: C3.raise2, border: `1px solid ${C3.line2}` }}
+            onMouseEnter={e => e.currentTarget.style.borderColor = C3.amber}
+            onMouseLeave={e => e.currentTarget.style.borderColor = C3.line2}
           >
             <div className="text-amber-600 font-bold text-sm mb-1">AUTO-PICK</div>
             <div className="text-gray-500 text-xs">Choose body parts, we pick exercises</div>
@@ -110,9 +111,9 @@ export default function StepPickExercises({ dayNames, dayExercises, onChange, al
           <button
             onClick={() => setMode('manual')}
             className="flex-1 p-4 rounded-lg text-center transition-all"
-            style={{ background: '#12121f', border: '1px solid #2a2a3e' }}
-            onMouseEnter={e => e.currentTarget.style.borderColor = '#d97706'}
-            onMouseLeave={e => e.currentTarget.style.borderColor = '#2a2a3e'}
+            style={{ background: C3.raise2, border: `1px solid ${C3.line2}` }}
+            onMouseEnter={e => e.currentTarget.style.borderColor = C3.amber}
+            onMouseLeave={e => e.currentTarget.style.borderColor = C3.line2}
           >
             <div className="text-amber-600 font-bold text-sm mb-1">CHOOSE MY OWN</div>
             <div className="text-gray-500 text-xs">Hand-pick from the full list</div>
@@ -136,9 +137,9 @@ export default function StepPickExercises({ dayNames, dayExercises, onChange, al
                   )}
                   className="px-3 py-1.5 text-xs font-bold uppercase rounded transition-all"
                   style={{
-                    background: selected ? '#d97706' : '#12121f',
-                    color: selected ? '#0a0a0f' : '#888',
-                    border: `1px solid ${selected ? '#d97706' : '#2a2a3e'}`,
+                    background: selected ? C3.amber : C3.raise2,
+                    color: selected ? C3.bg : '#888',
+                    border: `1px solid ${selected ? C3.amber : C3.line2}`,
                   }}
                 >
                   {mg} ({count})
@@ -151,7 +152,7 @@ export default function StepPickExercises({ dayNames, dayExercises, onChange, al
               onClick={handleAutoPick}
               disabled={allExercises.filter(ex => autoMuscles.includes(ex.muscle_group)).length < needed}
               className="w-full py-2 rounded font-bold text-sm uppercase transition-all"
-              style={{ background: '#d97706', color: '#0a0a0f' }}
+              style={{ background: C3.amber, color: C3.bg }}
             >
               GENERATE {needed} EXERCISES
             </button>
@@ -170,7 +171,7 @@ export default function StepPickExercises({ dayNames, dayExercises, onChange, al
           <div className="space-y-1 mb-3">
             {currentExercises.map((ex, i) => (
               <div key={ex.id} className="flex items-center justify-between p-2 rounded"
-                style={{ background: '#12121f', border: '1px solid #2a2a3e' }}>
+                style={{ background: C3.raise2, border: `1px solid ${C3.line2}` }}>
                 <div>
                   <span className="text-white text-sm">{ex.name}</span>
                   <span className="text-gray-500 text-xs ml-2">{ex.muscle_group}</span>
@@ -184,12 +185,12 @@ export default function StepPickExercises({ dayNames, dayExercises, onChange, al
           <div className="flex gap-2">
             <button onClick={handleShuffle}
               className="flex-1 py-2 rounded text-xs font-bold uppercase"
-              style={{ background: '#1a1a2e', color: '#d97706', border: '1px solid #2a2a3e' }}>
+              style={{ background: C3.raise2, color: C3.amber, border: `1px solid ${C3.line2}` }}>
               SHUFFLE ALL
             </button>
             <button onClick={() => { setDayExercises([]); setMode(null); }}
               className="flex-1 py-2 rounded text-xs font-bold uppercase"
-              style={{ background: '#1a1a2e', color: '#888', border: '1px solid #2a2a3e' }}>
+              style={{ background: C3.raise2, color: '#888', border: `1px solid ${C3.line2}` }}>
               CLEAR
             </button>
           </div>
@@ -215,7 +216,7 @@ export default function StepPickExercises({ dayNames, dayExercises, onChange, al
                 {currentExercises.map(ex => (
                   <button key={ex.id} onClick={() => toggleExercise(ex)}
                     className="px-2 py-1 rounded text-xs font-bold"
-                    style={{ background: '#d97706', color: '#0a0a0f' }}>
+                    style={{ background: C3.amber, color: C3.bg }}>
                     {ex.name} &times;
                   </button>
                 ))}
@@ -229,7 +230,7 @@ export default function StepPickExercises({ dayNames, dayExercises, onChange, al
               <button
                 onClick={() => setManualExpanded(manualExpanded === mg ? null : mg)}
                 className="w-full flex items-center justify-between p-2 rounded text-left"
-                style={{ background: '#12121f', border: '1px solid #2a2a3e' }}
+                style={{ background: C3.raise2, border: `1px solid ${C3.line2}` }}
               >
                 <span className="text-amber-600 text-xs font-bold uppercase">{mg}</span>
                 <span className="text-gray-500 text-xs">
@@ -250,7 +251,7 @@ export default function StepPickExercises({ dayNames, dayExercises, onChange, al
                         className="w-full text-left px-2 py-1.5 rounded text-sm flex items-center justify-between transition-all"
                         style={{
                           background: isSelected ? 'rgba(217, 119, 6, 0.15)' : 'transparent',
-                          color: disabled ? '#444' : isSelected ? '#d97706' : '#ccc',
+                          color: disabled ? '#444' : isSelected ? C3.amber : '#ccc',
                           opacity: disabled ? 0.5 : 1,
                         }}
                       >
@@ -270,7 +271,7 @@ export default function StepPickExercises({ dayNames, dayExercises, onChange, al
           {currentExercises.length > 0 && (
             <button onClick={() => { setDayExercises([]); setMode(null); }}
               className="w-full py-2 rounded text-xs font-bold uppercase mt-2"
-              style={{ background: '#1a1a2e', color: '#888', border: '1px solid #2a2a3e' }}>
+              style={{ background: C3.raise2, color: '#888', border: `1px solid ${C3.line2}` }}>
               CLEAR ALL
             </button>
           )}

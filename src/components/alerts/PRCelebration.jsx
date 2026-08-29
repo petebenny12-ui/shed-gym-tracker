@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { C, SERIF } from '../../config/constants';
+import { C3, FONTS } from '../../design';
 
 export default function PRCelebration({ exerciseName, weight, onDismiss }) {
   const [visible, setVisible] = useState(true);
@@ -43,16 +43,16 @@ export default function PRCelebration({ exerciseName, weight, onDismiss }) {
         className="text-center p-8"
         style={{ animation: 'prScale 0.5s ease-out' }}
       >
-        <div className="text-6xl mb-4" style={{ color: C.amber }}>&#127942;</div>
+        <div className="text-6xl mb-4" style={{ color: C3.amber }}>&#127942;</div>
         <div
           className="text-3xl font-bold mb-2"
-          style={{ fontFamily: SERIF, color: C.text }}
+          style={{ fontFamily: FONTS.sans, color: C3.text }}
         >
           NEW PR!
         </div>
-        <div className="text-xl font-bold" style={{ color: C.amber }}>{exerciseName}</div>
-        <div className="text-lg mt-1" style={{ color: C.text }}>{weight}kg</div>
-        <div className="text-xs mt-4" style={{ color: C.dim }}>Tap to dismiss</div>
+        <div className="text-xl font-bold" style={{ color: C3.amber }}>{exerciseName}</div>
+        <div className="text-lg mt-1" style={{ color: C3.text }}>{weight}kg</div>
+        <div className="text-xs mt-4" style={{ color: C3.muted }}>Tap to dismiss</div>
       </div>
     </div>
   );

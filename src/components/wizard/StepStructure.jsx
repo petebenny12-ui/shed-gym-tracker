@@ -1,10 +1,11 @@
+import { C3 } from "../../design";
 export default function StepStructure({ structure, onChange }) {
   const update = (key, val) => onChange({ ...structure, [key]: val });
 
   return (
     <div className="space-y-6">
       <h3 className="text-white text-lg font-bold uppercase tracking-wider"
-        style={{ fontFamily: "'Georgia', serif" }}>
+        style={{ fontFamily: FONTS.sans }}>
         Routine Structure
       </h3>
 
@@ -44,7 +45,7 @@ export default function StepStructure({ structure, onChange }) {
 
       {/* Supersetting toggle */}
       <div className="flex items-center justify-between p-3 rounded-lg"
-        style={{ background: '#12121f', border: '1px solid #2a2a3e' }}>
+        style={{ background: C3.raise2, border: `1px solid ${C3.line2}` }}>
         <div>
           <div className="text-white text-sm font-bold">Supersets</div>
           <div className="text-gray-500 text-xs">Pair exercises together</div>
@@ -52,7 +53,7 @@ export default function StepStructure({ structure, onChange }) {
         <button
           onClick={() => update('supersetting', !structure.supersetting)}
           className="w-12 h-6 rounded-full transition-all relative"
-          style={{ background: structure.supersetting ? '#d97706' : '#2a2a3e' }}
+          style={{ background: structure.supersetting ? C3.amber : C3.line2 }}
         >
           <div
             className="w-5 h-5 rounded-full bg-white absolute top-0.5 transition-all"
@@ -73,9 +74,9 @@ export default function StepStructure({ structure, onChange }) {
               onClick={() => update('setsPerExercise', n)}
               className="flex-1 py-2 rounded text-sm font-bold transition-all"
               style={{
-                background: structure.setsPerExercise === n ? '#d97706' : '#12121f',
-                color: structure.setsPerExercise === n ? '#0a0a0f' : '#888',
-                border: `1px solid ${structure.setsPerExercise === n ? '#d97706' : '#2a2a3e'}`,
+                background: structure.setsPerExercise === n ? C3.amber : C3.raise2,
+                color: structure.setsPerExercise === n ? C3.bg : '#888',
+                border: `1px solid ${structure.setsPerExercise === n ? C3.amber : C3.line2}`,
               }}
             >
               {n}
@@ -85,7 +86,7 @@ export default function StepStructure({ structure, onChange }) {
       </div>
 
       {/* Summary */}
-      <div className="p-3 rounded-lg text-center" style={{ background: '#1a1a2e', border: '1px solid #2a2a3e' }}>
+      <div className="p-3 rounded-lg text-center" style={{ background: C3.raise2, border: `1px solid ${C3.line2}` }}>
         <span className="text-gray-400 text-xs">
           {structure.numDays} days &times; {structure.exercisesPerDay} exercises
           {structure.supersetting ? ` = ${Math.ceil(structure.exercisesPerDay / 2)} supersets` : ''} &times; {structure.setsPerExercise} sets

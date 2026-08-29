@@ -2,8 +2,8 @@
 // Reference implementation showing how patterns fit together with real data.
 // Caller passes Supabase data; the design system handles rendering.
 
-import { useState } from "react";
-import {
+import { useState } from 'react';
+import { import { C3 } from '..';
   Screen,
   BottomNav,
   PlateauBanner,
@@ -83,10 +83,10 @@ function LandingView({ plateaus, programDays, onStartDay }) {
 
       <h2
         style={{
-          fontFamily: "Georgia, serif",
+          fontFamily: FONTS.sans,
           fontSize: 22,
           fontWeight: 700,
-          color: C.text,
+          color: C3.text,
           textTransform: "uppercase",
           margin: "8px 0 14px",
           letterSpacing: 0.8,
@@ -119,7 +119,7 @@ function ActiveSessionView({ session, onBack, onSetChange, onAddSet, onToggleMod
         style={{
           background: "transparent",
           border: "none",
-          color: C.muted,
+          color: C3.soft,
           fontSize: 13,
           marginBottom: 8,
           cursor: "pointer",
@@ -128,7 +128,7 @@ function ActiveSessionView({ session, onBack, onSetChange, onAddSet, onToggleMod
         ← Back
       </button>
 
-      <div style={{ color: C.muted, fontSize: 12, marginBottom: 14 }}>
+      <div style={{ color: C3.soft, fontSize: 12, marginBottom: 14 }}>
         Session: {session.startTime} · {session.dayName}
       </div>
 

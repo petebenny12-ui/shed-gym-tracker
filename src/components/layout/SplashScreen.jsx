@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { C3 } from '../../design';
 
 const SESSION_TIMEOUT_MS = 120 * 60 * 1000;
 const FLAG_KEY = 'splash-shown';
@@ -95,7 +96,7 @@ export default function SplashScreen() {
         position: 'fixed',
         inset: 0,
         zIndex: 9999,
-        background: '#0a0a0f',
+        background: C3.bg,
         pointerEvents: phase === 'fading' ? 'none' : 'auto',
       }}
     >
@@ -114,7 +115,7 @@ export default function SplashScreen() {
       <div
         style={{
           ...layerStyle,
-          background: 'radial-gradient(ellipse at center, transparent 30%, #0a0a0f 90%)',
+          background: `radial-gradient(ellipse at center, transparent 30%, ${C3.bg} 90%)`,
         }}
       />
       <div
@@ -129,10 +130,10 @@ export default function SplashScreen() {
       >
         <h1
           style={{
-            fontFamily: 'Georgia, serif',
+            fontFamily: FONTS.sans,
             color: '#fff',
             fontSize: 'clamp(2.5rem, 10vw, 5rem)',
-            letterSpacing: '0.15em',
+            letterSpacing: 1.2,
             margin: 0,
             textShadow: '0 2px 20px rgba(0,0,0,0.8)',
             fontWeight: 'normal',

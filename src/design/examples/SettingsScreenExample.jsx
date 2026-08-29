@@ -1,6 +1,7 @@
 // EXAMPLE: Settings screen composition.
 
 import {
+import { C3 } from "..";
   Screen,
   BottomNav,
   Card,
@@ -52,7 +53,7 @@ export function SettingsScreenExample({
           {/* Workout Builder — action hierarchy: Edit = primary (amber), Rebuild = destructive (warn) */}
           <Card padding={SPACE.lg} style={{ marginBottom: 14 }}>
             <SectionLabel>Workout Builder</SectionLabel>
-            <div style={{ color: C.text, fontSize: 13, marginBottom: 12 }}>
+            <div style={{ color: C3.text, fontSize: 13, marginBottom: 12 }}>
               {programSummary}
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
@@ -117,7 +118,7 @@ export function SettingsScreenExample({
               style={{
                 background: "transparent",
                 border: "none",
-                color: C.dim,
+                color: C3.muted,
                 fontSize: 12,
                 letterSpacing: 1.2,
                 textTransform: "uppercase",

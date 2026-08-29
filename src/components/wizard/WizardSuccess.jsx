@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase, withTimeout } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
+import { C3 } from '../../design';
 
 export default function WizardSuccess({ onClose, editDayOnly, routineSnapshot }) {
   const { user } = useAuth();
@@ -53,11 +54,11 @@ export default function WizardSuccess({ onClose, editDayOnly, routineSnapshot })
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6"
-      style={{ background: '#0a0a0f' }}>
+      style={{ background: C3.bg }}>
       <div className="text-center">
-        <div className="text-6xl mb-4" style={{ color: '#22c55e' }}>&#10003;</div>
+        <div className="text-6xl mb-4" style={{ color: C3.pr }}>&#10003;</div>
         <h2 className="text-white text-xl font-bold uppercase tracking-wider mb-2"
-          style={{ fontFamily: "'Georgia', serif" }}>
+          style={{ fontFamily: FONTS.sans }}>
           {editDayOnly ? 'Day Updated' : 'Routine Saved'}
         </h2>
         <p className="text-gray-400 text-sm mb-6">
@@ -71,7 +72,7 @@ export default function WizardSuccess({ onClose, editDayOnly, routineSnapshot })
             onClick={handleSendToPartner}
             disabled={sending}
             className="w-full py-3 mb-3 font-bold text-sm uppercase rounded-lg transition-all"
-            style={{ background: '#1a1a2e', color: '#d97706', border: '1px solid #2a2a3e' }}
+            style={{ background: C3.raise2, color: C3.amber, border: `1px solid ${C3.line2}` }}
           >
             {sending ? 'SENDING...' : `SEND TO ${partner.name.toUpperCase()}`}
           </button>
@@ -86,7 +87,7 @@ export default function WizardSuccess({ onClose, editDayOnly, routineSnapshot })
         <button
           onClick={onClose}
           className="w-full py-3 font-bold text-lg uppercase rounded-lg"
-          style={{ background: '#d97706', color: '#0a0a0f', letterSpacing: '0.1em' }}
+          style={{ background: C3.amber, color: C3.bg, letterSpacing: 1.2 }}
         >
           DONE
         </button>

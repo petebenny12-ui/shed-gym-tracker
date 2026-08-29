@@ -4,7 +4,7 @@ export default function RefreshSuggestion({ exerciseName, onDismiss }) {
   return (
     <div
       className="mx-3 mb-2 p-3 rounded-lg"
-      style={{ background: '#12121f', border: '1px solid #2a2a3e' }}
+      style={{ background: C3.raise2, border: `1px solid ${C3.line2}` }}
     >
       <div className="flex justify-between items-start">
         <div>

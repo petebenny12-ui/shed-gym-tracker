@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { C3 } from '../../design';
 
 export default function ImportSection({ onStatus }) {
   const [importText, setImportText] = useState('');
@@ -26,12 +27,12 @@ export default function ImportSection({ onStatus }) {
   };
 
   return (
-    <div className="p-3 rounded-lg" style={{ background: '#12121f', border: '1px solid #2a2a3e' }}>
+    <div className="p-3 rounded-lg" style={{ background: C3.raise2, border: `1px solid ${C3.line2}` }}>
       <div className="text-gray-400 text-xs uppercase tracking-wider mb-2">Import</div>
       <button
         onClick={() => fileInputRef.current?.click()}
         className="w-full py-2 font-bold text-sm uppercase rounded mb-2"
-        style={{ background: '#1a1a2e', color: '#d97706', border: '1px solid #2a2a3e' }}
+        style={{ background: C3.raise2, color: C3.amber, border: `1px solid ${C3.line2}` }}
       >
         Upload JSON File
       </button>
@@ -41,15 +42,15 @@ export default function ImportSection({ onStatus }) {
         value={importText}
         onChange={(e) => setImportText(e.target.value)}
         className="w-full p-2 rounded text-white text-xs"
-        style={{ background: '#1a1a2e', border: '1px solid #2a2a3e', minHeight: 80, resize: 'vertical' }}
+        style={{ background: C3.raise2, border: `1px solid ${C3.line2}`, minHeight: 80, resize: 'vertical' }}
         placeholder="Paste exported JSON here..."
       />
       <button
         onClick={() => { if (importText.trim()) processImport(importText); }}
         className="w-full py-2 font-bold text-sm uppercase rounded mt-2"
         style={{
-          background: importText.trim() ? '#d97706' : '#1a1a2e',
-          color: importText.trim() ? '#0a0a0f' : '#555',
+          background: importText.trim() ? C3.amber : C3.raise2,
+          color: importText.trim() ? C3.bg : '#555',
         }}
       >
         Import Data

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
+import { C3 } from '../../design';
 
 const MUSCLE_GROUPS = ['chest', 'back', 'shoulders', 'biceps', 'triceps', 'legs', 'core'];
 
@@ -39,8 +40,8 @@ export default function ExercisePicker({ onSelect, onClose, currentExerciseId, m
     >
       <div
         style={{
-          background: '#12121f',
-          borderTop: '1px solid #2a2a3e',
+          background: C3.raise2,
+          borderTop: `1px solid ${C3.line2}`,
           borderRadius: '12px 12px 0 0',
           padding: 16,
           width: '100%',
@@ -61,14 +62,14 @@ export default function ExercisePicker({ onSelect, onClose, currentExerciseId, m
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search..."
           className="w-full p-2 rounded text-white text-sm mb-3"
-          style={{ background: '#1a1a2e', border: '1px solid #2a2a3e' }}
+          style={{ background: C3.raise2, border: `1px solid ${C3.line2}` }}
         />
 
         <div className="flex flex-wrap gap-1 mb-3">
           <button
             onClick={() => setFilter('')}
             className="px-2 py-1 text-xs rounded font-bold"
-            style={{ background: !filter ? '#d97706' : '#1a1a2e', color: !filter ? '#0a0a0f' : '#888' }}
+            style={{ background: !filter ? C3.amber : C3.raise2, color: !filter ? C3.bg : '#888' }}
           >
             All
           </button>
@@ -77,7 +78,7 @@ export default function ExercisePicker({ onSelect, onClose, currentExerciseId, m
               key={mg}
               onClick={() => setFilter(mg)}
               className="px-2 py-1 text-xs rounded font-bold capitalize"
-              style={{ background: filter === mg ? '#d97706' : '#1a1a2e', color: filter === mg ? '#0a0a0f' : '#888' }}
+              style={{ background: filter === mg ? C3.amber : C3.raise2, color: filter === mg ? C3.bg : '#888' }}
             >
               {mg}
             </button>

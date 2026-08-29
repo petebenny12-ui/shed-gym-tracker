@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
+import { C3 } from '../../design';
 
 export default function InvitePartner({ onInviteSent }) {
   const { user } = useAuth();
@@ -67,7 +68,7 @@ export default function InvitePartner({ onInviteSent }) {
   };
 
   return (
-    <div className="p-4 rounded-lg" style={{ background: '#12121f', border: '1px solid #2a2a3e' }}>
+    <div className="p-4 rounded-lg" style={{ background: C3.raise2, border: `1px solid ${C3.line2}` }}>
       <div className="text-gray-400 text-xs uppercase tracking-wider mb-3">Invite a Training Partner</div>
 
       {!inviteLink ? (
@@ -75,7 +76,7 @@ export default function InvitePartner({ onInviteSent }) {
           onClick={generateInvite}
           disabled={loading}
           className="w-full py-3 font-bold text-sm uppercase rounded-lg"
-          style={{ background: '#d97706', color: '#0a0a0f', opacity: loading ? 0.7 : 1 }}
+          style={{ background: C3.amber, color: C3.bg, opacity: loading ? 0.7 : 1 }}
         >
           {loading ? 'Generating...' : 'Generate Invite Link'}
         </button>
@@ -83,14 +84,14 @@ export default function InvitePartner({ onInviteSent }) {
         <div>
           <div
             className="p-3 rounded mb-3 text-amber-600 text-xs break-all text-center font-mono"
-            style={{ background: '#1a1a2e', border: '1px solid #2a2a3e' }}
+            style={{ background: C3.raise2, border: `1px solid ${C3.line2}` }}
           >
             {inviteLink}
           </div>
           <button
             onClick={copyLink}
             className="w-full py-2 font-bold text-sm uppercase rounded"
-            style={{ background: copied ? '#22c55e' : '#d97706', color: '#0a0a0f' }}
+            style={{ background: copied ? C3.pr : C3.amber, color: C3.bg }}
           >
             {copied ? 'Copied!' : 'Copy Link'}
           </button>

@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react';
-import ExerciseBlock from '../components/session/ExerciseBlock';
-import TierRule from '../components/session/TierRule';
 import { buildLadder } from '../lib/ladder';
 import { suggestNextLoad } from '../lib/progression';
 import { C3, TYPE } from '../design';
+import ExerciseBlock from '../components/session/ExerciseBlock';
+import TierRule from '../components/session/TierRule';
 
 /**
  * Scratch route — /lab/session

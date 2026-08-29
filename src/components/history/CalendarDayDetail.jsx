@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { C, CARD_DEPTH } from '../../config/constants';
+import { C3, INNER_HIGHLIGHT } from '../../design';
 
 function SessionDetail({ session, dayTitle, isOwn, onEdit, onDelete }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -22,16 +22,16 @@ function SessionDetail({ session, dayTitle, isOwn, onEdit, onDelete }) {
   );
 
   return (
-    <div className="rounded-lg overflow-hidden" style={{ background: C.card, border: `1px solid ${C.border}`, boxShadow: CARD_DEPTH }}>
+    <div className="rounded-lg overflow-hidden" style={{ background: C3.raise2, border: `1px solid ${C3.line2}`, boxShadow: INNER_HIGHLIGHT }}>
       <div className="p-3">
         <div className="flex justify-between items-center mb-2">
           <div>
-            <span className="font-bold text-sm" style={{ color: C.amber }}>DAY {session.day_number}</span>
-            <span className="text-sm ml-2" style={{ color: C.muted }}>— {dayTitle}</span>
+            <span className="font-bold text-sm" style={{ color: C3.amber }}>DAY {session.day_number}</span>
+            <span className="text-sm ml-2" style={{ color: C3.soft }}>— {dayTitle}</span>
           </div>
           <div className="text-right">
-            <div className="text-sm font-bold" style={{ color: C.text }}>{Math.round(totalVol).toLocaleString()}kg</div>
-            <div className="text-[10px]" style={{ color: C.dim }}>total vol</div>
+            <div className="text-sm font-bold" style={{ color: C3.text }}>{Math.round(totalVol).toLocaleString()}kg</div>
+            <div className="text-[10px]" style={{ color: C3.muted }}>total vol</div>
           </div>
         </div>
 
@@ -39,12 +39,12 @@ function SessionDetail({ session, dayTitle, isOwn, onEdit, onDelete }) {
           {exercises.map((ex, eidx) => (
             <div key={eidx}>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold" style={{ color: C.dim }}>{ex.label}</span>
-                <span className="text-xs font-bold" style={{ color: C.text }}>{ex.name}</span>
+                <span className="text-xs font-bold" style={{ color: C3.muted }}>{ex.label}</span>
+                <span className="text-xs font-bold" style={{ color: C3.text }}>{ex.name}</span>
               </div>
               <div className="flex gap-3 mt-0.5">
                 {ex.sets.map((s, sidx) => (
-                  <span key={sidx} className="text-xs" style={{ color: C.muted }}>
+                  <span key={sidx} className="text-xs" style={{ color: C3.soft }}>
                     {s.weight_kg}kg &times; {s.reps}
                   </span>
                 ))}
@@ -55,11 +55,11 @@ function SessionDetail({ session, dayTitle, isOwn, onEdit, onDelete }) {
 
         {/* Edit/Delete — only for own sessions */}
         {isOwn && (
-          <div className="flex gap-2 pt-2 mt-2" style={{ borderTop: `1px solid ${C.cardHi}` }}>
+          <div className="flex gap-2 pt-2 mt-2" style={{ borderTop: `1px solid ${C3.raise2}` }}>
             <button
               onClick={() => onEdit(session)}
               className="flex-1 py-1.5 text-xs font-bold uppercase rounded"
-              style={{ background: C.cardHi, color: C.amber, border: `1px solid ${C.border}` }}
+              style={{ background: C3.raise2, color: C3.amber, border: `1px solid ${C3.line2}` }}
             >
               Edit
             </button>
@@ -67,7 +67,7 @@ function SessionDetail({ session, dayTitle, isOwn, onEdit, onDelete }) {
               <button
                 onClick={() => setConfirmDelete(true)}
                 className="flex-1 py-1.5 text-xs font-bold uppercase rounded"
-                style={{ background: C.cardHi, color: C.warn, border: `1px solid ${C.border}` }}
+                style={{ background: C3.raise2, color: C3.warn, border: `1px solid ${C3.line2}` }}
               >
                 Delete
               </button>
@@ -76,14 +76,14 @@ function SessionDetail({ session, dayTitle, isOwn, onEdit, onDelete }) {
                 <button
                   onClick={() => onDelete(session.id)}
                   className="flex-1 py-1.5 text-xs font-bold uppercase rounded"
-                  style={{ background: C.warn, color: C.text }}
+                  style={{ background: C3.warn, color: C3.text }}
                 >
                   Confirm
                 </button>
                 <button
                   onClick={() => setConfirmDelete(false)}
                   className="flex-1 py-1.5 text-xs font-bold uppercase rounded"
-                  style={{ background: C.cardHi, color: C.muted, border: `1px solid ${C.border}` }}
+                  style={{ background: C3.raise2, color: C3.soft, border: `1px solid ${C3.line2}` }}
                 >
                   Cancel
                 </button>
@@ -119,8 +119,8 @@ export default function CalendarDayDetail({
   return (
     <div className="p-3">
       <div className="flex items-center justify-between mb-3">
-        <button onClick={onBack} className="text-sm" style={{ color: C.dim }}>&larr; Back</button>
-        <span className="font-bold text-sm uppercase tracking-wider" style={{ color: C.amber }}>
+        <button onClick={onBack} className="text-sm" style={{ color: C3.muted }}>&larr; Back</button>
+        <span className="font-bold text-sm uppercase tracking-wider" style={{ color: C3.amber }}>
           {dateDisplay}
         </span>
       </div>
@@ -131,7 +131,7 @@ export default function CalendarDayDetail({
         {hasMine && (
           <div>
             <div className="text-xs font-bold uppercase tracking-wider mb-2"
-              style={{ color: C.user }}>
+              style={{ color: C3.you }}>
               Your Workouts
             </div>
             <div className="space-y-2">
@@ -153,7 +153,7 @@ export default function CalendarDayDetail({
         {hasPartner && (
           <div>
             <div className="text-xs font-bold uppercase tracking-wider mb-2"
-              style={{ color: C.vs }}>
+              style={{ color: C3.crew }}>
               {partnerName || 'Partner'}'s Workouts
             </div>
             <div className="space-y-2">

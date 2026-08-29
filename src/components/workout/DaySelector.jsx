@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useWorkoutData } from '../../hooks/useWorkoutData';
+import { C3, DayChooserRow, FONTS, SPACE, SectionLabel } from '../../design';
 import BodyweightLogger from './BodyweightLogger';
-import { C, FONTS, SPACE, DayChooserRow, SectionLabel } from '../../design';
 
 export default function DaySelector({ days, onSelectDay }) {
   const { fetchSessions, fetchLastSession } = useWorkoutData();
@@ -54,8 +54,8 @@ export default function DaySelector({ days, onSelectDay }) {
     <div style={{ padding: SPACE.lg }}>
       <h2
         style={{
-          fontFamily: FONTS.serif,
-          color: C.text,
+          fontFamily: FONTS.sans,
+          color: C3.text,
           fontSize: 22,
           fontWeight: 700,
           letterSpacing: 0.8,

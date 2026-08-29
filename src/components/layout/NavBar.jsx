@@ -1,5 +1,5 @@
 import { Dumbbell, Calendar, TrendingUp, Swords, Settings } from 'lucide-react';
-import { C } from '../../config/constants';
+import { C3 } from '../../design';
 
 const tabs = [
   { id: 'workout', label: 'Lift', icon: Dumbbell },
@@ -21,7 +21,7 @@ export default function NavBar({ view, setView }) {
         background: 'rgba(15, 15, 24, 0.92)',
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',
-        borderTop: `1px solid ${C.border}`,
+        borderTop: `1px solid ${C3.line2}`,
         paddingBottom: 'env(safe-area-inset-bottom, 0px)',
       }}
     >
@@ -39,11 +39,11 @@ export default function NavBar({ view, setView }) {
               <Icon
                 size={20}
                 strokeWidth={active ? 2.4 : 1.8}
-                color={active ? C.amber : C.muted}
+                color={active ? C3.amber : C3.soft}
               />
               <span
                 className="text-[10px] font-bold uppercase tracking-wider"
-                style={{ color: active ? C.amber : C.muted }}
+                style={{ color: active ? C3.amber : C3.soft }}
               >
                 {t.label}
               </span>

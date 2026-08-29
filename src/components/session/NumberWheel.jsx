@@ -81,7 +81,7 @@ const WHEEL_CSS = `
   line-height: ${ITEM_H}px;
   scroll-snap-align: center;
   text-align: center;
-  font-family: ${FONTS.mono};
+  font-family: ${FONTS.sans};
   font-variant-numeric: tabular-nums;
   font-size: ${TYPE.wheelFar.fontSize}px;
   color: ${C3.ghost};

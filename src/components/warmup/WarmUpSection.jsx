@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { C, CollapsibleBar } from '../../design';
+import { C3, CollapsibleBar } from '../../design';
 
 const WARMUP_EXERCISES = [
   { name: 'Arm Circles', reps: '20 each direction' },
@@ -32,13 +32,13 @@ export default function WarmUpSection() {
               width: 16,
               height: 16,
               borderRadius: 3,
-              border: `1px solid ${done.has(i) ? '#22c55e' : C.border}`,
-              background: done.has(i) ? '#22c55e' : 'transparent',
+              border: `1px solid ${done.has(i) ? C3.pr : C3.line2}`,
+              background: done.has(i) ? C3.pr : 'transparent',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               fontSize: 10,
-              color: C.bg,
+              color: C3.bg,
             }}
           >
             {done.has(i) ? '\u2713' : ''}
@@ -46,13 +46,13 @@ export default function WarmUpSection() {
           <span
             style={{
               fontSize: 14,
-              color: done.has(i) ? C.dim : C.text,
+              color: done.has(i) ? C3.muted : C3.text,
               textDecoration: done.has(i) ? 'line-through' : 'none',
             }}
           >
             {ex.name}
           </span>
-          <span style={{ color: C.dim, fontSize: 12, marginLeft: 'auto' }}>{ex.reps}</span>
+          <span style={{ color: C3.muted, fontSize: 12, marginLeft: 'auto' }}>{ex.reps}</span>
         </div>
       ))}
     </CollapsibleBar>

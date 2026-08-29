@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, ReferenceLine, ResponsiveContainer, Cell } from 'recharts';
-import { C, SERIF, CARD_DEPTH } from '../../config/constants';
+import { C3, FONTS, INNER_HIGHLIGHT } from '../../design';
 
 const TARGET = 4;
 const ALL_MUSCLES = ['chest', 'back', 'shoulders', 'arms', 'biceps', 'triceps', 'legs', 'core'];
@@ -51,25 +51,25 @@ export default function FrequencyChart({ sessions }) {
   }, [sessions]);
 
   return (
-    <div className="mb-4 p-3 rounded-lg" style={{ background: C.card, border: `1px solid ${C.border}`, boxShadow: CARD_DEPTH }}>
+    <div className="mb-4 p-3 rounded-lg" style={{ background: C3.raise2, border: `1px solid ${C3.line2}`, boxShadow: INNER_HIGHLIGHT }}>
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-xs font-bold uppercase" style={{ fontFamily: SERIF, color: C.amber }}>
+        <h3 className="text-xs font-bold uppercase" style={{ fontFamily: FONTS.sans, color: C3.amber }}>
           Training Frequency
         </h3>
-        <span className="text-[10px]" style={{ color: C.dim }}>target {TARGET}/wk</span>
+        <span className="text-[10px]" style={{ color: C3.muted }}>target {TARGET}/wk</span>
       </div>
       <ResponsiveContainer width="100%" height={120}>
         <BarChart data={weekData} barCategoryGap="20%">
           <XAxis
             dataKey="label"
-            tick={{ fill: C.dim, fontSize: 9 }}
+            tick={{ fill: C3.muted, fontSize: 9 }}
             axisLine={false}
             tickLine={false}
           />
           <YAxis hide domain={[0, 'auto']} />
           <ReferenceLine
             y={TARGET}
-            stroke={C.amber}
+            stroke={C3.amber}
             strokeDasharray="4 3"
             strokeWidth={1}
           />
@@ -77,7 +77,7 @@ export default function FrequencyChart({ sessions }) {
             {weekData.map((entry, i) => (
               <Cell
                 key={i}
-                fill={entry.count >= TARGET ? C.user : `${C.user}66`}
+                fill={entry.count >= TARGET ? C3.you : `${C3.you}66`}
               />
             ))}
           </Bar>
@@ -85,11 +85,19 @@ export default function FrequencyChart({ sessions }) {
       </ResponsiveContainer>
 
       {gaps.length > 0 && (
-        <div className="mt-2 p-2 rounded text-xs" style={{ background: 'rgba(244,63,94,0.08)', border: `1px solid ${C.warn}` }}>
-          <span className="font-bold" style={{ color: C.warn }}>Gap alert:</span>
-          <span className="ml-1" style={{ color: C.muted }}>
-            No {gaps.join(', ')} in 2 weeks
-          </span>
+        <div
+          className="mt-3"
+          style={{
+            padding: '8px 12px',
+            background: 'rgba(244,63,94,0.08)',
+            borderLeft: `3px solid ${C3.warn}`,
+            borderRadius: C3.radius,
+            color: C3.text,
+            fontSize: 12,
+          }}
+        >
+          <b style={{ color: C3.warn }}>Gap alert:</b>{' '}
+          <span style={{ color: C3.soft }}>No {gaps.join(', ')} in 2 weeks</span>
         </div>
       )}
     </div>

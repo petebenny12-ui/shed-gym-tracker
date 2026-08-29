@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Crown } from 'lucide-react';
-import { C, SERIF, CARD_DEPTH } from '../../config/constants';
+import { C3, FONTS, INNER_HIGHLIGHT } from '../../design';
 
 // Calculate raw trait values from a user's sessions.
 // Sessions are expected in descending order by started_at (as returned by useWorkoutData).
@@ -107,38 +107,35 @@ function scaleRelative(mine, theirs) {
   return { mine: (mine / max) * 20, theirs: (theirs / max) * 20 };
 }
 
-function TraitBar({ label, mineVal, theirsVal, myName, theirName }) {
+function TraitBar({ label, mineVal, theirsVal }) {
   const minePct = (mineVal / 20) * 100;
   const theirsPct = (theirsVal / 20) * 100;
   return (
-    <div className="mb-3">
-      <div className="flex items-center justify-between mb-1">
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
         <span
-          className="text-[10px] font-bold uppercase tracking-wider"
-          style={{ fontFamily: SERIF, color: C.muted }}
+          style={{
+            color: C3.text,
+            fontSize: 11,
+            fontWeight: 700,
+            letterSpacing: 0.6,
+            textTransform: 'uppercase',
+          }}
         >
           {label}
         </span>
-        <span className="text-[10px]" style={{ color: C.dim }}>
-          {mineVal.toFixed(1)} vs {theirsVal.toFixed(1)}
+        <span style={{ color: C3.soft, fontSize: 11 }}>
+          <span style={{ color: C3.you }}>{mineVal.toFixed(1)}</span>
+          {' vs '}
+          <span style={{ color: C3.crew }}>{theirsVal.toFixed(1)}</span>
         </span>
       </div>
-      <div className="flex items-center gap-2">
-        <span className="text-[9px] w-10 truncate text-right" style={{ color: C.dim }}>{myName}</span>
-        <div className="flex-1 h-2 rounded" style={{ background: C.cardHi }}>
-          <div
-            className="h-full rounded transition-all"
-            style={{ width: `${minePct}%`, background: C.user }}
-          />
+      <div style={{ display: 'grid', gap: 3 }}>
+        <div style={{ height: 7, background: C3.bg, borderRadius: 4, overflow: 'hidden', border: `1px solid ${C3.line2}` }}>
+          <div style={{ width: `${minePct}%`, height: '100%', background: C3.you, transition: 'width 300ms' }} />
         </div>
-      </div>
-      <div className="flex items-center gap-2 mt-1">
-        <span className="text-[9px] w-10 truncate text-right" style={{ color: C.dim }}>{theirName}</span>
-        <div className="flex-1 h-2 rounded" style={{ background: C.cardHi }}>
-          <div
-            className="h-full rounded transition-all"
-            style={{ width: `${theirsPct}%`, background: C.vs }}
-          />
+        <div style={{ height: 7, background: C3.bg, borderRadius: 4, overflow: 'hidden', border: `1px solid ${C3.line2}` }}>
+          <div style={{ width: `${theirsPct}%`, height: '100%', background: C3.crew, transition: 'width 300ms' }} />
         </div>
       </div>
     </div>
@@ -195,77 +192,152 @@ export default function BeastScore({ mySessions, partnerSessions, myName, theirN
   return (
     <div
       className="mb-4 p-4 rounded-lg"
-      style={{ background: C.card, border: `1px solid ${C.border}`, boxShadow: CARD_DEPTH }}
+      style={{ background: C3.raise2, border: `1px solid ${C3.line2}`, boxShadow: INNER_HIGHLIGHT }}
     >
-      <div className="text-center mb-4">
-        <h3
-          className="text-2xl font-bold uppercase tracking-[0.2em]"
-          style={{ fontFamily: SERIF, color: C.amber }}
+      <div style={{ textAlign: 'center', marginBottom: 18 }}>
+        <div
+          style={{
+            fontFamily: FONTS.sans,
+            color: C3.amber,
+            fontSize: 40,
+            fontWeight: 700,
+            letterSpacing: 1.2,
+          }}
         >
           BEAST
-        </h3>
+        </div>
         <div
-          className="text-[9px] uppercase tracking-wider mt-0.5"
-          style={{ fontFamily: SERIF, color: C.dim }}
+          style={{
+            color: C3.soft,
+            fontSize: 10,
+            fontWeight: 600,
+            letterSpacing: 1.2,
+            textTransform: 'uppercase',
+            marginTop: 2,
+          }}
         >
-          Benchmarked Exercise And Strength Tracker
+          Benchmarked Exercise & Strength Tracker
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 mb-5">
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr auto 1fr',
+          gap: 10,
+          alignItems: 'center',
+          marginBottom: 20,
+        }}
+      >
+        {/* My score card */}
         <div
-          className="text-center p-3 rounded-lg relative"
-          style={{ background: C.bg, border: `1px solid ${iLead ? C.user : C.border}` }}
+          style={{
+            background: C3.bg,
+            border: `1px solid ${iLead ? C3.you : C3.line2}`,
+            borderRadius: C3.radius,
+            padding: '14px 10px',
+            textAlign: 'center',
+            position: 'relative',
+          }}
         >
           {iLead && (
-            <Crown size={16} color={C.amber} className="absolute -top-2 left-1/2 -translate-x-1/2" style={{ filter: 'drop-shadow(0 0 4px rgba(217,118,6,0.5))' }} />
+            <Crown
+              size={14}
+              color={C3.you}
+              style={{ position: 'absolute', top: 6, right: 6 }}
+            />
           )}
           <div
-            className="text-[10px] font-bold uppercase tracking-wider mb-1 truncate"
-            style={{ fontFamily: SERIF, color: C.muted }}
+            style={{
+              color: C3.soft,
+              fontSize: 10,
+              fontWeight: 700,
+              letterSpacing: 1.2,
+              textTransform: 'uppercase',
+              marginBottom: 4,
+            }}
           >
             {myName}
           </div>
           <div
-            className="text-4xl font-bold"
-            style={{ fontFamily: SERIF, color: C.amber }}
+            style={{
+              fontFamily: FONTS.sans,
+              color: C3.you,
+              fontSize: 38,
+              fontWeight: 700,
+              lineHeight: 1,
+            }}
           >
             {Math.round(mineScore)}
           </div>
-          <div className="text-[9px] uppercase tracking-wider" style={{ color: C.dim }}>/ 100</div>
+          <div style={{ color: C3.muted, fontSize: 10, marginTop: 2 }}>/ 100</div>
         </div>
+
+        {/* VS divider */}
         <div
-          className="text-center p-3 rounded-lg relative"
-          style={{ background: C.bg, border: `1px solid ${!iLead ? C.vs : C.border}` }}
+          style={{
+            fontFamily: FONTS.sans,
+            color: C3.amber,
+            fontSize: 28,
+            fontWeight: 700,
+            letterSpacing: 1.2,
+          }}
+        >
+          VS
+        </div>
+
+        {/* Their score card */}
+        <div
+          style={{
+            background: C3.bg,
+            border: `1px solid ${!iLead ? C3.crew : C3.line2}`,
+            borderRadius: C3.radius,
+            padding: '14px 10px',
+            textAlign: 'center',
+            position: 'relative',
+          }}
         >
           {!iLead && (
-            <Crown size={16} color={C.amber} className="absolute -top-2 left-1/2 -translate-x-1/2" style={{ filter: 'drop-shadow(0 0 4px rgba(217,118,6,0.5))' }} />
+            <Crown
+              size={14}
+              color={C3.crew}
+              style={{ position: 'absolute', top: 6, right: 6 }}
+            />
           )}
           <div
-            className="text-[10px] font-bold uppercase tracking-wider mb-1 truncate"
-            style={{ fontFamily: SERIF, color: C.muted }}
+            style={{
+              color: C3.soft,
+              fontSize: 10,
+              fontWeight: 700,
+              letterSpacing: 1.2,
+              textTransform: 'uppercase',
+              marginBottom: 4,
+            }}
           >
             {theirName}
           </div>
           <div
-            className="text-4xl font-bold"
-            style={{ fontFamily: SERIF, color: C.amber }}
+            style={{
+              fontFamily: FONTS.sans,
+              color: C3.crew,
+              fontSize: 38,
+              fontWeight: 700,
+              lineHeight: 1,
+            }}
           >
             {Math.round(theirsScore)}
           </div>
-          <div className="text-[9px] uppercase tracking-wider" style={{ color: C.dim }}>/ 100</div>
+          <div style={{ color: C3.muted, fontSize: 10, marginTop: 2 }}>/ 100</div>
         </div>
       </div>
 
-      <div>
+      <div style={{ display: 'grid', gap: 14 }}>
         {rows.map((r) => (
           <TraitBar
             key={r.key}
             label={r.label}
             mineVal={traits.mine[r.key]}
             theirsVal={traits.theirs[r.key]}
-            myName={myName}
-            theirName={theirName}
           />
         ))}
       </div>

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { supabase, withTimeout } from '../../lib/supabase';
 import { computeGoalProjection, buildGoalUpdate, CLEARED_GOAL } from '../../lib/bodyweightGoal';
-import { C, CARD_DEPTH } from '../../config/constants';
+import { C3, INNER_HIGHLIGHT } from '../../design';
 
 function formatGoalDate(value) {
   const m = String(value).match(/^(\d{4})-(\d{2})-(\d{2})/);
@@ -59,10 +59,10 @@ export default function BodyweightGoalEditor({ logs }) {
   };
 
   let summary = null;
-  let summaryColor = C.muted;
+  let summaryColor = C3.soft;
   if (projection.status === 'active') {
     summary = `${projection.requiredRatePerDay.toFixed(2)} kg/day to hit ${projection.goalWeightKg} kg by ${formatGoalDate(projection.goalDate)}`;
-    summaryColor = C.amber;
+    summaryColor = C3.amber;
   } else if (projection.status === 'goal_reached') {
     summary = `Goal reached — target was ${projection.goalWeightKg} kg`;
   } else if (projection.status === 'date_passed') {
@@ -72,13 +72,13 @@ export default function BodyweightGoalEditor({ logs }) {
   }
 
   return (
-    <div className="mb-4 p-3 rounded-lg" style={{ background: C.card, border: `1px solid ${C.border}`, boxShadow: CARD_DEPTH }}>
+    <div className="mb-4 p-3 rounded-lg" style={{ background: C3.raise2, border: `1px solid ${C3.line2}`, boxShadow: INNER_HIGHLIGHT }}>
       <div className="flex items-center justify-between">
-        <h3 className="text-xs font-bold uppercase" style={{ color: C.amber }}>Bodyweight Goal</h3>
+        <h3 className="text-xs font-bold uppercase" style={{ color: C3.amber }}>Bodyweight Goal</h3>
         <button
           onClick={() => setEditing((v) => !v)}
           className="text-xs uppercase tracking-wider"
-          style={{ color: C.amber }}
+          style={{ color: C3.amber }}
         >
           {editing ? 'Close' : hasGoal ? 'Edit' : 'Set goal'}
         </button>
@@ -89,7 +89,7 @@ export default function BodyweightGoalEditor({ logs }) {
       )}
 
       {!summary && !editing && (
-        <div className="text-xs mt-2" style={{ color: C.dim }}>
+        <div className="text-xs mt-2" style={{ color: C3.muted }}>
           Set a target weight and date to plot a trend line on the chart above.
         </div>
       )}
@@ -98,13 +98,13 @@ export default function BodyweightGoalEditor({ logs }) {
         <div className="mt-3">
           <div className="flex gap-2">
             <div className="flex-1">
-              <div className="text-[10px] uppercase tracking-wider mb-1" style={{ color: C.dim }}>Goal weight (kg)</div>
+              <div className="text-[10px] uppercase tracking-wider mb-1" style={{ color: C3.muted }}>Goal weight (kg)</div>
               <input
                 type="number"
                 value={goalWeight}
                 onChange={(e) => setGoalWeight(e.target.value)}
                 className="w-full p-2 rounded text-center font-bold"
-                style={{ background: C.cardHi, border: `1px solid ${C.border}`, color: C.text }}
+                style={{ background: C3.raise2, border: `1px solid ${C3.line2}`, color: C3.text }}
                 placeholder="110"
                 min="0"
                 max="500"
@@ -112,13 +112,13 @@ export default function BodyweightGoalEditor({ logs }) {
               />
             </div>
             <div className="flex-1">
-              <div className="text-[10px] uppercase tracking-wider mb-1" style={{ color: C.dim }}>Goal date</div>
+              <div className="text-[10px] uppercase tracking-wider mb-1" style={{ color: C3.muted }}>Goal date</div>
               <input
                 type="date"
                 value={goalDate}
                 onChange={(e) => setGoalDate(e.target.value)}
                 className="w-full p-2 rounded text-center font-bold"
-                style={{ background: C.cardHi, border: `1px solid ${C.border}`, color: C.text, colorScheme: 'dark' }}
+                style={{ background: C3.raise2, border: `1px solid ${C3.line2}`, color: C3.text, colorScheme: 'dark' }}
               />
             </div>
           </div>
@@ -127,7 +127,7 @@ export default function BodyweightGoalEditor({ logs }) {
               onClick={handleSave}
               disabled={saving}
               className="flex-1 py-2 font-bold text-xs uppercase rounded"
-              style={{ background: C.amber, color: C.bg }}
+              style={{ background: C3.amber, color: C3.bg }}
             >
               {saving ? 'Saving…' : 'Save goal'}
             </button>
@@ -136,7 +136,7 @@ export default function BodyweightGoalEditor({ logs }) {
                 onClick={handleClear}
                 disabled={saving}
                 className="px-3 py-2 font-bold text-xs uppercase rounded"
-                style={{ background: 'transparent', border: `1px solid ${C.border}`, color: C.muted }}
+                style={{ background: 'transparent', border: `1px solid ${C3.line2}`, color: C3.soft }}
               >
                 Clear
               </button>

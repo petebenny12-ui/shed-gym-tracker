@@ -3,15 +3,16 @@
 // ────────────────────────────────────────────────────────────
 // Rules:
 // 1. Colours are ROLE-BASED, not person-based.
-//    Logged-in user = blue (C.user). Opponent = teal (C.vs).
+//    Logged-in user = blue (C3.you). Opponent = teal (C3.crew).
 //    On Howie's phone, Howie is blue and Pete is teal. Role swap.
 // 2. Days where both users trained get a DIAGONAL SPLIT tile (not solid).
 // 3. Tile labels show MUSCLE GROUP ("Shldrs"), not "Day 1".
 // 4. Use the short label map — "Shoulders + Upper Back" doesn't fit a tile.
 // ────────────────────────────────────────────────────────────
 
-import { C, FONTS, RADIUS } from "../tokens";
-import { LegendDot } from "../primitives";
+import { FONTS, RADIUS } from '../tokens';
+import { LegendDot } from '../primitives';
+import { C3 } from '..';
 
 // Short labels for calendar tiles. Full names are fine for Recent Sessions but
 // truncate on tiles (you saw "Shoulde..." in the live app — that's why).
@@ -47,8 +48,8 @@ export function CalendarDay({ day, you, them, label, isToday, onClick }) {
   const both = you && them;
   let bg = "transparent";
   if (!both) {
-    if (you) bg = `${C.user}33`;
-    else if (them) bg = `${C.vs}33`;
+    if (you) bg = `${C3.you}33`;
+    else if (them) bg = `${C3.crew}33`;
   }
 
   return (
@@ -57,7 +58,7 @@ export function CalendarDay({ day, you, them, label, isToday, onClick }) {
       style={{
         aspectRatio: "1",
         background: bg,
-        border: isToday ? `1.5px solid ${C.amber}` : `1px solid ${C.border}`,
+        border: isToday ? `1.5px solid ${C3.amber}` : `1px solid ${C3.line2}`,
         borderRadius: RADIUS.md,
         padding: 5,
         position: "relative",
@@ -72,7 +73,7 @@ export function CalendarDay({ day, you, them, label, isToday, onClick }) {
           style={{
             position: "absolute",
             inset: 0,
-            background: `linear-gradient(135deg, ${C.user}44 0%, ${C.user}44 50%, ${C.vs}44 50%, ${C.vs}44 100%)`,
+            background: `linear-gradient(135deg, ${C3.you}44 0%, ${C3.you}44 50%, ${C3.crew}44 50%, ${C3.crew}44 100%)`,
           }}
         />
       )}
@@ -80,7 +81,7 @@ export function CalendarDay({ day, you, them, label, isToday, onClick }) {
         style={{
           fontSize: 11,
           fontWeight: 600,
-          color: isToday ? C.amber : C.text,
+          color: isToday ? C3.amber : C3.text,
           position: "relative",
           zIndex: 1,
         }}
@@ -91,7 +92,7 @@ export function CalendarDay({ day, you, them, label, isToday, onClick }) {
         <span
           style={{
             fontSize: 8,
-            color: C.muted,
+            color: C3.soft,
             marginTop: "auto",
             position: "relative",
             zIndex: 1,
@@ -120,9 +121,9 @@ export function CalendarLegend({ opponentName = "Them" }) {
         marginBottom: 12,
       }}
     >
-      <LegendDot color={C.user} label="You" />
-      <LegendDot color={C.vs} label={opponentName} />
-      <LegendDot splitColors={[C.user, C.vs]} label="Both" />
+      <LegendDot color={C3.you} label="You" />
+      <LegendDot color={C3.crew} label={opponentName} />
+      <LegendDot splitColors={[C3.you, C3.crew]} label="Both" />
     </div>
   );
 }
@@ -143,11 +144,11 @@ export function CalendarHeader({ monthLabel, onPrev, onNext, onToday, showTodayB
       <button onClick={onPrev} style={navBtn}>←</button>
       <div
         style={{
-          fontFamily: FONTS.serif,
-          color: C.text,
+          fontFamily: FONTS.sans,
+          color: C3.text,
           fontSize: 16,
           fontWeight: 700,
-          letterSpacing: 1.5,
+          letterSpacing: 1.2,
           textTransform: "uppercase",
         }}
       >
@@ -160,9 +161,9 @@ export function CalendarHeader({ monthLabel, onPrev, onNext, onToday, showTodayB
           style={{
             position: "absolute",
             right: 0,
-            background: C.cardHi,
-            border: `1px solid ${C.border}`,
-            color: C.amber,
+            background: C3.raise2,
+            border: `1px solid ${C3.line2}`,
+            color: C3.amber,
             fontSize: 10,
             fontWeight: 700,
             letterSpacing: 1.2,
@@ -182,7 +183,7 @@ export function CalendarHeader({ monthLabel, onPrev, onNext, onToday, showTodayB
 const navBtn = {
   background: "transparent",
   border: "none",
-  color: C.muted,
+  color: C3.soft,
   cursor: "pointer",
   padding: 8,
   fontSize: 18,
@@ -202,7 +203,7 @@ export function CalendarGrid({ days, onDayClick }) {
           gridTemplateColumns: "repeat(7, 1fr)",
           fontSize: 10,
           fontWeight: 700,
-          color: C.dim,
+          color: C3.muted,
           letterSpacing: 1.2,
           textAlign: "center",
           marginBottom: 6,

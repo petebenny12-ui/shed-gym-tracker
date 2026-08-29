@@ -1,8 +1,9 @@
 // Settings patterns — weight mode list, weigh-in warning, sign-out.
 
-import { ArrowRight } from "lucide-react";
-import { C, FONTS, RADIUS, SPACE } from "../tokens";
-import { Card, SectionLabel, SegmentedToggle } from "../primitives";
+import { ArrowRight } from 'lucide-react';
+import { FONTS, RADIUS, SPACE } from '../tokens';
+import { Card, SectionLabel, SegmentedToggle } from '../primitives';
+import { C3 } from '..';
 
 // ═════════════════════════════════════════════════════════════
 // WeightModeList — per-exercise Total/Per Side toggles
@@ -13,7 +14,7 @@ export function WeightModeList({ exercises, onChange }) {
   return (
     <Card padding={SPACE.lg} style={{ marginBottom: 14 }}>
       <SectionLabel>Weight Recording Mode</SectionLabel>
-      <div style={{ color: C.muted, fontSize: 12, marginBottom: 14, lineHeight: 1.5 }}>
+      <div style={{ color: C3.soft, fontSize: 12, marginBottom: 14, lineHeight: 1.5 }}>
         How each exercise logs weight. DB defaults to <b>per side</b>, BB to <b>total</b>.
         Both users of the same exercise should record the same way for fair VS.
       </div>
@@ -27,19 +28,19 @@ export function WeightModeList({ exercises, onChange }) {
               alignItems: "center",
               justifyContent: "space-between",
               padding: "10px 12px",
-              background: C.bg,
+              background: C3.bg,
               borderRadius: RADIUS.lg,
-              border: `1px solid ${C.border}`,
+              border: `1px solid ${C3.line2}`,
               gap: 10,
             }}
           >
-            <span style={{ color: C.text, fontSize: 13, flex: 1 }}>{ex.name}</span>
+            <span style={{ color: C3.text, fontSize: 13, flex: 1 }}>{ex.name}</span>
             <SegmentedToggle
               value={ex.mode}
               onChange={(m) => onChange(ex.id, m)}
               options={[
-                { value: "total", label: "Total", color: C.user },
-                { value: "per_side", label: "Per side", color: C.amber },
+                { value: "total", label: "Total", color: C3.you },
+                { value: "per_side", label: "Per side", color: C3.amber },
               ]}
             />
           </div>
@@ -58,12 +59,12 @@ export function WeighInStat({ count, onLogClick }) {
   if (!isWarning) {
     return (
       <div style={{ textAlign: "center" }}>
-        <div style={{ fontFamily: FONTS.serif, color: C.amber, fontSize: 28, fontWeight: 700 }}>
+        <div style={{ fontFamily: FONTS.sans, color: C3.amber, fontSize: 28, fontWeight: 700 }}>
           {count}
         </div>
         <div
           style={{
-            color: C.muted,
+            color: C3.soft,
             fontSize: 11,
             letterSpacing: 1,
             textTransform: "uppercase",
@@ -81,17 +82,17 @@ export function WeighInStat({ count, onLogClick }) {
       style={{
         textAlign: "center",
         background: "rgba(244,63,94,0.08)",
-        border: `1px solid ${C.warn}`,
+        border: `1px solid ${C3.warn}`,
         borderRadius: RADIUS.lg,
         padding: "10px 6px",
       }}
     >
-      <div style={{ fontFamily: FONTS.serif, color: C.warn, fontSize: 28, fontWeight: 700 }}>
+      <div style={{ fontFamily: FONTS.sans, color: C3.warn, fontSize: 28, fontWeight: 700 }}>
         {count}
       </div>
       <div
         style={{
-          color: C.warn,
+          color: C3.warn,
           fontSize: 11,
           letterSpacing: 1,
           textTransform: "uppercase",
@@ -107,7 +108,7 @@ export function WeighInStat({ count, onLogClick }) {
           style={{
             marginTop: 8,
             background: "transparent",
-            color: C.warn,
+            color: C3.warn,
             border: "none",
             fontSize: 11,
             fontWeight: 700,
@@ -136,12 +137,12 @@ export function PrefRow({ label, sub, value, onChange, lastRow }) {
         alignItems: "center",
         gap: 14,
         padding: "10px 0",
-        borderBottom: lastRow ? "none" : `1px solid ${C.border}`,
+        borderBottom: lastRow ? "none" : `1px solid ${C3.line2}`,
       }}
     >
       <div style={{ flex: 1 }}>
-        <div style={{ color: C.text, fontSize: 13, fontWeight: 600 }}>{label}</div>
-        <div style={{ color: C.muted, fontSize: 11, marginTop: 2 }}>{sub}</div>
+        <div style={{ color: C3.text, fontSize: 13, fontWeight: 600 }}>{label}</div>
+        <div style={{ color: C3.soft, fontSize: 11, marginTop: 2 }}>{sub}</div>
       </div>
       <Toggle value={value} onChange={onChange} />
     </div>
@@ -156,7 +157,7 @@ function Toggle({ value, onChange }) {
         width: 40,
         height: 22,
         borderRadius: RADIUS.pill,
-        background: value ? C.amber : C.border,
+        background: value ? C3.amber : C3.line2,
         border: "none",
         position: "relative",
         cursor: "pointer",

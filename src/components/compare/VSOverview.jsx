@@ -2,20 +2,8 @@ import { useState, useEffect, useMemo } from 'react';
 import { supabase, withTimeout } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { useWorkoutData } from '../../hooks/useWorkoutData';
+import { Button, C3, Card, FONTS, HeadToHead, RecentPRs, SPACE, SectionLabel, VolumeCompare, VsHero, VsMetric } from '../../design';
 import InvitePartner from './InvitePartner';
-import {
-  C,
-  FONTS,
-  SPACE,
-  Card,
-  SectionLabel,
-  Button,
-  VsHero,
-  VsMetric,
-  HeadToHead,
-  VolumeCompare,
-  RecentPRs,
-} from '../../design';
 
 // ─── BEAST score calculation ────────────────────────────────
 function calculateTraits(sessions) {
@@ -268,7 +256,7 @@ export default function VSOverview() {
 
   if (loading) {
     return (
-      <div style={{ padding: 24, textAlign: 'center', color: C.amber, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2 }}>
+      <div style={{ padding: 24, textAlign: 'center', color: C3.amber, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1.2 }}>
         Loading...
       </div>
     );
@@ -277,10 +265,10 @@ export default function VSOverview() {
   if (!partner) {
     return (
       <div style={{ padding: 24, textAlign: 'center' }}>
-        <h2 style={{ fontFamily: FONTS.serif, color: C.text, fontSize: 18, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: SPACE.md }}>
+        <h2 style={{ fontFamily: FONTS.sans, color: C3.text, fontSize: 18, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: SPACE.md }}>
           VS
         </h2>
-        <div style={{ color: C.dim, marginBottom: SPACE.lg }}>No VS partner linked yet.</div>
+        <div style={{ color: C3.muted, marginBottom: SPACE.lg }}>No VS partner linked yet.</div>
         <Button variant="secondary" onClick={loadVSData} style={{ marginBottom: SPACE.lg }}>
           Retry
         </Button>
@@ -318,7 +306,7 @@ export default function VSOverview() {
       {/* Head to head */}
       <SectionLabel>Head to Head</SectionLabel>
       {comparisons.length === 0 ? (
-        <div style={{ color: C.dim, textAlign: 'center', padding: '32px 0', fontSize: 13 }}>
+        <div style={{ color: C3.muted, textAlign: 'center', padding: '32px 0', fontSize: 13 }}>
           Both of you need to log sessions first.
         </div>
       ) : (

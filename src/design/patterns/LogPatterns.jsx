@@ -3,8 +3,9 @@
 // the live v2 app had "-207m", "-338m", "1463m" values because of
 // buggy duration calculation. This component's helper gets it right.
 
-import { C, FONTS, SPACE, RADIUS } from "../tokens";
-import { Card, SectionLabel, Stat } from "../primitives";
+import { FONTS, SPACE, RADIUS } from '../tokens';
+import { Card, SectionLabel, Stat } from '../primitives';
+import { C3 } from '..';
 
 // ─── Monthly summary ───────────────────────────────────────
 // stats: { sessions: { value, target }, streakWeeks, volumeKg }
@@ -90,13 +91,13 @@ export function RecentSessions({ sessions, max = 4 }) {
                 alignItems: "center",
                 gap: 12,
                 padding: "10px 0",
-                borderBottom: i < visible.length - 1 ? `1px solid ${C.border}` : "none",
+                borderBottom: i < visible.length - 1 ? `1px solid ${C3.line2}` : "none",
                 cursor: s.onClick ? "pointer" : "default",
               }}
             >
-              <div style={{ color: C.muted, fontSize: 11, width: 48 }}>{s.dateLabel}</div>
-              <div style={{ flex: 1, color: C.text, fontSize: 13 }}>{s.title}</div>
-              <div style={{ color: C.dim, fontSize: 11, fontFamily: FONTS.sans }}>
+              <div style={{ color: C3.soft, fontSize: 11, width: 48 }}>{s.dateLabel}</div>
+              <div style={{ flex: 1, color: C3.text, fontSize: 13 }}>{s.title}</div>
+              <div style={{ color: C3.muted, fontSize: 11, fontFamily: FONTS.sans }}>
                 {formatDuration(mins)}
               </div>
               <WhoDot who={s.who} />
@@ -104,7 +105,7 @@ export function RecentSessions({ sessions, max = 4 }) {
           );
         })}
         {visible.length === 0 && (
-          <div style={{ color: C.dim, fontSize: 12, padding: "8px 0", textAlign: "center" }}>
+          <div style={{ color: C3.muted, fontSize: 12, padding: "8px 0", textAlign: "center" }}>
             No recent sessions
           </div>
         )}
@@ -121,7 +122,7 @@ function WhoDot({ who }) {
           width: 10,
           height: 10,
           borderRadius: 3,
-          background: `linear-gradient(135deg, ${C.user} 50%, ${C.vs} 50%)`,
+          background: `linear-gradient(135deg, ${C3.you} 50%, ${C3.crew} 50%)`,
         }}
       />
     );
@@ -132,7 +133,7 @@ function WhoDot({ who }) {
         width: 10,
         height: 10,
         borderRadius: 3,
-        background: who === "you" ? C.user : C.vs,
+        background: who === "you" ? C3.you : C3.crew,
       }}
     />
   );

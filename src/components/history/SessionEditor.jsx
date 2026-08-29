@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useWorkoutData } from '../../hooks/useWorkoutData';
-import { C, CARD_DEPTH } from '../../config/constants';
+import { C3, INNER_HIGHLIGHT } from '../../design';
 
 export default function SessionEditor({ session, dayTitle, onBack, onSaved }) {
   const { updateSession } = useWorkoutData();
@@ -92,8 +92,8 @@ export default function SessionEditor({ session, dayTitle, onBack, onSaved }) {
   return (
     <div className="p-3">
       <div className="flex items-center justify-between mb-3">
-        <button onClick={onBack} className="text-sm" style={{ color: C.dim }}>&larr; Back</button>
-        <span className="font-bold text-sm uppercase" style={{ color: C.amber }}>
+        <button onClick={onBack} className="text-sm" style={{ color: C3.muted }}>&larr; Back</button>
+        <span className="font-bold text-sm uppercase" style={{ color: C3.amber }}>
           Edit — Day {session.day_number} — {dayTitle}
         </span>
       </div>
@@ -104,7 +104,7 @@ export default function SessionEditor({ session, dayTitle, onBack, onSaved }) {
           value={sessionDate}
           onChange={(e) => setSessionDate(e.target.value)}
           className="text-xs bg-transparent border-b border-gray-700 focus:border-amber-600 outline-none px-1 py-0.5"
-          style={{ color: C.muted, colorScheme: 'dark' }}
+          style={{ color: C3.soft, colorScheme: 'dark' }}
         />
       </div>
 
@@ -113,16 +113,16 @@ export default function SessionEditor({ session, dayTitle, onBack, onSaved }) {
           <div
             key={ex.exerciseId}
             className="p-3 rounded-lg"
-            style={{ background: C.card, border: `1px solid ${C.border}`, boxShadow: CARD_DEPTH }}
+            style={{ background: C3.raise2, border: `1px solid ${C3.line2}`, boxShadow: INNER_HIGHLIGHT }}
           >
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-xs font-bold" style={{ color: C.dim }}>{ex.supersetLabel}</span>
-              <span className="text-sm font-bold" style={{ color: C.text }}>{ex.name}</span>
+              <span className="text-xs font-bold" style={{ color: C3.muted }}>{ex.supersetLabel}</span>
+              <span className="text-sm font-bold" style={{ color: C3.text }}>{ex.name}</span>
             </div>
 
             {ex.sets.map((set, setIdx) => (
               <div key={setIdx} className="flex items-center gap-2 mb-1.5">
-                <span className="text-xs w-4" style={{ color: C.dim }}>{setIdx + 1}</span>
+                <span className="text-xs w-4" style={{ color: C3.muted }}>{setIdx + 1}</span>
                 <input
                   type="number"
                   inputMode="decimal"
@@ -130,9 +130,9 @@ export default function SessionEditor({ session, dayTitle, onBack, onSaved }) {
                   onChange={(e) => updateSet(exIdx, setIdx, 'weight', e.target.value)}
                   placeholder="kg"
                   className="flex-1 text-sm bg-transparent border-b border-gray-700 focus:border-amber-600 outline-none px-1 py-0.5 text-center"
-                  style={{ color: C.text }}
+                  style={{ color: C3.text }}
                 />
-                <span className="text-xs" style={{ color: C.dim }}>&times;</span>
+                <span className="text-xs" style={{ color: C3.muted }}>&times;</span>
                 <input
                   type="number"
                   inputMode="numeric"
@@ -140,12 +140,12 @@ export default function SessionEditor({ session, dayTitle, onBack, onSaved }) {
                   onChange={(e) => updateSet(exIdx, setIdx, 'reps', e.target.value)}
                   placeholder="reps"
                   className="flex-1 text-sm bg-transparent border-b border-gray-700 focus:border-amber-600 outline-none px-1 py-0.5 text-center"
-                  style={{ color: C.text }}
+                  style={{ color: C3.text }}
                 />
                 <button
                   onClick={() => removeSet(exIdx, setIdx)}
                   className="hover:text-red-500 text-xs px-1"
-                  style={{ color: C.dim }}
+                  style={{ color: C3.muted }}
                 >
                   &times;
                 </button>
@@ -155,7 +155,7 @@ export default function SessionEditor({ session, dayTitle, onBack, onSaved }) {
             <button
               onClick={() => addSet(exIdx)}
               className="text-xs mt-1 hover:text-amber-600"
-              style={{ color: C.dim }}
+              style={{ color: C3.muted }}
             >
               + Add set
             </button>
@@ -168,9 +168,9 @@ export default function SessionEditor({ session, dayTitle, onBack, onSaved }) {
         disabled={saving}
         className="w-full py-3 font-bold text-lg uppercase rounded-lg mt-3 transition-all"
         style={{
-          background: saving ? '#92400e' : C.amber,
-          color: C.bg,
-          letterSpacing: '0.1em',
+          background: saving ? C3.partial : C3.amber,
+          color: C3.bg,
+          letterSpacing: 1.2,
         }}
       >
         {saving ? 'SAVING...' : 'SAVE CHANGES'}

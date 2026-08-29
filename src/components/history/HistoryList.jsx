@@ -3,18 +3,7 @@ import { supabase, withTimeout } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { useWorkoutData } from '../../hooks/useWorkoutData';
 import { useRoutine } from '../../hooks/useRoutine';
-import {
-  C,
-  CalendarHeader,
-  CalendarLegend,
-  CalendarGrid,
-  buildCalendarDays,
-  shortenDayLabel,
-  MonthlySummary,
-  RecentSessions,
-  formatVolume,
-  sessionDurationMinutes,
-} from '../../design';
+import { C3, CalendarGrid, CalendarHeader, CalendarLegend, MonthlySummary, RecentSessions, buildCalendarDays, formatVolume, sessionDurationMinutes, shortenDayLabel } from '../../design';
 import SessionEditor from './SessionEditor';
 import CalendarDayDetail from './CalendarDayDetail';
 
@@ -227,7 +216,7 @@ export default function HistoryList() {
 
   if (loading) {
     return (
-      <div style={{ padding: 24, textAlign: 'center', color: C.amber, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2 }}>
+      <div style={{ padding: 24, textAlign: 'center', color: C3.amber, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1.2 }}>
         Loading...
       </div>
     );

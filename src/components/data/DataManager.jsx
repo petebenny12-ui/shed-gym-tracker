@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react';
+import { ArrowRight } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { useRoutine } from '../../hooks/useRoutine';
 import { useExerciseSettings } from '../../hooks/useExerciseSettings';
+import { signOut } from '../../lib/auth';
+import { C3, FONTS, INNER_HIGHLIGHT } from '../../design';
 import PreferencesSection from './PreferencesSection';
 import ExportSection from './ExportSection';
 import ImportSection from './ImportSection';
 import DangerZone from './DangerZone';
 import WorkoutWizard from '../wizard/WorkoutWizard';
-import { signOut } from '../../lib/auth';
-import { C, SERIF, CARD_DEPTH } from '../../config/constants';
 
 export default function DataManager() {
   const { user, profile } = useAuth();
@@ -88,44 +89,61 @@ export default function DataManager() {
     <div className="p-4 space-y-4">
       <h2
         className="text-lg font-bold uppercase tracking-wider"
-        style={{ fontFamily: SERIF, color: C.text }}
+        style={{ fontFamily: FONTS.sans, color: C3.text }}
       >
         Settings
       </h2>
 
       {/* Workout Builder */}
-      <div className="p-3 rounded-lg" style={{ background: C.card, border: `1px solid ${C.border}`, boxShadow: CARD_DEPTH }}>
-        <div className="text-xs font-bold uppercase tracking-wider mb-2" style={{ fontFamily: SERIF, color: C.amber }}>
+      <div className="p-3 rounded-lg" style={{ background: C3.raise2, border: `1px solid ${C3.line2}`, boxShadow: INNER_HIGHLIGHT }}>
+        <div className="text-xs font-bold uppercase tracking-wider mb-2" style={{ fontFamily: FONTS.sans, color: C3.amber }}>
           Workout Builder
         </div>
 
         {days.length > 0 ? (
-          <div className="text-sm mb-3" style={{ color: C.muted }}>
+          <div className="text-sm mb-3" style={{ color: C3.soft }}>
             {days.length} days, ~{Math.round(totalExercises / days.length)} exercises/day, supersets {hasSupersetting ? 'on' : 'off'}
           </div>
         ) : (
-          <div className="text-sm mb-3" style={{ color: C.dim }}>No routine set up yet.</div>
+          <div className="text-sm mb-3" style={{ color: C3.muted }}>No routine set up yet.</div>
         )}
 
-        <div className="flex gap-2">
-          <button
-            onClick={() => checkInProgressAndLaunch('full')}
-            className="flex-1 py-2.5 rounded-lg font-bold text-sm uppercase tracking-wider"
-            style={{ background: 'transparent', color: C.warn, border: `2px solid ${C.warn}` }}
-          >
-            Rebuild Routine
-          </button>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
           <button
             onClick={() => setShowDayPicker(!showDayPicker)}
             disabled={days.length === 0}
-            className="flex-1 py-2.5 rounded-lg font-bold text-sm uppercase tracking-wider"
             style={{
-              background: C.cardHi,
-              color: days.length > 0 ? C.amber : C.dim,
-              border: `1px solid ${C.border}`,
+              padding: '11px 0',
+              background: C3.amber,
+              color: C3.bg,
+              border: 'none',
+              borderRadius: C3.radius,
+              fontSize: 12,
+              fontWeight: 700,
+              letterSpacing: 1.2,
+              textTransform: 'uppercase',
+              cursor: days.length > 0 ? 'pointer' : 'default',
+              opacity: days.length > 0 ? 1 : 0.5,
             }}
           >
-            Edit a Single Day
+            Edit a Day
+          </button>
+          <button
+            onClick={() => checkInProgressAndLaunch('full')}
+            style={{
+              padding: '11px 0',
+              background: 'transparent',
+              color: C3.warn,
+              border: `1px solid ${C3.warn}`,
+              borderRadius: C3.radius,
+              fontSize: 12,
+              fontWeight: 700,
+              letterSpacing: 1.2,
+              textTransform: 'uppercase',
+              cursor: 'pointer',
+            }}
+          >
+            Rebuild
           </button>
         </div>
 
@@ -136,11 +154,11 @@ export default function DataManager() {
                 key={day.day}
                 onClick={() => { setShowDayPicker(false); checkInProgressAndLaunch(day); }}
                 className="w-full text-left p-2 rounded-lg text-sm transition-all"
-                style={{ background: C.bg, border: `1px solid ${C.border}` }}
+                style={{ background: C3.bg, border: `1px solid ${C3.line2}` }}
               >
-                <span className="font-bold" style={{ color: C.amber }}>Day {day.day}</span>
-                <span className="ml-2" style={{ color: C.muted }}>— {day.title}</span>
-                <span className="text-xs ml-2" style={{ color: C.dim }}>
+                <span className="font-bold" style={{ color: C3.amber }}>Day {day.day}</span>
+                <span className="ml-2" style={{ color: C3.soft }}>— {day.title}</span>
+                <span className="text-xs ml-2" style={{ color: C3.muted }}>
                   ({day.supersets.length} {day.supersets.some(s => s.ex2) ? 'supersets' : 'exercises'})
                 </span>
               </button>
@@ -150,71 +168,130 @@ export default function DataManager() {
       </div>
 
       {/* Stats summary */}
-      <div className="p-3 rounded-lg" style={{ background: C.card, border: `1px solid ${C.border}`, boxShadow: CARD_DEPTH }}>
-        <div className="text-xs font-bold uppercase tracking-wider mb-2" style={{ fontFamily: SERIF, color: C.muted }}>
+      <div className="p-3 rounded-lg" style={{ background: C3.raise2, border: `1px solid ${C3.line2}`, boxShadow: INNER_HIGHLIGHT }}>
+        <div className="text-xs font-bold uppercase tracking-wider mb-2" style={{ fontFamily: FONTS.sans, color: C3.amber }}>
           Current Data
         </div>
-        <div className="flex justify-around">
-          <div className="text-center">
-            <div className="text-xl font-bold" style={{ color: C.amber }}>{sessionCount}</div>
-            <div className="text-xs" style={{ color: C.dim }}>Sessions</div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontFamily: FONTS.sans, color: C3.amber, fontSize: 28, fontWeight: 700 }}>{sessionCount}</div>
+            <div style={{ color: C3.soft, fontSize: 11, letterSpacing: 1, textTransform: 'uppercase', marginTop: 2 }}>Sessions</div>
           </div>
-          <div className="text-center">
-            <div className="text-xl font-bold" style={{ color: bwCount === 0 ? C.warn : C.amber }}>{bwCount}</div>
-            <div className="text-xs" style={{ color: bwCount === 0 ? C.warn : C.dim }}>
-              Weigh-ins{bwCount === 0 ? ' !' : ''}
+          <div
+            style={{
+              textAlign: 'center',
+              ...(bwCount <= 1 ? {
+                background: 'rgba(244,63,94,0.08)',
+                border: `1px solid ${C3.warn}`,
+                borderRadius: C3.radius,
+                padding: '10px 6px',
+              } : {}),
+            }}
+          >
+            <div style={{ fontFamily: FONTS.sans, color: bwCount <= 1 ? C3.warn : C3.amber, fontSize: 28, fontWeight: 700 }}>{bwCount}</div>
+            <div
+              style={{
+                color: bwCount <= 1 ? C3.warn : C3.soft,
+                fontSize: 11,
+                letterSpacing: 1,
+                textTransform: 'uppercase',
+                marginTop: 2,
+                fontWeight: bwCount <= 1 ? 700 : 400,
+              }}
+            >
+              Weigh-in{bwCount !== 1 ? 's' : ''}
             </div>
+            {bwCount <= 1 && (
+              <button
+                onClick={() => {/* Navigate to bodyweight logger — handled by parent */}}
+                style={{
+                  marginTop: 8,
+                  background: 'transparent',
+                  color: C3.warn,
+                  border: 'none',
+                  fontSize: 11,
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 4,
+                }}
+              >
+                Log one <ArrowRight size={12} />
+              </button>
+            )}
           </div>
         </div>
       </div>
 
       {/* Weight Mode */}
       {routineExercises.length > 0 && (
-        <div className="rounded-lg" style={{ background: C.card, border: `1px solid ${C.border}`, boxShadow: CARD_DEPTH }}>
-          <button
-            onClick={() => setShowWeightModes(!showWeightModes)}
-            className="w-full p-3 flex items-center justify-between text-left"
-          >
-            <div>
-              <div className="text-xs font-bold uppercase tracking-wider" style={{ fontFamily: SERIF, color: C.amber }}>
-                Weight Recording
-              </div>
-              <div className="text-xs mt-0.5" style={{ color: C.dim }}>
-                Total bar weight or per-side
-              </div>
-            </div>
-            <span className="text-xs" style={{ color: C.dim }}>{showWeightModes ? '▲' : '▼'}</span>
-          </button>
-          {showWeightModes && (
-            <div style={{ borderTop: `1px solid ${C.border}` }}>
-              {routineExercises.map(ex => {
-                const mode = exSettings[ex.id] || 'total';
-                return (
-                  <div
-                    key={ex.id}
-                    className="flex items-center justify-between px-3 py-2"
-                    style={{ borderBottom: `1px solid ${C.border}` }}
-                  >
-                    <div>
-                      <span className="text-xs font-bold" style={{ color: C.text }}>{ex.name}</span>
-                      <span className="text-[9px] ml-1.5" style={{ color: C.dim }}>{ex.muscle_group}</span>
-                    </div>
+        <div className="p-3 rounded-lg" style={{ background: C3.raise2, border: `1px solid ${C3.line2}`, boxShadow: INNER_HIGHLIGHT }}>
+          <div className="text-xs font-bold uppercase tracking-wider mb-1" style={{ fontFamily: FONTS.sans, color: C3.amber }}>
+            Weight Recording Mode
+          </div>
+          <div style={{ color: C3.soft, fontSize: 12, marginBottom: 14, lineHeight: 1.5 }}>
+            How each exercise logs weight. DB defaults to <strong style={{ color: C3.text }}>per side</strong>, BB to <strong style={{ color: C3.text }}>total</strong>. Both users record the same way for fair VS.
+          </div>
+          <div style={{ display: 'grid', gap: 8 }}>
+            {routineExercises.map(ex => {
+              const mode = exSettings[ex.id] || 'total';
+              return (
+                <div
+                  key={ex.id}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '10px 12px',
+                    background: C3.bg,
+                    borderRadius: C3.radius,
+                    border: `1px solid ${C3.line2}`,
+                  }}
+                >
+                  <span style={{ color: C3.text, fontSize: 13 }}>{ex.name}</span>
+                  <div style={{ display: 'flex', background: C3.raise2, borderRadius: C3.radius, padding: 2 }}>
                     <button
-                      onClick={() => setWeightMode(ex.id, mode === 'per_side' ? 'total' : 'per_side')}
-                      className="px-2 py-0.5 rounded text-[10px] font-bold uppercase"
+                      onClick={() => setWeightMode(ex.id, 'total')}
                       style={{
-                        background: mode === 'per_side' ? C.amberDim : C.cardHi,
-                        color: mode === 'per_side' ? C.amber : C.dim,
-                        border: `1px solid ${mode === 'per_side' ? C.amber : C.border}`,
+                        padding: '6px 12px',
+                        background: mode !== 'per_side' ? C3.you : 'transparent',
+                        color: mode !== 'per_side' ? C3.bg : C3.soft,
+                        border: 'none',
+                        borderRadius: 4,
+                        fontSize: 11,
+                        fontWeight: 700,
+                        letterSpacing: 0.8,
+                        textTransform: 'uppercase',
+                        cursor: 'pointer',
+                        transition: 'all 160ms',
                       }}
                     >
-                      {mode === 'per_side' ? 'per side' : 'total'}
+                      Total
+                    </button>
+                    <button
+                      onClick={() => setWeightMode(ex.id, 'per_side')}
+                      style={{
+                        padding: '6px 12px',
+                        background: mode === 'per_side' ? C3.amber : 'transparent',
+                        color: mode === 'per_side' ? C3.bg : C3.soft,
+                        border: 'none',
+                        borderRadius: 4,
+                        fontSize: 11,
+                        fontWeight: 700,
+                        letterSpacing: 0.8,
+                        textTransform: 'uppercase',
+                        cursor: 'pointer',
+                        transition: 'all 160ms',
+                      }}
+                    >
+                      Per side
                     </button>
                   </div>
-                );
-              })}
-            </div>
-          )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 
@@ -228,7 +305,7 @@ export default function DataManager() {
         <button
           onClick={signOut}
           className="text-sm uppercase tracking-wider"
-          style={{ color: C.warn, background: 'none', border: 'none' }}
+          style={{ color: C3.warn, background: 'none', border: 'none' }}
         >
           Sign out
         </button>
@@ -237,7 +314,7 @@ export default function DataManager() {
       {status && (
         <div
           className="text-center text-sm font-bold"
-          style={{ color: status.includes('fail') || status.includes('Invalid') ? C.warn : C.success }}
+          style={{ color: status.includes('fail') || status.includes('Invalid') ? C3.warn : C3.pr }}
         >
           {status}
         </div>

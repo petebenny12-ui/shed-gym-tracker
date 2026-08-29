@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import KeypadSheet, { keypadNote, ladderStep } from '../components/session/KeypadSheet';
 import { buildLadder } from '../lib/ladder';
+import KeypadSheet, { keypadNote, ladderStep } from '../components/session/KeypadSheet';
 
 const ladder = buildLadder({ increment: 2.5, min: 20, max: 200 });
 

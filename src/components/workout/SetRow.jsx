@@ -1,5 +1,5 @@
 import { validateWeight, validateReps } from '../../lib/validation';
-import { C } from '../../config/constants';
+import { C3 } from '../../design';
 
 export default function SetRow({ weight, reps, onWeightChange, onRepsChange }) {
   const handleWeightChange = (e) => {
@@ -27,11 +27,11 @@ export default function SetRow({ weight, reps, onWeightChange, onRepsChange }) {
           padding: '5px 2px',
           borderRadius: 4,
           textAlign: 'center',
-          color: C.text,
+          color: C3.text,
           fontSize: 12,
           fontWeight: 'bold',
-          background: C.cardHi,
-          border: `1px solid ${C.border}`,
+          background: C3.raise2,
+          border: `1px solid ${C3.line2}`,
           boxSizing: 'border-box',
         }}
         placeholder="-"
@@ -50,11 +50,11 @@ export default function SetRow({ weight, reps, onWeightChange, onRepsChange }) {
           padding: '5px 2px',
           borderRadius: 4,
           textAlign: 'center',
-          color: C.text,
+          color: C3.text,
           fontSize: 12,
           fontWeight: 'bold',
-          background: C.cardHi,
-          border: `1px solid ${C.border}`,
+          background: C3.raise2,
+          border: `1px solid ${C3.line2}`,
           boxSizing: 'border-box',
         }}
         placeholder="-"

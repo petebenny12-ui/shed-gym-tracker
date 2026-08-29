@@ -1,3 +1,4 @@
+import { C3 } from "../../design";
 const options = [
   { value: 'dumbbells', label: 'DUMBBELLS ONLY', desc: 'Adjustable or fixed dumbbells' },
   { value: 'full_gym', label: 'FULL GYM', desc: 'Barbells, machines, cables + dumbbells' },
@@ -16,8 +17,8 @@ export default function EquipmentStep({ selected, onSelect }) {
           onClick={() => onSelect(o.value)}
           className="w-full p-4 rounded-lg border-2 text-left transition-all"
           style={{
-            background: selected === o.value ? '#d9770620' : '#12121f',
-            borderColor: selected === o.value ? '#d97706' : '#2a2a3e',
+            background: selected === o.value ? `${C3.amber}20` : C3.raise2,
+            borderColor: selected === o.value ? C3.amber : C3.line2,
           }}
         >
           <div className="text-white font-bold text-sm">{o.label}</div>

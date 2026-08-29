@@ -2,9 +2,9 @@
 // Shed Gym v2 Design System — Public API
 // ────────────────────────────────────────────────────────────
 // Use this as the ONLY import path from outside the design folder:
-//     import { Card, Button, PlateauBanner, ... } from "@/design";
+//     import { Card, Button, PlateauBanner,  } from "@/design";
 // or:
-//     import { ... } from "../design";
+//     import {  } from "../design";
 //
 // Never import from individual files under design/ outside this folder.
 // ────────────────────────────────────────────────────────────
