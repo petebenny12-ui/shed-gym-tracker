@@ -8,6 +8,7 @@ import OnboardingPage from './pages/OnboardingPage';
 import InviteLandingPage from './pages/InviteLandingPage';
 import MainApp from './pages/MainApp';
 import WheelLab from './pages/WheelLab';
+import SessionLab from './pages/SessionLab';
 import SplashScreen from './components/layout/SplashScreen';
 
 function ErrorScreen({ message }) {
@@ -54,6 +55,7 @@ function AppRoutes() {
       {/* Scratch route for the v3 session wheel — unauthed so it opens straight
           on a phone. Delete with WheelLab.jsx once the session screen ships. */}
       <Route path="/lab/wheel" element={<WheelLab />} />
+      <Route path="/lab/session" element={<SessionLab />} />
       <Route
         path="/*"
         element={
