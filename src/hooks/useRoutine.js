@@ -29,11 +29,9 @@ export function useRoutine() {
           day_number,
           title,
           routine_supersets (
-            id,
-            label,
-            sort_order,
-            exercise1:exercises!exercise1_id ( id, name, muscle_group, load_type, has_demo ),
-            exercise2:exercises!exercise2_id ( id, name, muscle_group, load_type, has_demo )
+            *,
+            exercise1:exercises!exercise1_id ( id, name, muscle_group, load_type, equipment, has_demo ),
+            exercise2:exercises!exercise2_id ( id, name, muscle_group, load_type, equipment, has_demo )
           )
         `)
         .eq('user_id', user.id)
@@ -55,9 +53,15 @@ export function useRoutine() {
           .map((ss) => ({
             id: ss.id,
             label: ss.label,
-            ex1: { id: ss.exercise1.id, name: ss.exercise1.name, muscleGroup: ss.exercise1.muscle_group, loadType: ss.exercise1.load_type, hasDemo: ss.exercise1.has_demo },
+            // v3: tier and rep targets. Undefined until migration 012 is applied,
+            // which is exactly how the app decides which session screen to show.
+            tier: ss.tier ?? null,
+            targetSets: ss.target_sets ?? null,
+            repMin: ss.rep_min ?? null,
+            repMax: ss.rep_max ?? null,
+            ex1: { id: ss.exercise1.id, name: ss.exercise1.name, muscleGroup: ss.exercise1.muscle_group, loadType: ss.exercise1.load_type, equipment: ss.exercise1.equipment, hasDemo: ss.exercise1.has_demo },
             ex2: ss.exercise2
-              ? { id: ss.exercise2.id, name: ss.exercise2.name, muscleGroup: ss.exercise2.muscle_group, loadType: ss.exercise2.load_type, hasDemo: ss.exercise2.has_demo }
+              ? { id: ss.exercise2.id, name: ss.exercise2.name, muscleGroup: ss.exercise2.muscle_group, loadType: ss.exercise2.load_type, equipment: ss.exercise2.equipment, hasDemo: ss.exercise2.has_demo }
               : null,
           })),
       }));

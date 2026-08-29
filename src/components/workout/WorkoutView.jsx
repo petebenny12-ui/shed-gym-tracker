@@ -4,6 +4,8 @@ import { useAuth } from '../../context/AuthContext';
 import { supabase, withTimeout } from '../../lib/supabase';
 import DaySelector from './DaySelector';
 import WorkoutSession from './WorkoutSession';
+import SessionScreen from '../session/SessionScreen';
+import { hasTierData } from '../../lib/sessionModel';
 import { C, Button } from '../../design';
 
 export default function WorkoutView() {
@@ -51,6 +53,12 @@ export default function WorkoutView() {
   }
 
   if (selectedDay) {
+    // v3: a routine day whose exercises carry a tier gets the new session
+    // screen. Days without tier data keep the superset grid until they are
+    // migrated, so nothing changes for an un-migrated routine.
+    if (hasTierData(selectedDay)) {
+      return <SessionScreen day={selectedDay} onBack={() => setSelectedDay(null)} />;
+    }
     return (
       <WorkoutSession
         day={selectedDay}

@@ -7,7 +7,10 @@ export function useWorkoutData() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
 
-  // Fetch all sessions for the current user (with sets)
+  // Fetch all sessions for the current user (with sets).
+  // `*` on both levels so the v3 columns (sessions.completion, sessions.mission,
+  // session_sets.tier) come through once migration 012 is applied, and their
+  // absence before that is simply an undefined field rather than a failed query.
   const fetchSessions = useCallback(async () => {
     if (!user) return [];
     console.log('[WorkoutData] Fetching all sessions...');
@@ -15,19 +18,10 @@ export function useWorkoutData() {
       supabase
         .from('sessions')
         .select(`
-          id,
-          day_number,
-          routine_id,
-          started_at,
-          finished_at,
+          *,
           session_sets (
-            id,
-            exercise_id,
-            superset_label,
-            set_number,
-            weight_kg,
-            reps,
-            exercises ( id, name, muscle_group, load_type )
+            *,
+            exercises ( id, name, muscle_group, load_type, equipment )
           )
         `)
         .eq('user_id', user.id)
@@ -38,6 +32,104 @@ export function useWorkoutData() {
     if (error) return [];
     console.log('[WorkoutData] Sessions loaded:', data?.length ?? 0);
     return data || [];
+  }, [user]);
+
+  /**
+   * Past sets for a list of exercises, newest first, grouped by exercise and
+   * then by the session they belong to. Feeds the progression suggestion and
+   * the "last Anvil 4 × 8 @ 80" line.
+   *
+   * @returns {Promise<Record<string, Array<Array<object>>>>} exerciseId → sessions, newest first
+   */
+  const fetchExerciseHistory = useCallback(async (exerciseIds) => {
+    if (!user || !exerciseIds || exerciseIds.length === 0) return {};
+    console.log('[WorkoutData] Fetching history for', exerciseIds.length, 'exercises');
+
+    const { data, error } = await withTimeout(
+      supabase
+        .from('session_sets')
+        .select('*, sessions!inner ( id, user_id, started_at )')
+        .in('exercise_id', exerciseIds)
+        .eq('sessions.user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(500),
+      'fetchExerciseHistory'
+    );
+
+    if (error) return {};
+
+    const byExercise = {};
+    for (const row of data || []) {
+      const list = (byExercise[row.exercise_id] ||= []);
+      const startedAt = row.sessions?.started_at || '';
+      const last = list[list.length - 1];
+      if (last && last.key === row.session_id) last.sets.push(row);
+      else list.push({ key: row.session_id, startedAt, sets: [row] });
+    }
+
+    const out = {};
+    for (const [exerciseId, sessions] of Object.entries(byExercise)) {
+      out[exerciseId] = sessions
+        .sort((a, b) => String(b.startedAt).localeCompare(String(a.startedAt)))
+        .map((s) => s.sets.sort((a, b) => (a.set_number ?? 0) - (b.set_number ?? 0)));
+    }
+    return out;
+  }, [user]);
+
+  /**
+   * Per-exercise settings — weight mode, and from migration 012 the wheel's
+   * increment and the odd weights this user has typed before.
+   * `select('*')` so it works either side of the migration.
+   *
+   * @returns {Promise<Record<string, object>>} exerciseId → settings row
+   */
+  const fetchExerciseSettings = useCallback(async () => {
+    if (!user) return {};
+    const { data, error } = await withTimeout(
+      supabase.from('user_exercise_settings').select('*').eq('user_id', user.id),
+      'fetchExerciseSettings'
+    );
+    if (error) return {};
+    return Object.fromEntries((data || []).map((row) => [row.exercise_id, row]));
+  }, [user]);
+
+  /**
+   * Remember an off-ladder weight so the wheel offers it next time.
+   * Best effort: a failure here must never block a logged set.
+   */
+  const rememberExtraWeight = useCallback(async (exerciseId, weight) => {
+    if (!user || !Number.isFinite(Number(weight))) return { error: null };
+
+    const { data, error: readErr } = await withTimeout(
+      supabase
+        .from('user_exercise_settings')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('exercise_id', exerciseId)
+        .maybeSingle(),
+      'rememberExtraWeight (read)'
+    );
+    if (readErr) return { error: readErr.message };
+
+    const existing = Array.isArray(data?.extra_weights) ? data.extra_weights.map(Number) : [];
+    if (existing.includes(Number(weight))) return { error: null };
+    const extra_weights = [...existing, Number(weight)].sort((a, b) => a - b);
+
+    const { error } = await withTimeout(
+      supabase
+        .from('user_exercise_settings')
+        .upsert(
+          { user_id: user.id, exercise_id: exerciseId, extra_weights },
+          { onConflict: 'user_id,exercise_id' }
+        ),
+      'rememberExtraWeight (write)'
+    );
+    if (error) {
+      // Pre-012 the column is not there yet — the weight still logged fine.
+      console.warn('[WorkoutData] Could not save extra weight:', error.message);
+      return { error: error.message };
+    }
+    return { error: null };
   }, [user]);
 
   // Fetch last session for a specific day (for prepopulation)
@@ -238,5 +330,16 @@ export function useWorkoutData() {
     return { error: null };
   }, [user]);
 
-  return { fetchSessions, fetchLastSession, saveSession, deleteSession, updateSession, fetchPartnerSessions, loading };
+  return {
+    fetchSessions,
+    fetchLastSession,
+    fetchExerciseHistory,
+    fetchExerciseSettings,
+    rememberExtraWeight,
+    saveSession,
+    deleteSession,
+    updateSession,
+    fetchPartnerSessions,
+    loading,
+  };
 }
