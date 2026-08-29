@@ -1,6 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { computeGoalProjection, daysBetween, buildGoalUpdate, CLEARED_GOAL } from '../lib/bodyweightGoal';
 
+// `today` must be a Date on the intended LOCAL calendar day: computeGoalProjection
+// reads a Date by its local date and a timestamp string by its date part, so a
+// UTC instant like 12:00Z lands on the next day east of UTC+12 and the day
+// arithmetic below shifts by one. Build it locally instead of parsing an instant.
+const localNoon = (y, m, d) => new Date(y, m - 1, d, 12, 0, 0);
+
 const logs = [
   { weight_kg: 130, logged_at: '2026-03-01T08:00:00.000Z' },
   { weight_kg: 124, logged_at: '2026-05-30T08:00:00.000Z' }, // most recent
@@ -20,7 +26,7 @@ describe('computeGoalProjection', () => {
   });
 
   it('projects an active line anchored on the raw last entry', () => {
-    const today = new Date('2026-05-30T12:00:00.000Z');
+    const today = localNoon(2026, 5, 30);
     const p = computeGoalProjection(
       logs,
       { goal_weight_kg: 110, goal_date: '2026-08-28' },
@@ -38,7 +44,7 @@ describe('computeGoalProjection', () => {
   });
 
   it('re-steepens target_today as days pass without a new log', () => {
-    const today = new Date('2026-06-29T12:00:00.000Z'); // 30 days later
+    const today = localNoon(2026, 6, 29); // 30 days later
     const p = computeGoalProjection(
       logs,
       { goal_weight_kg: 110, goal_date: '2026-08-28' },
@@ -55,7 +61,7 @@ describe('computeGoalProjection', () => {
   });
 
   it('reports date passed and never a negative rate', () => {
-    const today = new Date('2026-09-01T12:00:00.000Z');
+    const today = localNoon(2026, 9, 1);
     const p = computeGoalProjection(
       logs,
       { goal_weight_kg: 110, goal_date: '2026-08-28' },
@@ -72,7 +78,7 @@ describe('computeGoalProjection', () => {
       goal_anchor_weight_kg: 130,
       goal_anchor_date: '2026-03-01T08:00:00.000Z',
     };
-    const today = new Date('2026-05-30T12:00:00.000Z');
+    const today = localNoon(2026, 5, 30);
     const p = computeGoalProjection(logs, settings, today);
     // Green (locked) line starts at the anchor, not the latest log.
     expect(p.lockedLine[0].weight).toBe(130);
@@ -82,7 +88,7 @@ describe('computeGoalProjection', () => {
   });
 
   it('guards divide-by-zero when goal date equals the last log date', () => {
-    const today = new Date('2026-05-30T12:00:00.000Z');
+    const today = localNoon(2026, 5, 30);
     const p = computeGoalProjection(
       logs,
       { goal_weight_kg: 110, goal_date: '2026-05-30' },
