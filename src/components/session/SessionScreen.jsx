@@ -93,17 +93,42 @@ function RestRing({ count, duration, running, onStart }) {
 
 export default function SessionScreen({ day, onBack }) {
   const { user } = useAuth();
-  const { fetchExerciseHistory, fetchExerciseSettings, rememberExtraWeight } = useWorkoutData();
+  const {
+    fetchExerciseHistory,
+    fetchExerciseSettings,
+    rememberExtraWeight,
+    notePersonalRecord,
+    recomputePersonalRecord,
+  } = useWorkoutData();
   const { timerCount, timerDuration, timerRunning, startTimer } = useTimer();
 
   const mission = useMemo(() => missionName(day), [day]);
   const storageKey = `shed:v3session:${user?.id || 'anon'}:${day?.id}`;
+
+  // An undo that could not be sent puts the tick back rather than letting the
+  // screen quietly disagree with the database.
+  const restoreTick = useCallback(({ key }) => {
+    const [exerciseId, setNumber] = String(key).split(':');
+    setSetsById((prev) => {
+      const next = { ...prev };
+      for (const [id, sets] of Object.entries(prev)) {
+        const idx = sets.findIndex(
+          (s) => String(s.setNumber) === setNumber && exerciseIdOf.current[id] === exerciseId,
+        );
+        if (idx >= 0) {
+          next[id] = sets.map((s, i) => (i === idx ? { ...s, logged: true } : s));
+        }
+      }
+      return next;
+    });
+  }, []);
 
   const {
     startedAt,
     pending,
     failed,
     logSet,
+    unlogSet,
     finish,
     retry,
     clearStore,
@@ -112,6 +137,7 @@ export default function SessionScreen({ day, onBack }) {
     routineId: day?.id,
     dayNumber: day?.day,
     mission: mission ? mission.toUpperCase() : null,
+    onGiveUp: restoreTick,
   });
 
   const [history, setHistory] = useState(null);
@@ -128,6 +154,8 @@ export default function SessionScreen({ day, onBack }) {
   const [keypad, setKeypad] = useState(null);
   const blockRefs = useRef({});
   const collapseTimer = useRef(null);
+  /** block id → exercise id, so a queue key can be mapped back to a row. */
+  const exerciseIdOf = useRef({});
 
   // ── Load history and per-exercise settings ───────────────────────────────
   const exerciseIds = useMemo(() => {
@@ -212,6 +240,10 @@ export default function SessionScreen({ day, onBack }) {
     [exercises, setsById, extras],
   );
 
+  useEffect(() => {
+    for (const ex of view) exerciseIdOf.current[ex.id] = ex.exerciseId;
+  }, [view]);
+
   const crux = view.find((ex) => ex.tier === 'crux');
   const cruxComplete = !!crux && crux.doneCount >= crux.targetSets;
   const anythingLogged = view.some((ex) => ex.doneCount > 0);
@@ -241,6 +273,26 @@ export default function SessionScreen({ day, onBack }) {
       ...prev,
       [exerciseId]: (prev[exerciseId] || []).map((s, i) => (i === index ? { ...s, ...changes } : s)),
     }));
+  };
+
+  /**
+   * A wheel moved. If that set is already logged, the row has to follow the
+   * wheel — the write is an upsert on the set's own row id, so it updates
+   * rather than inserting a second one.
+   */
+  const handleSetChange = (ex, index, changes) => {
+    changeSet(ex.id, index, changes);
+    const sets = setsById[ex.id] || ex.sets;
+    const set = { ...sets[index], ...changes };
+    if (!set?.logged) return;
+    logSet({
+      exerciseId: ex.exerciseId,
+      supersetLabel: ex.supersetLabel,
+      setNumber: set.setNumber,
+      weight: ex.ladder.length === 0 ? null : set.weight,
+      reps: set.reps,
+      tier: ex.tier,
+    });
   };
 
   const handleLogSet = (ex, index, overrides = null) => {
@@ -274,6 +326,35 @@ export default function SessionScreen({ day, onBack }) {
         if (nextId) scrollOpenIntoView(nextId);
       }, AUTO_COLLAPSE_MS);
     }
+
+    notePersonalRecord(ex.exerciseId, ex.ladder.length === 0 ? null : set.weight, set.reps)
+      .catch(() => { /* a PR is a nicety; the set is already logged */ });
+  };
+
+  /**
+   * Undo a logged set. The wheels keep their numbers, so putting it back is one
+   * more tap — which is why there is no confirmation here, and must not be one.
+   */
+  const handleUnlogSet = (ex, index) => {
+    const sets = setsById[ex.id] || ex.sets;
+    const set = sets[index];
+    if (!set) return;
+
+    changeSet(ex.id, index, { logged: false });
+    unlogSet({ exerciseId: ex.exerciseId, setNumber: set.setNumber });
+
+    // Don't leave a personal record pointing at a set that no longer exists.
+    recomputePersonalRecord(ex.exerciseId)
+      .catch(() => { /* best effort; the set is already gone from the UI */ });
+
+    // An exercise that is no longer finished should not stay folded away.
+    if (collapseTimer.current) clearTimeout(collapseTimer.current);
+  };
+
+  const toggleSet = (ex, index) => {
+    const sets = setsById[ex.id] || ex.sets;
+    if (sets[index]?.logged) handleUnlogSet(ex, index);
+    else handleLogSet(ex, index);
   };
 
   /** Long press on a wheel — the keypad takes over for weights the ladder lacks. */
@@ -423,8 +504,8 @@ export default function SessionScreen({ day, onBack }) {
               onOpen={openExercise}
               missionName={mission}
               pending={openId === ex.id ? pending : 0}
-              onSetChange={(i, changes) => changeSet(ex.id, i, changes)}
-              onLogSet={(i) => handleLogSet(ex, i)}
+              onSetChange={(i, changes) => handleSetChange(ex, i, changes)}
+              onToggleSet={(i) => toggleSet(ex, i)}
               onLongPress={(i, field) => openKeypad(ex, i, field)}
             />
           </div>

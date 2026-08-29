@@ -94,7 +94,7 @@ export default function ExerciseBlock({
   missionName,
   pending = 0,
   onSetChange,
-  onLogSet,
+  onToggleSet,
   onLongPress,
 }) {
   const bodyRef = useRef(null);
@@ -277,7 +277,7 @@ export default function ExerciseBlock({
                 exerciseName={name}
                 onWeightChange={(v) => onSetChange?.(i, { weight: v })}
                 onRepsChange={(v) => onSetChange?.(i, { reps: v })}
-                onLog={() => onLogSet?.(i)}
+                onToggle={() => onToggleSet?.(i)}
                 onLongPress={(field) => onLongPress?.(i, field)}
               />
             ))}

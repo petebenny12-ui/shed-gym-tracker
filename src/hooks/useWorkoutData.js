@@ -94,6 +94,93 @@ export function useWorkoutData() {
   }, [user]);
 
   /**
+   * Record a personal record if this set beat the standing one.
+   * Same shape the superset screen writes: one row per user + exercise, best weight.
+   *
+   * @returns {Promise<{isPR: boolean}>}
+   */
+  const notePersonalRecord = useCallback(async (exerciseId, weight, reps) => {
+    const kg = Number(weight);
+    if (!user || !Number.isFinite(kg) || kg <= 0) return { isPR: false };
+
+    const { data, error } = await withTimeout(
+      supabase
+        .from('personal_records')
+        .select('weight_kg')
+        .eq('user_id', user.id)
+        .eq('exercise_id', exerciseId)
+        .maybeSingle(),
+      'notePersonalRecord (read)'
+    );
+    if (error) return { isPR: false };
+
+    const standing = parseFloat(data?.weight_kg) || 0;
+    if (kg <= standing) return { isPR: false };
+
+    const { error: writeErr } = await withTimeout(
+      supabase.from('personal_records').upsert({
+        user_id: user.id,
+        exercise_id: exerciseId,
+        weight_kg: kg,
+        reps: Number(reps) || 0,
+        achieved_at: new Date().toISOString(),
+      }, { onConflict: 'user_id,exercise_id' }),
+      'notePersonalRecord (write)'
+    );
+    return { isPR: !writeErr };
+  }, [user]);
+
+  /**
+   * Rebuild an exercise's PR from the sets that still exist.
+   *
+   * Called after a set is unlogged, so a deleted set can't leave a personal
+   * record pointing at nothing. If every set for that exercise is gone, the PR
+   * row goes with them.
+   */
+  const recomputePersonalRecord = useCallback(async (exerciseId) => {
+    if (!user) return { error: null };
+
+    const { data, error } = await withTimeout(
+      supabase
+        .from('session_sets')
+        .select('weight_kg, reps, created_at, sessions!inner ( user_id )')
+        .eq('exercise_id', exerciseId)
+        .eq('sessions.user_id', user.id)
+        .order('weight_kg', { ascending: false })
+        .limit(1),
+      'recomputePersonalRecord (read)'
+    );
+    if (error) return { error: error.message };
+
+    const best = data?.[0];
+    const kg = parseFloat(best?.weight_kg) || 0;
+
+    if (!best || kg <= 0) {
+      const { error: delErr } = await withTimeout(
+        supabase
+          .from('personal_records')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('exercise_id', exerciseId),
+        'recomputePersonalRecord (clear)'
+      );
+      return { error: delErr?.message || null };
+    }
+
+    const { error: writeErr } = await withTimeout(
+      supabase.from('personal_records').upsert({
+        user_id: user.id,
+        exercise_id: exerciseId,
+        weight_kg: kg,
+        reps: Number(best.reps) || 0,
+        achieved_at: best.created_at || new Date().toISOString(),
+      }, { onConflict: 'user_id,exercise_id' }),
+      'recomputePersonalRecord (write)'
+    );
+    return { error: writeErr?.message || null };
+  }, [user]);
+
+  /**
    * Remember an off-ladder weight so the wheel offers it next time.
    * Best effort: a failure here must never block a logged set.
    */
@@ -336,6 +423,8 @@ export function useWorkoutData() {
     fetchExerciseHistory,
     fetchExerciseSettings,
     rememberExtraWeight,
+    notePersonalRecord,
+    recomputePersonalRecord,
     saveSession,
     deleteSession,
     updateSession,

@@ -26,7 +26,7 @@ export default function SetRow({
   exerciseName = '',
   onWeightChange,
   onRepsChange,
-  onLog,
+  onToggle,
   onLongPress,
 }) {
   const bodyweight = !weightLadder || weightLadder.length === 0;
@@ -87,10 +87,12 @@ export default function SetRow({
 
       <button
         type="button"
-        onClick={onLog}
+        onClick={onToggle}
         disabled={disabled}
         aria-pressed={logged}
-        aria-label={logged ? `${label} logged` : `Log ${label.toLowerCase()}`}
+        // One tap to undo a mis-tap, one more to redo. The wheels keep their
+        // numbers either way, which is why there is no "are you sure".
+        aria-label={logged ? `${label} logged, tap to undo` : `Log ${label.toLowerCase()}`}
         style={{
           // 18px icon in a 44px target, pulled back so the row stays wheel-height.
           width: 44,

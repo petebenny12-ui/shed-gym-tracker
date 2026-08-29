@@ -140,7 +140,7 @@ export default function SessionLab() {
       onOpen={(id) => setOpenId((cur) => (cur === id ? null : id))}
       missionName="Anvil"
       onSetChange={(i, changes) => patch(ex.id, i, changes)}
-      onLogSet={(i) => patch(ex.id, i, { logged: true })}
+      onToggleSet={(i) => patch(ex.id, i, { logged: !state[ex.id][i].logged })}
       onLongPress={() => {}}
     />
   );

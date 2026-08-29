@@ -3,8 +3,11 @@ import { render, screen, fireEvent, act } from '@testing-library/react';
 import SessionScreen from '../components/session/SessionScreen';
 
 const logSet = vi.fn();
+const unlogSet = vi.fn();
 const finish = vi.fn(async () => ({ error: null }));
 const clearStore = vi.fn();
+const notePersonalRecord = vi.fn(async () => ({ isPR: false }));
+const recomputePersonalRecord = vi.fn(async () => ({ error: null }));
 
 vi.mock('../context/AuthContext', () => ({
   useAuth: () => ({ user: { id: 'user-1' }, profile: null }),
@@ -15,6 +18,8 @@ vi.mock('../hooks/useWorkoutData', () => ({
     fetchExerciseHistory: async () => ({}),
     fetchExerciseSettings: async () => ({}),
     rememberExtraWeight: async () => ({ error: null }),
+    notePersonalRecord,
+    recomputePersonalRecord,
   }),
 }));
 
@@ -25,6 +30,7 @@ vi.mock('../hooks/useSetLogger', () => ({
     pending: 0,
     failed: false,
     logSet,
+    unlogSet,
     finish,
     retry: vi.fn(),
     clearStore,
@@ -128,6 +134,61 @@ describe('SessionScreen — logging', () => {
       tier: 'crux',
     });
     expect(screen.getByText(/1 logged/)).toBeInTheDocument();
+  });
+
+  it('unlogs a mis-tapped set on a second tap, with no confirmation', async () => {
+    await renderScreen();
+    const tick = screen.getAllByRole('button', { name: /^Log back squat/i })[0];
+    await act(async () => { fireEvent.click(tick); });
+
+    const logged = screen.getByRole('button', { name: /^Back Squat, set 1 logged, tap to undo/i });
+    expect(logged).toHaveAttribute('aria-pressed', 'true');
+
+    await act(async () => { fireEvent.click(logged); });
+
+    expect(unlogSet).toHaveBeenCalledWith({ exerciseId: 'ex-squat', setNumber: 1 });
+    expect(screen.getByText(/0 logged/)).toBeInTheDocument();
+    // No dialog, no "are you sure" — the undo is the whole interaction.
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    // And it is one tap to put it back.
+    expect(screen.getByRole('button', { name: /^Log back squat, set 1/i })).toBeInTheDocument();
+  });
+
+  it('keeps the weight and reps when a set is unlogged', async () => {
+    await renderScreen();
+    const before = screen.getAllByRole('spinbutton')[0].getAttribute('aria-valuenow');
+
+    const tick = screen.getAllByRole('button', { name: /^Log back squat/i })[0];
+    await act(async () => { fireEvent.click(tick); });
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /set 1 logged, tap to undo/i }));
+    });
+
+    expect(screen.getAllByRole('spinbutton')[0]).toHaveAttribute('aria-valuenow', before);
+  });
+
+  it('recomputes the personal record after an undo', async () => {
+    await renderScreen();
+    const tick = screen.getAllByRole('button', { name: /^Log back squat/i })[0];
+    await act(async () => { fireEvent.click(tick); });
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /set 1 logged, tap to undo/i }));
+    });
+    expect(recomputePersonalRecord).toHaveBeenCalledWith('ex-squat');
+  });
+
+  it('updates the same row when a logged set’s wheel is moved', async () => {
+    await renderScreen();
+    const tick = screen.getAllByRole('button', { name: /^Log back squat/i })[0];
+    await act(async () => { fireEvent.click(tick); });
+    logSet.mockClear();
+
+    const wheel = screen.getAllByRole('spinbutton')[0];
+    await act(async () => { fireEvent.keyDown(wheel, { key: 'ArrowUp' }); });
+
+    // One write for the same set — the logger upserts it onto the same row id.
+    expect(logSet).toHaveBeenCalledTimes(1);
+    expect(logSet.mock.calls[0][0]).toMatchObject({ exerciseId: 'ex-squat', setNumber: 1 });
   });
 });
 
