@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import ExerciseBlock from './ExerciseBlock';
+import KeypadSheet from './KeypadSheet';
 import TierRule from './TierRule';
 import { C3, FONTS, ICON, TABULAR, TYPE } from '../../design';
 import { useAuth } from '../../context/AuthContext';
 import { useSetLogger } from '../../hooks/useSetLogger';
 import { useTimer } from '../../hooks/useTimer';
 import { useWorkoutData } from '../../hooks/useWorkoutData';
+import { isOffLadder, withExtra } from '../../lib/ladder';
 import { completionShape, loggedSets } from '../../lib/sessionFormat';
 import { firstIncomplete, missionName, toSessionExercises } from '../../lib/sessionModel';
 
@@ -91,7 +93,7 @@ function RestRing({ count, duration, running, onStart }) {
 
 export default function SessionScreen({ day, onBack }) {
   const { user } = useAuth();
-  const { fetchExerciseHistory, fetchExerciseSettings } = useWorkoutData();
+  const { fetchExerciseHistory, fetchExerciseSettings, rememberExtraWeight } = useWorkoutData();
   const { timerCount, timerDuration, timerRunning, startTimer } = useTimer();
 
   const mission = useMemo(() => missionName(day), [day]);
@@ -120,6 +122,10 @@ export default function SessionScreen({ day, onBack }) {
   const [elapsed, setElapsed] = useState(0);
   const [finishing, setFinishing] = useState(false);
   const [finished, setFinished] = useState(null);
+  // Weights typed on the keypad that the ladder didn't offer. They join the
+  // wheel straight away, and are saved so they are there next time too.
+  const [extras, setExtras] = useState({});
+  const [keypad, setKeypad] = useState(null);
   const blockRefs = useRef({});
   const collapseTimer = useRef(null);
 
@@ -199,9 +205,11 @@ export default function SessionScreen({ day, onBack }) {
       const sets = setsById[ex.id] || ex.sets;
       const doneCount = loggedSets(sets).length;
       const nextSetIndex = sets.findIndex((s) => !s.logged);
-      return { ...ex, sets, doneCount, nextSetIndex: nextSetIndex === -1 ? null : nextSetIndex };
+      const typed = extras[ex.exerciseId] || [];
+      const ladder = typed.reduce((acc, w) => withExtra(acc, w), ex.ladder);
+      return { ...ex, ladder, sets, doneCount, nextSetIndex: nextSetIndex === -1 ? null : nextSetIndex };
     }),
-    [exercises, setsById],
+    [exercises, setsById, extras],
   );
 
   const crux = view.find((ex) => ex.tier === 'crux');
@@ -235,13 +243,14 @@ export default function SessionScreen({ day, onBack }) {
     }));
   };
 
-  const handleLogSet = (ex, index) => {
+  const handleLogSet = (ex, index, overrides = null) => {
     const sets = setsById[ex.id] || ex.sets;
-    const set = sets[index];
-    if (!set) return;
+    const stored = sets[index];
+    if (!stored) return;
+    const set = { ...stored, ...(overrides || {}) };
 
     // The tick goes amber now. The write catches up when it can.
-    changeSet(ex.id, index, { logged: true });
+    changeSet(ex.id, index, { ...(overrides || {}), logged: true });
     logSet({
       exerciseId: ex.exerciseId,
       supersetLabel: ex.supersetLabel,
@@ -265,6 +274,43 @@ export default function SessionScreen({ day, onBack }) {
         if (nextId) scrollOpenIntoView(nextId);
       }, AUTO_COLLAPSE_MS);
     }
+  };
+
+  /** Long press on a wheel — the keypad takes over for weights the ladder lacks. */
+  const openKeypad = (ex, index, field) => {
+    const sets = setsById[ex.id] || ex.sets;
+    const set = sets[index];
+    if (!set) return;
+    setKeypad({
+      exerciseId: ex.id,
+      index,
+      field,
+      value: field === 'weight' ? set.weight : set.reps,
+      setNumber: set.setNumber,
+      name: ex.name,
+      ladder: ex.ladder,
+    });
+  };
+
+  const commitKeypad = (typed) => {
+    if (!keypad) return;
+    const ex = view.find((e) => e.id === keypad.exerciseId);
+    setKeypad(null);
+    if (!ex) return;
+
+    if (keypad.field === 'weight' && isOffLadder(ex.ladder, typed)) {
+      // The app learns the odd weights rather than being told about the rack.
+      setExtras((prev) => {
+        const current = prev[ex.exerciseId] || [];
+        if (current.includes(typed)) return prev;
+        return { ...prev, [ex.exerciseId]: [...current, typed] };
+      });
+      rememberExtraWeight(ex.exerciseId, typed).catch(() => {
+        // A logged set never waits on this.
+      });
+    }
+
+    handleLogSet(ex, keypad.index, keypad.field === 'weight' ? { weight: typed } : { reps: typed });
   };
 
   const endSession = async () => {
@@ -379,7 +425,7 @@ export default function SessionScreen({ day, onBack }) {
               pending={openId === ex.id ? pending : 0}
               onSetChange={(i, changes) => changeSet(ex.id, i, changes)}
               onLogSet={(i) => handleLogSet(ex, i)}
-              onLongPress={() => {}}
+              onLongPress={(i, field) => openKeypad(ex, i, field)}
             />
           </div>
         ))}
@@ -451,6 +497,18 @@ export default function SessionScreen({ day, onBack }) {
         />
       </div>
 
+      <KeypadSheet
+        open={!!keypad}
+        field={keypad?.field}
+        exerciseName={keypad?.name}
+        setNumber={keypad?.setNumber}
+        value={keypad?.value}
+        ladder={keypad?.ladder || []}
+        missionName={mission}
+        onCancel={() => setKeypad(null)}
+        onCommit={commitKeypad}
+      />
+
       {finishing ? (
         <div
           role="dialog"
@@ -458,7 +516,7 @@ export default function SessionScreen({ day, onBack }) {
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(0,0,0,0.6)',
+            background: C3.scrim,
             display: 'flex',
             alignItems: 'flex-end',
             zIndex: 50,

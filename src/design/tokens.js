@@ -69,6 +69,9 @@ export const C3 = {
   // Wheel slot marks for a set that is not yet logged
   slotIdle: "#3f3f4a",
 
+  // Behind a sheet
+  scrim: "rgba(0,0,0,0.6)",
+
   // Brand — amber is brand, active nav, primary CTA, and the crux. Nothing else.
   amber:     "#d97706",
   amberEdge: "rgba(217,118,6,0.55)",   // wheel slot marks
