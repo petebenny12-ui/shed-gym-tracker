@@ -7,6 +7,7 @@ import VerifyEmailPage from './pages/VerifyEmailPage';
 import OnboardingPage from './pages/OnboardingPage';
 import InviteLandingPage from './pages/InviteLandingPage';
 import MainApp from './pages/MainApp';
+import WheelLab from './pages/WheelLab';
 import SplashScreen from './components/layout/SplashScreen';
 
 function ErrorScreen({ message }) {
@@ -50,6 +51,9 @@ function AppRoutes() {
       />
       <Route path="/verify-email" element={<VerifyEmailPage />} />
       <Route path="/invite/:code" element={<InviteLandingPage />} />
+      {/* Scratch route for the v3 session wheel — unauthed so it opens straight
+          on a phone. Delete with WheelLab.jsx once the session screen ships. */}
+      <Route path="/lab/wheel" element={<WheelLab />} />
       <Route
         path="/*"
         element={
