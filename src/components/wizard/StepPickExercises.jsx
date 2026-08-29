@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { C3 } from '../../design';
+import { C3, FONTS } from '../../design';
 
 const MUSCLE_GROUPS = ['chest', 'back', 'shoulders', 'biceps', 'triceps', 'legs', 'core'];
 

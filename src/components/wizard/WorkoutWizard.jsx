@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase, withTimeout } from '../../lib/supabase';
 import { useRoutine } from '../../hooks/useRoutine';
-import { C3 } from '../../design';
+import { C3, FONTS } from '../../design';
 import StepStructure from './StepStructure';
 import StepNameDays from './StepNameDays';
 import StepPickExercises from './StepPickExercises';

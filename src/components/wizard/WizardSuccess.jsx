@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase, withTimeout } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
-import { C3 } from '../../design';
+import { C3, FONTS } from '../../design';
 
 export default function WizardSuccess({ onClose, editDayOnly, routineSnapshot }) {
   const { user } = useAuth();

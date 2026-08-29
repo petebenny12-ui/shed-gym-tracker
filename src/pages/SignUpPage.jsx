@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { signUp } from '../lib/auth';
 import { validateDisplayName, sanitizeText } from '../lib/validation';
-import { C3 } from '../design';
+import { AUTH_GRADIENT, C3, FONTS } from '../design';
 
 export default function SignUpPage() {
   const [displayName, setDisplayName] = useState('');

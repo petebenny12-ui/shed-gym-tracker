@@ -1,5 +1,6 @@
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
+import { C3 } from '../../design';
 
 export default function DangerZone({ onStatus }) {
   const { user, profile } = useAuth();

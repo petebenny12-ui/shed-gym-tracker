@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { buildRoutine } from '../lib/routineBuilder';
-import { C3 } from '../design';
+import { AUTH_GRADIENT, C3, FONTS } from '../design';
 import GoalStep from '../components/onboarding/GoalStep';
 import EquipmentStep from '../components/onboarding/EquipmentStep';
 import ExperienceStep from '../components/onboarding/ExperienceStep';

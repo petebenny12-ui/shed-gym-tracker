@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { AUTH_GRADIENT, FONTS } from '../design';
 
 export default function VerifyEmailPage() {
   return (

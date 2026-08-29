@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { supabase, withTimeout } from '../../lib/supabase';
 import { validateBodyweight } from '../../lib/validation';
 import { computeGoalProjection, buildGoalUpdate, CLEARED_GOAL } from '../../lib/bodyweightGoal';
-import { C3, cardBase } from '../../design';
+import { C3, FONTS, cardBase } from '../../design';
 
 function formatGoalDate(value) {
   const m = String(value).match(/^(\d{4})-(\d{2})-(\d{2})/);

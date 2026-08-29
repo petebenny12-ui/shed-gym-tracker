@@ -1,4 +1,4 @@
-import { C3 } from "../../design";
+import { C3, FONTS } from "../../design";
 export default function StepReview({ structure, dayNames, dayPairings }) {
   return (
     <div>

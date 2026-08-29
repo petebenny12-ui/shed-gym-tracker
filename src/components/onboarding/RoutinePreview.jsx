@@ -1,3 +1,5 @@
+import { C3 } from '../../design';
+
 export default function RoutinePreview({ routine }) {
   return (
     <div className="space-y-3">

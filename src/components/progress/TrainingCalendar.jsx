@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { C3, FONTS, INNER_HIGHLIGHT } from '../../design';
+import { C3, FONTS, INNER_HIGHLIGHT, MUSCLE } from '../../design';
 
 const MUSCLE_COLORS = {
   chest: C3.warn,

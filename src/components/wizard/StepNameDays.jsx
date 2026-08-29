@@ -1,4 +1,4 @@
-import { C3 } from "../../design";
+import { C3, FONTS } from "../../design";
 export default function StepNameDays({ dayNames, onChange }) {
   const updateName = (idx, name) => {
     const next = [...dayNames];

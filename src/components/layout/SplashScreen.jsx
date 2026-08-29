@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { C3 } from '../../design';
+import { C3, FONTS } from '../../design';
 
 const SESSION_TIMEOUT_MS = 120 * 60 * 1000;
 const FLAG_KEY = 'splash-shown';

@@ -4,7 +4,7 @@ import { supabase, withTimeout } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { signUp } from '../lib/auth';
 import { validateDisplayName, sanitizeText } from '../lib/validation';
-import { C3 } from '../design';
+import { AUTH_GRADIENT, C3, FONTS } from '../design';
 
 export default function InviteLandingPage() {
   const { code } = useParams();

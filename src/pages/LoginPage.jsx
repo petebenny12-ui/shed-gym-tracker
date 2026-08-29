@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { signIn } from '../lib/auth';
-import { C3 } from '../design';
+import { AUTH_GRADIENT, C3, FONTS } from '../design';
 import { QUOTES } from '../config/constants';
 
 export default function LoginPage() {

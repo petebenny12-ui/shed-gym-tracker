@@ -1,3 +1,5 @@
+import { C3 } from '../../design';
+
 export default function RefreshSuggestion({ exerciseName, onDismiss }) {
   if (!exerciseName) return null;
 

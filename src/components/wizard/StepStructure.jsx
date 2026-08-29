@@ -1,4 +1,4 @@
-import { C3 } from "../../design";
+import { C3, FONTS } from "../../design";
 export default function StepStructure({ structure, onChange }) {
   const update = (key, val) => onChange({ ...structure, [key]: val });
 

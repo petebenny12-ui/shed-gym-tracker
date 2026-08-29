@@ -11,6 +11,7 @@ import MainApp from './pages/MainApp';
 import WheelLab from './pages/WheelLab';
 import SessionLab from './pages/SessionLab';
 import SplashScreen from './components/layout/SplashScreen';
+import AppErrorBoundary from './components/layout/AppErrorBoundary';
 
 function ErrorScreen({ message }) {
   return (
@@ -71,9 +72,11 @@ function AppRoutes() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <SplashScreen />
-      <AppRoutes />
-    </AuthProvider>
+    <AppErrorBoundary>
+      <AuthProvider>
+        <SplashScreen />
+        <AppRoutes />
+      </AuthProvider>
+    </AppErrorBoundary>
   );
 }
