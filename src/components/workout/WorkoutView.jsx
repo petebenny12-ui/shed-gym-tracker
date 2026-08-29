@@ -5,7 +5,7 @@ import { supabase, withTimeout } from '../../lib/supabase';
 import DaySelector from './DaySelector';
 import WorkoutSession from './WorkoutSession';
 import SessionScreen from '../session/SessionScreen';
-import { hasTierData } from '../../lib/sessionModel';
+import { usesTieredSession } from '../../lib/sessionModel';
 import { C, Button } from '../../design';
 
 export default function WorkoutView() {
@@ -53,10 +53,10 @@ export default function WorkoutView() {
   }
 
   if (selectedDay) {
-    // v3: a routine day whose exercises carry a tier gets the new session
-    // screen. Days without tier data keep the superset grid until they are
-    // migrated, so nothing changes for an un-migrated routine.
-    if (hasTierData(selectedDay)) {
+    // v3: a routine day with a crux gets the new session screen. Days without
+    // one keep the superset grid — including every routine that migration 012
+    // backfilled to 'foundation'. Nothing changes until a mission is authored.
+    if (usesTieredSession(selectedDay)) {
       return <SessionScreen day={selectedDay} onBack={() => setSelectedDay(null)} />;
     }
     return (

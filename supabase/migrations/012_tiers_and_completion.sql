@@ -44,6 +44,11 @@ ALTER TABLE sessions
   ADD COLUMN IF NOT EXISTS mission    TEXT;
 
 -- ── Backfill existing rows so nothing reads as null ──
+-- Note: this marks every existing routine row 'foundation', which means every
+-- current routine "has tier data". The app therefore routes on the presence of
+-- a CRUX, not on tier being non-null (see usesTieredSession in
+-- src/lib/sessionModel.js) — otherwise running this file would sweep the live
+-- superset routines onto a session screen built around a crux they lack.
 UPDATE routine_supersets SET tier = 'foundation' WHERE tier IS NULL;
 UPDATE session_sets      SET tier = 'foundation' WHERE tier IS NULL;
 UPDATE sessions          SET completion = 'full' WHERE completion IS NULL;

@@ -16,9 +16,22 @@ const DEFAULT_SETS = { crux: 4, foundation: 3, armour: 3 };
 /** Deadlift-style lifts move two rungs; everything else one. A setting, not a name check. */
 const DEFAULT_RUNGS = 1;
 
-/** True once any exercise in the day carries a tier — the v3 screen's entry condition. */
+/** True once any exercise in the day carries a tier at all. */
 export function hasTierData(day) {
   return (day?.supersets || []).some((ss) => !!ss.tier);
+}
+
+/**
+ * Whether this day gets the v3 session screen.
+ *
+ * Deliberately stricter than "has tier data": migration 012 backfills every
+ * existing routine row to 'foundation' so nothing reads as null, which would
+ * otherwise sweep Pete and Howie's current superset routines onto a screen
+ * built around a crux they haven't got. A day earns the new screen by having
+ * a crux — that is, by being authored as a Crux Method mission.
+ */
+export function usesTieredSession(day) {
+  return (day?.supersets || []).some((ss) => ss.tier === 'crux');
 }
 
 /** The mission name for the header and the "last Anvil" line. */
