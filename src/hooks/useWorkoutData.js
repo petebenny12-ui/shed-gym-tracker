@@ -94,6 +94,41 @@ export function useWorkoutData() {
   }, [user]);
 
   /**
+   * Exercises this user logs in something other than reps — a carry in metres.
+   *
+   * They have no volume, no e1RM and no plateau, so callers use this to keep
+   * them out of strength trends. `session_sets` doesn't record the unit, so it
+   * comes from the routine rows that define the work.
+   *
+   * @returns {Promise<{ids: Set<string>, names: Set<string>}>}
+   */
+  const fetchNonRepExercises = useCallback(async () => {
+    const empty = { ids: new Set(), names: new Set() };
+    if (!user) return empty;
+
+    const { data, error } = await withTimeout(
+      supabase
+        .from('routine_supersets')
+        .select('rep_unit, exercise1:exercises!exercise1_id ( id, name ), exercise2:exercises!exercise2_id ( id, name )')
+        .neq('rep_unit', 'reps'),
+      'fetchNonRepExercises'
+    );
+    // Pre-rep_unit databases just have no such column — nothing to exclude.
+    if (error) return empty;
+
+    const ids = new Set();
+    const names = new Set();
+    for (const row of data || []) {
+      for (const ex of [row.exercise1, row.exercise2]) {
+        if (!ex) continue;
+        ids.add(ex.id);
+        names.add(ex.name);
+      }
+    }
+    return { ids, names };
+  }, [user]);
+
+  /**
    * Record a personal record if this set beat the standing one.
    * Same shape the superset screen writes: one row per user + exercise, best weight.
    *
@@ -422,6 +457,7 @@ export function useWorkoutData() {
     fetchLastSession,
     fetchExerciseHistory,
     fetchExerciseSettings,
+    fetchNonRepExercises,
     rememberExtraWeight,
     notePersonalRecord,
     recomputePersonalRecord,

@@ -106,6 +106,7 @@ export default function ExerciseBlock({
     tier = 'foundation',
     ladder = [],
     repValues = [],
+    repUnit = 'reps',
     sets = [],
     lastSets = [],
     suggestion,
@@ -116,12 +117,12 @@ export default function ExerciseBlock({
   const complete = done > 0 && done >= (Number(exercise?.targetSets) || sets.length);
   const bodyweight = !ladder || ladder.length === 0;
   const target = formatTarget(exercise);
-  const lastTime = formatLastTime(lastSets, missionName);
+  const lastTime = formatLastTime(lastSets, missionName, repUnit);
   const delta = formatDelta(suggestion?.delta);
 
   // ── Collapsed ────────────────────────────────────────────────────────────
   if (!open && !mounted) {
-    const result = formatResult(sets);
+    const result = formatResult(sets, repUnit);
     return (
       <button
         type="button"
@@ -260,7 +261,7 @@ export default function ExerciseBlock({
       >
         <div ref={bodyRef}>
           <div style={{ padding: '16px 22px 0' }}>
-            <SetColumnHeads bodyweight={bodyweight} />
+            <SetColumnHeads bodyweight={bodyweight} repUnit={repUnit} />
           </div>
 
           <div style={{ padding: '4px 22px 0' }}>
@@ -272,6 +273,7 @@ export default function ExerciseBlock({
                 reps={set.reps}
                 weightLadder={ladder}
                 repValues={repValues}
+                repUnit={repUnit}
                 logged={!!set.logged}
                 isNext={i === nextSetIndex}
                 exerciseName={name}
@@ -292,7 +294,7 @@ export default function ExerciseBlock({
             }}
           >
             <span style={{ ...TYPE.meta, flexGrow: 1, minWidth: 0 }}>
-              {formatTally(sets)}
+              {formatTally(sets, repUnit)}
               {pending > 0 ? (
                 <span
                   aria-label="saving"

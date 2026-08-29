@@ -12,10 +12,15 @@ const PLATEAU_SESSIONS = 7;
  *
  * Returns array of { exerciseId, exerciseName, volume, lastWeight, lastReps, sessions }.
  */
-export function detectPlateaus(sessions) {
+export function detectPlateaus(sessions, { excludeExerciseIds } = {}) {
   // Group per exercise: one entry per session the exercise appears in.
   // { [exerciseId]: { name, entries: [{ date, volume, topWeight, topReps }] } }
   const byExercise = {};
+  // Work that isn't logged in reps — a carry — has no volume and no strength
+  // trend, so it can't plateau and must not appear as one.
+  const skip = excludeExerciseIds instanceof Set
+    ? excludeExerciseIds
+    : new Set(excludeExerciseIds || []);
 
   for (const session of sessions) {
     // Accumulate per-exercise totals within this single session.
@@ -23,7 +28,7 @@ export function detectPlateaus(sessions) {
     for (const set of session.session_sets || []) {
       const ex = set.exercises;
       const id = ex?.id ?? set.exercise_id;
-      if (id == null) continue;
+      if (id == null || skip.has(id)) continue;
       const weight = parseFloat(set.weight_kg) || 0;
       const reps = parseInt(set.reps, 10) || 0;
       if (!perEx[id]) perEx[id] = { name: ex?.name || 'Exercise', volume: 0, topWeight: 0, topReps: 0 };

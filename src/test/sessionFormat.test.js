@@ -8,7 +8,10 @@ import {
   formatTally,
   formatTarget,
   formatWeight,
+  isRepBased,
   topWeight,
+  unitLabel,
+  weightSpread,
 } from '../lib/sessionFormat';
 
 const set = (weight, reps, logged = true) => ({ weight, reps, logged });
@@ -53,6 +56,58 @@ describe('formatTally', () => {
 
   it('reads as zero, not as a failure', () => {
     expect(formatTally([{ weight: 80, reps: 8, logged: false }])).toBe('0 logged');
+  });
+});
+
+describe('mixed loads — the tally must not quote one weight for four', () => {
+  // The bug: four sets at 40, 20, 20 and 20 read "4 logged · 25 reps at 40".
+  const mixed = [set(40, 10), set(20, 5), set(20, 5), set(20, 5)];
+
+  it('reports the range in the tally', () => {
+    expect(formatTally(mixed)).toBe('4 logged · 25 reps, 20–40kg');
+  });
+
+  it('reports the range in the collapsed summary', () => {
+    expect(formatResult(mixed)).toBe('20–40kg × 10·5·5·5');
+  });
+
+  it('spots that the loads differed', () => {
+    expect(weightSpread(mixed)).toEqual({ min: 20, max: 40, mixed: true });
+    expect(weightSpread([set(40, 8), set(40, 8)])).toEqual({ min: 40, max: 40, mixed: false });
+  });
+
+  it('still says "at" when every set was the same load', () => {
+    expect(formatTally([set(40, 8), set(40, 8)])).toBe('2 logged · 16 reps at 40');
+    expect(formatResult([set(40, 8), set(40, 8)])).toBe('40 × 8·8');
+  });
+});
+
+describe('a carry is in metres, not reps', () => {
+  const carry = [set(24, 40), set(24, 40), set(24, 20)];
+
+  it('targets read in metres', () => {
+    expect(formatTarget({ targetSets: 3, repMin: 20, repMax: 40, repUnit: 'metres' }))
+      .toBe('3 × 20–40m');
+  });
+
+  it('totals metres without calling them reps', () => {
+    expect(formatTally(carry, 'metres')).toBe('3 logged · 100m at 24');
+  });
+
+  it('summarises a carry in metres', () => {
+    expect(formatResult(carry, 'metres')).toBe('24 × 40·40·20m');
+  });
+
+  it('names the unit on the column head', () => {
+    expect(unitLabel('metres')).toBe('M');
+    expect(unitLabel('seconds')).toBe('SEC');
+    expect(unitLabel()).toBe('REPS');
+  });
+
+  it('knows which work has a rep range at all', () => {
+    expect(isRepBased('reps')).toBe(true);
+    expect(isRepBased(undefined)).toBe(true);
+    expect(isRepBased('metres')).toBe(false);
   });
 });
 

@@ -19,7 +19,7 @@ import { C, PlateauBanner, defaultPlateauSuggestions } from '../design';
 export default function MainApp() {
   const { profile, refreshProfile } = useAuth();
   const [view, setView] = useState('workout');
-  const { fetchSessions } = useWorkoutData();
+  const { fetchSessions, fetchNonRepExercises } = useWorkoutData();
   const [daysSince, setDaysSince] = useState(0);
   const [plateaus, setPlateaus] = useState([]);
   const [v2Done, setV2Done] = useState(profile?.settings?.completed_v2_migration || false);
@@ -44,16 +44,17 @@ export default function MainApp() {
 
   useEffect(() => {
     console.log('[MainApp] Mounted — fetching alert data...');
-    fetchSessions()
-      .then((sessions) => {
+    Promise.all([fetchSessions(), fetchNonRepExercises()])
+      .then(([sessions, nonRep]) => {
         console.log('[MainApp] Alert data loaded —', sessions.length, 'sessions');
         setDaysSince(daysSinceLastSession(sessions));
-        setPlateaus(detectPlateaus(sessions));
+        // A carry has no volume, so it can't plateau.
+        setPlateaus(detectPlateaus(sessions, { excludeExerciseIds: nonRep.ids }));
       })
       .catch((err) => {
         console.error('[MainApp] Alert fetch failed (non-blocking):', err);
       });
-  }, [fetchSessions]);
+  }, [fetchSessions, fetchNonRepExercises]);
 
   const renderView = () => {
     switch (view) {

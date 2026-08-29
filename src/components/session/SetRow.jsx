@@ -1,6 +1,7 @@
 import { Check } from 'lucide-react';
 import NumberWheel, { WHEEL_H } from './NumberWheel';
 import { C3, FONTS, ICON, TABULAR } from '../../design';
+import { unitLabel } from '../../lib/sessionFormat';
 
 /**
  * One set: its number, a weight wheel, a reps wheel, and a tick.
@@ -20,6 +21,7 @@ export default function SetRow({
   reps,
   weightLadder = [],
   repValues = [],
+  repUnit = 'reps',
   logged = false,
   isNext = false,
   disabled = false,
@@ -31,6 +33,8 @@ export default function SetRow({
 }) {
   const bodyweight = !weightLadder || weightLadder.length === 0;
   const label = exerciseName ? `${exerciseName}, set ${setNumber}` : `Set ${setNumber}`;
+  // Spoken unit for the right-hand wheel: "40 metres" reads properly, "40 reps" does not.
+  const unitWord = repUnit === 'metres' ? 'metres' : repUnit === 'seconds' ? 'seconds' : 'reps';
 
   return (
     <div
@@ -79,8 +83,8 @@ export default function SetRow({
         width={REPS_WHEEL_W}
         logged={logged}
         disabled={disabled}
-        unit="reps"
-        ariaLabel={`${label} reps`}
+        unit={unitWord}
+        ariaLabel={`${label} ${unitWord}`}
       />
 
       <div style={{ flex: 1 }} />
@@ -120,7 +124,7 @@ export default function SetRow({
 }
 
 /** The KG / REPS heads, on the same grid as the rows above. */
-export function SetColumnHeads({ bodyweight = false }) {
+export function SetColumnHeads({ bodyweight = false, repUnit = 'reps' }) {
   const head = {
     fontFamily: FONTS.mono,
     fontSize: 9.5,
@@ -138,7 +142,7 @@ export function SetColumnHeads({ bodyweight = false }) {
       <div style={{ flex: 1 }} />
       <div style={{ ...head, width: WEIGHT_WHEEL_W }}>{bodyweight ? '' : 'KG'}</div>
       <div style={{ width: GUTTER, flexShrink: 0 }} />
-      <div style={{ ...head, width: REPS_WHEEL_W }}>REPS</div>
+      <div style={{ ...head, width: REPS_WHEEL_W }}>{unitLabel(repUnit)}</div>
       <div style={{ flex: 1 }} />
       <div style={{ width: ICON.tick, flexShrink: 0 }} />
     </div>

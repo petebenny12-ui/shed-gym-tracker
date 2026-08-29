@@ -6,7 +6,7 @@
 
 import { buildLadderForExercise, nearest } from './ladder';
 import { missStreakFrom, suggestNextLoad } from './progression';
-import { topWeight } from './sessionFormat';
+import { isRepBased, topWeight } from './sessionFormat';
 
 const TIER_ORDER = { crux: 0, foundation: 1, armour: 2 };
 
@@ -44,13 +44,27 @@ export function missionName(day) {
   return cleaned.charAt(0).toUpperCase() + cleaned.slice(1).toLowerCase();
 }
 
-/** The rep values a reps wheel offers. Always reaches past the top of the range. */
-export function repValuesFor(repMax) {
-  const top = Math.max(30, Number(repMax) + 10 || 0);
+/**
+ * The values the right-hand wheel offers.
+ *
+ * Reps count up in ones; a carry counts up in 5m steps, because nobody walks
+ * 37 metres. Always reaches past the top of the range.
+ */
+export function repValuesFor(repMax, repUnit = 'reps') {
+  const max = Number(repMax) || 0;
+  if (repUnit === 'metres') {
+    const top = Math.max(100, Math.ceil((max + 20) / 5) * 5);
+    return Array.from({ length: top / 5 }, (_, i) => (i + 1) * 5);
+  }
+  if (repUnit === 'seconds') {
+    const top = Math.max(120, Math.ceil((max + 30) / 5) * 5);
+    return Array.from({ length: top / 5 }, (_, i) => (i + 1) * 5);
+  }
+  const top = Math.max(30, max + 10);
   return Array.from({ length: top }, (_, i) => i + 1);
 }
 
-function prefillFor({ ladder, suggestion, lastSets, repMin, repMax, setIndex }) {
+function prefillFor({ ladder, suggestion, lastSets, repMin, repMax, repValues, setIndex }) {
   const last = lastSets?.[setIndex];
   const lastReps = Number(last?.reps);
   const lastWeight = topWeight(lastSets);
@@ -65,6 +79,12 @@ function prefillFor({ ladder, suggestion, lastSets, repMin, repMax, setIndex }) 
   if (suggestion?.delta > 0) reps = Number(repMin) || lastReps || 8;
   else if (Number.isFinite(lastReps) && lastReps > 0) reps = lastReps;
   else reps = Number(repMin) || Number(repMax) || 8;
+
+  // Snap onto what the wheel actually offers — a carry counts in 5s, so a
+  // prefill of 8 would sit between two rungs.
+  if (repValues && repValues.length > 0 && !repValues.includes(reps)) {
+    reps = nearest(repValues, reps) ?? repValues[0];
+  }
 
   return { weight, reps };
 }
@@ -91,6 +111,7 @@ export function toSessionExercises({ day, history = {}, settings = {} }) {
     const targetSets = Number(ss.targetSets) || DEFAULT_SETS[tier] || 3;
     const repMin = ss.repMin ?? null;
     const repMax = ss.repMax ?? null;
+    const repUnit = ss.repUnit || 'reps';
     const setting = settings[exercise.id] || null;
 
     const ladder = buildLadderForExercise(exercise, setting);
@@ -98,7 +119,9 @@ export function toSessionExercises({ day, history = {}, settings = {} }) {
     const lastSets = sessions[0] || [];
     const repRange = { min: Number(repMin) || 1, max: Number(repMax) || 0 };
 
-    const suggestion = repRange.max
+    // Double progression is a rep rule. A carry has no rep range and no
+    // meaningful e1RM, so it gets no suggestion rather than a nonsense one.
+    const suggestion = repRange.max && isRepBased(repUnit)
       ? suggestNextLoad({
           lastSets,
           repRange,
@@ -109,12 +132,12 @@ export function toSessionExercises({ day, history = {}, settings = {} }) {
         })
       : { suggestion: null, delta: 0, reason: null, deload: false };
 
-    const repValues = repValuesFor(repMax);
+    const repValues = repValuesFor(repMax, repUnit);
 
     const sets = Array.from({ length: targetSets }, (_, i) => ({
       setNumber: i + 1,
       logged: false,
-      ...prefillFor({ ladder, suggestion, lastSets, repMin, repMax, setIndex: i }),
+      ...prefillFor({ ladder, suggestion, lastSets, repMin, repMax, repValues, setIndex: i }),
     }));
 
     return {
@@ -128,6 +151,7 @@ export function toSessionExercises({ day, history = {}, settings = {} }) {
       targetSets,
       repMin,
       repMax,
+      repUnit,
       ladder,
       repValues,
       lastSets,

@@ -17,21 +17,23 @@ import BodyweightChart from './BodyweightChart';
 import BodyweightGoalEditor from './BodyweightGoalEditor';
 
 export default function ProgressView() {
-  const { fetchSessions } = useWorkoutData();
+  const { fetchSessions, fetchNonRepExercises } = useWorkoutData();
   const { fetchAll } = useBodyweight();
   const { profile } = useAuth();
   const [sessions, setSessions] = useState([]);
   const [bwLogs, setBwLogs] = useState([]);
   const [selectedExercise, setSelectedExercise] = useState(null);
+  const [nonRep, setNonRep] = useState({ ids: new Set(), names: new Set() });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([fetchSessions(), fetchAll()]).then(([s, bw]) => {
+    Promise.all([fetchSessions(), fetchAll(), fetchNonRepExercises()]).then(([s, bw, nr]) => {
       setSessions(s);
       setBwLogs(bw);
+      setNonRep(nr);
       setLoading(false);
     });
-  }, [fetchSessions, fetchAll]);
+  }, [fetchSessions, fetchAll, fetchNonRepExercises]);
 
   // Build weekly frequency data for FrequencyChart
   const weeklyFrequency = useMemo(() => {
@@ -67,13 +69,16 @@ export default function ProgressView() {
     return map;
   }, [sessions]);
 
-  // Build exercise list with id, name, muscleGroup for ExerciseSelector
+  // Build exercise list with id, name, muscleGroup for ExerciseSelector.
+  // A carry is logged in metres, so it has no strength trend to chart — it is
+  // left out rather than plotted as if 40 metres were 40 reps.
   const exercises = useMemo(() => {
     const exMap = {};
     for (const s of sessions) {
       for (const set of s.session_sets || []) {
         const ex = set.exercises;
         if (!ex?.name) continue;
+        if (nonRep.ids.has(ex.id) || nonRep.names.has(ex.name)) continue;
         if (!exMap[ex.id || ex.name]) {
           exMap[ex.id || ex.name] = {
             id: ex.id || ex.name,
@@ -84,7 +89,7 @@ export default function ProgressView() {
       }
     }
     return Object.values(exMap).sort((a, b) => a.name.localeCompare(b.name));
-  }, [sessions]);
+  }, [sessions, nonRep]);
 
   // Build progress chart points for selected exercise (chronological: oldest first)
   const progressPoints = useMemo(() => {

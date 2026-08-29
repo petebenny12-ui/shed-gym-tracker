@@ -3,6 +3,10 @@
  *
  * Every one of these has to read at arm's length, on a phone, in a shed. Short
  * beats complete. None of them may render a short session as a shortfall.
+ *
+ * Units: a set's number is reps by default, but a carry is logged in metres.
+ * Nothing here may add metres to a rep count or quote one weight for a mixed
+ * set of loads.
  */
 
 /** 82.5 stays 82.5; 80.0 becomes 80. */
@@ -12,14 +16,44 @@ export function formatWeight(v) {
   return String(Math.round(n * 100) / 100);
 }
 
-/** "4 × 5–8", or "4 × 8" when the range is a single number. */
-export function formatTarget({ targetSets, repMin, repMax } = {}) {
+/** How a unit's number is written: 8 reps, 40m, 30s. */
+export function formatUnitValue(n, repUnit = 'reps') {
+  if (repUnit === 'metres') return `${n}m`;
+  if (repUnit === 'seconds') return `${n}s`;
+  return String(n);
+}
+
+/** The word for a total: "8 reps", "40m", "30s". */
+export function formatUnitTotal(n, repUnit = 'reps') {
+  if (repUnit === 'metres') return `${n}m`;
+  if (repUnit === 'seconds') return `${n}s`;
+  return `${n} rep${n === 1 ? '' : 's'}`;
+}
+
+/** Column head over the right-hand wheel. */
+export function unitLabel(repUnit = 'reps') {
+  if (repUnit === 'metres') return 'M';
+  if (repUnit === 'seconds') return 'SEC';
+  return 'REPS';
+}
+
+/** Only reps-based work has a rep range, a progression rule or a strength trend. */
+export function isRepBased(repUnit) {
+  return !repUnit || repUnit === 'reps';
+}
+
+/** "4 × 5–8", "3 × 20–40m", or "3 sets" when there is no range. */
+export function formatTarget({ targetSets, repMin, repMax, repUnit = 'reps' } = {}) {
   const sets = Number(targetSets);
   const lo = Number(repMin);
   const hi = Number(repMax);
-  const reps = Number.isFinite(lo) && Number.isFinite(hi)
-    ? (lo === hi ? `${lo}` : `${lo}–${hi}`)
-    : (Number.isFinite(hi) ? `${hi}` : Number.isFinite(lo) ? `${lo}` : '');
+
+  let reps = '';
+  if (Number.isFinite(lo) && Number.isFinite(hi)) {
+    reps = lo === hi ? formatUnitValue(lo, repUnit) : `${lo}–${formatUnitValue(hi, repUnit)}`;
+  } else if (Number.isFinite(hi)) reps = formatUnitValue(hi, repUnit);
+  else if (Number.isFinite(lo)) reps = formatUnitValue(lo, repUnit);
+
   if (!Number.isFinite(sets)) return reps;
   return reps ? `${sets} × ${reps}` : `${sets} sets`;
 }
@@ -54,45 +88,70 @@ export function topWeight(sets) {
 }
 
 /**
- * The compact result carried by a collapsed row: "82.5 × 6·6·5·5".
- * Bodyweight work drops the load: "6·6·5·5".
+ * The spread of loads across the logged sets.
+ * `mixed` is what stops a line quoting one weight for four different ones.
  */
-export function formatResult(sets) {
+export function weightSpread(sets) {
+  const weights = loggedSets(sets).map(weightOf).filter((w) => w != null && w > 0);
+  if (weights.length === 0) return { min: null, max: null, mixed: false };
+  const min = Math.min(...weights);
+  const max = Math.max(...weights);
+  return { min, max, mixed: min !== max };
+}
+
+/** "82.5" for one load, "20–40kg" when they differed, '' for bodyweight. */
+function loadLabel(sets) {
+  const { min, max, mixed } = weightSpread(sets);
+  if (min == null) return '';
+  return mixed ? `${formatWeight(min)}–${formatWeight(max)}kg` : formatWeight(max);
+}
+
+/**
+ * The compact result carried by a collapsed row: "82.5 × 6·6·5·5".
+ * Mixed loads show the range — "20–40kg × 8·8·8·6" — rather than picking one.
+ * Bodyweight work drops the load entirely.
+ */
+export function formatResult(sets, repUnit = 'reps') {
   const done = loggedSets(sets);
   if (done.length === 0) return '';
-  const reps = done.map(repsOf).join('·');
-  const w = topWeight(done);
-  return w == null || w === 0 ? reps : `${formatWeight(w)} × ${reps}`;
+  const numbers = done.map(repsOf);
+  const tail = repUnit === 'reps' || !repUnit
+    ? numbers.join('·')
+    : formatUnitValue(numbers.join('·'), repUnit);
+  const load = loadLabel(done);
+  return load ? `${load} × ${tail}` : tail;
 }
 
 /**
  * The open block's tally: "3 logged · 17 reps at 82.5".
+ * Mixed loads read "4 logged · 25 reps, 20–40kg" — the line reports what was
+ * actually lifted rather than quoting the top set for all of them.
  * Reads as an account of what got done, never as a count of what didn't.
  */
-export function formatTally(sets) {
+export function formatTally(sets, repUnit = 'reps') {
   const done = loggedSets(sets);
   if (done.length === 0) return '0 logged';
-  const reps = done.reduce((t, s) => t + repsOf(s), 0);
-  const w = topWeight(done);
-  const at = w == null || w === 0 ? '' : ` at ${formatWeight(w)}`;
-  return `${done.length} logged · ${reps} rep${reps === 1 ? '' : 's'}${at}`;
+  const total = done.reduce((t, s) => t + repsOf(s), 0);
+  const { mixed } = weightSpread(done);
+  const load = loadLabel(done);
+  const suffix = load ? (mixed ? `, ${load}` : ` at ${load}`) : '';
+  return `${done.length} logged · ${formatUnitTotal(total, repUnit)}${suffix}`;
 }
 
 /**
  * "last Anvil 4 × 8 @ 80" — what happened the last time this exercise came round.
  * Returns '' when there is no history, so a first-ever exercise says nothing at all.
  */
-export function formatLastTime(lastSets, missionName) {
+export function formatLastTime(lastSets, missionName, repUnit = 'reps') {
   const done = loggedSets(lastSets);
   if (done.length === 0) return '';
-  const reps = done.map(repsOf);
-  const lo = Math.min(...reps);
-  const hi = Math.max(...reps);
-  const repPart = lo === hi ? `${hi}` : `${lo}–${hi}`;
-  const w = topWeight(done);
+  const numbers = done.map(repsOf);
+  const lo = Math.min(...numbers);
+  const hi = Math.max(...numbers);
+  const part = lo === hi ? formatUnitValue(hi, repUnit) : `${lo}–${formatUnitValue(hi, repUnit)}`;
   const where = missionName ? `last ${missionName}` : 'last time';
-  const load = w == null || w === 0 ? '' : ` @ ${formatWeight(w)}`;
-  return `${where} ${done.length} × ${repPart}${load}`;
+  const load = loadLabel(done);
+  return `${where} ${done.length} × ${part}${load ? ` @ ${load}` : ''}`;
 }
 
 /** A collapsed row's meta before it is done: "3 × 6–10 · 60". */
