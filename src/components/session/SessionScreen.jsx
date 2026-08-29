@@ -434,10 +434,7 @@ export default function SessionScreen({ day, onBack }) {
             border: 'none',
             borderRadius: C3.radius,
             padding: 18,
-            fontFamily: FONTS.sans,
-            fontSize: 12,
-            letterSpacing: 1.2,
-            textTransform: 'uppercase',
+            ...TYPE.button,
             cursor: 'pointer',
           }}
         >
@@ -561,10 +558,7 @@ export default function SessionScreen({ day, onBack }) {
             border: 'none',
             borderRadius: C3.radius,
             padding: 18,
-            fontFamily: FONTS.sans,
-            fontSize: 12,
-            letterSpacing: 1.2,
-            textTransform: 'uppercase',
+            ...TYPE.button,
             cursor: anythingLogged ? 'pointer' : 'default',
           }}
         >
@@ -631,10 +625,7 @@ export default function SessionScreen({ day, onBack }) {
                 border: 'none',
                 borderRadius: C3.radius,
                 padding: 18,
-                fontFamily: FONTS.sans,
-                fontSize: 12,
-                letterSpacing: 1.2,
-                textTransform: 'uppercase',
+            ...TYPE.button,
                 cursor: 'pointer',
                 marginBottom: 10,
               }}
@@ -651,10 +642,7 @@ export default function SessionScreen({ day, onBack }) {
                 border: `${C3.hair}px solid ${C3.line2}`,
                 borderRadius: C3.radius,
                 padding: 18,
-                fontFamily: FONTS.sans,
-                fontSize: 12,
-                letterSpacing: 1.2,
-                textTransform: 'uppercase',
+            ...TYPE.button,
                 cursor: 'pointer',
               }}
             >

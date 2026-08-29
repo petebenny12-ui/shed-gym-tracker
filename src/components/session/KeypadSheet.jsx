@@ -136,7 +136,6 @@ export default function KeypadSheet({
     fontFamily: FONTS.sans,
     fontSize: 12,
     letterSpacing: 1.2,
-    textTransform: 'uppercase',
     cursor: 'pointer',
   };
 

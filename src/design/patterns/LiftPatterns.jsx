@@ -6,9 +6,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
-import { FONTS, RADIUS, SPACE, cardBase } from '../tokens';
+import { C3, FONTS, RADIUS, SPACE, TYPE, cardBase } from '../tokens';
 import { ModeChip } from '../primitives';
-import { C3 } from '..';
 
 // ─── CollapsibleBar ────────────────────────────────────────
 // Used for Warm-up / Cool-down sections.
@@ -323,40 +322,68 @@ function SetInput({ value, onChange }) {
 
 // ─── Day chooser row ───────────────────────────────────────
 // For the Lift landing page — "DAY 1 — Chest + Triceps" card.
-export function DayChooserRow({ dayNumber, dayName, sessionsLogged, lastDate, onClick }) {
+/** I, II, III, IV — the mission's position in the rotation. */
+const ROMAN = ["", "I", "II", "III", "IV", "V", "VI", "VII"];
+
+/**
+ * One mission in the day list.
+ *
+ * "DAY 4 — THE ANVIL" said the same thing twice: the missions are named, and
+ * there are exactly four of them. So the name is the row's title, its crux
+ * sits underneath, and the position is a small numeral rather than a label.
+ * Hairline rows, matching the session screen's collapsed exercises — no cards.
+ */
+export function DayChooserRow({
+  dayNumber,
+  dayName,
+  cruxName,
+  cruxNext,
+  sessionsLogged,
+  lastDate,
+  onClick,
+}) {
+  const subtitle = [cruxName, cruxNext ? `${cruxNext}kg next` : null]
+    .filter(Boolean)
+    .join(" · ");
+
   return (
     <button
       onClick={onClick}
       style={{
-        ...cardBase,
         width: "100%",
-        padding: SPACE.lg,
+        minHeight: 44,
+        padding: "13px 22px",
+        background: "transparent",
+        border: "none",
+        borderBottom: `${C3.hair}px solid ${C3.lineFaint}`,
         textAlign: "left",
         cursor: "pointer",
         display: "flex",
-        alignItems: "center",
+        alignItems: "baseline",
         gap: 14,
       }}
     >
-      <div style={{ flex: 1 }}>
-        <div style={{ display: "flex", alignItems: "baseline", gap: 10, flexWrap: "wrap" }}>
-          <span
-            style={{
-              fontFamily: FONTS.sans,
-              color: C3.amber,
-              fontSize: 16,
-              fontWeight: 700,
-              letterSpacing: 0.8,
-            }}
-          >
-            DAY {dayNumber}
-          </span>
-          <span style={{ color: C3.text, fontSize: 15, fontWeight: 500 }}>— {dayName}</span>
-        </div>
-        <div style={{ color: C3.muted, fontSize: 12, marginTop: 4 }}>
-          {lastDate ? `Last: ${lastDate} · ` : ""}{sessionsLogged} sessions logged
-        </div>
-      </div>
+      <span
+        style={{
+          ...TYPE.sectionLabel,
+          width: 22,
+          flexShrink: 0,
+          color: C3.faint,
+        }}
+      >
+        {ROMAN[dayNumber] || dayNumber}
+      </span>
+
+      <span style={{ flex: 1, minWidth: 0 }}>
+        <span style={{ ...TYPE.exerciseCollapsed, display: "block" }}>{dayName}</span>
+        {subtitle ? (
+          <span style={{ ...TYPE.meta, display: "block", marginTop: 3 }}>{subtitle}</span>
+        ) : null}
+      </span>
+
+      <span style={{ ...TYPE.meta, color: C3.faint, flexShrink: 0 }}>
+        {lastDate || (sessionsLogged ? `${sessionsLogged}` : "—")}
+      </span>
     </button>
   );
 }

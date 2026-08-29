@@ -1,19 +1,25 @@
-import { C3 } from '../../design';
+import { C3, FONTS } from '../../design';
 
+/**
+ * How long it has been. One line, stated, and that is all.
+ *
+ * This used to be a full-width amber box reading "The shed is waiting. Get
+ * back to it." Being told off by a workout app is why people delete workout
+ * apps. The fact is enough; the reader can draw their own conclusion.
+ */
 export default function RestDayNudge({ daysSince }) {
   if (daysSince < 3) return null;
 
   return (
     <div
-      className="mx-3 mt-3 p-3 rounded-lg text-center"
-      style={{ background: C3.amberWarm, border: `1px solid ${C3.amber}` }}
+      style={{
+        padding: '10px 22px 0',
+        fontFamily: FONTS.sans,
+        fontSize: 12,
+        color: C3.faint,
+      }}
     >
-      <div className="text-sm font-bold" style={{ color: C3.amber }}>
-        {daysSince} days since your last session
-      </div>
-      <div className="text-xs mt-1" style={{ color: C3.soft }}>
-        The shed is waiting. Get back to it.
-      </div>
+      Last session {daysSince} days ago
     </div>
   );
 }

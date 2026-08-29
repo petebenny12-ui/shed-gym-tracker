@@ -59,7 +59,6 @@ export function BottomNav({ active, onChange }) {
                 fontSize: 10,
                 fontWeight: 700,
                 letterSpacing: 1.2,
-                textTransform: "uppercase",
               }}
             >
               {t.label}

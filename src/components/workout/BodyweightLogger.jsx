@@ -189,11 +189,14 @@ export default function BodyweightLogger() {
       )}
 
       {needsWeeklyWeighIn && (
+        // A missed weigh-in is not an error, so it isn't red and isn't a panel.
         <div
-          className="mb-2 p-2 rounded text-center text-xs font-bold"
-          style={{ background: C3.warnFaint, border: `1px solid ${C3.warn}`, color: C3.warn }}
+          className="mb-2"
+          style={{ fontFamily: FONTS.sans, fontSize: 12, color: C3.faint }}
         >
-          &#9888; WEEKLY WEIGH-IN DUE — last logged {daysSinceLast === 999 ? 'never' : `${daysSinceLast} days ago`}
+          {daysSinceLast === 999
+            ? 'No weigh-in logged yet'
+            : `Last weigh-in ${daysSinceLast} days ago`}
         </div>
       )}
 

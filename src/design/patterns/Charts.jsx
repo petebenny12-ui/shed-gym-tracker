@@ -16,13 +16,34 @@ import { Card, SectionLabel, Chip, LegendDot } from '../primitives';
 import { C3 } from '..';
 
 // ═════════════════════════════════════════════════════════════
+// ChartSection — a hairline-separated block, not a floating card.
+// ═════════════════════════════════════════════════════════════
+// Charts used to sit in bordered, rounded panels, which made the screen read
+// as a dashboard of widgets. A section is a rule and some space: the content
+// is the thing. `padding` is accepted and ignored so call sites did not all
+// have to change at once.
+function ChartSection({ children, style }) {
+  return (
+    <section
+      style={{
+        padding: "16px 0 18px",
+        borderBottom: `${C3.hair}px solid ${C3.line}`,
+        ...style,
+      }}
+    >
+      {children}
+    </section>
+  );
+}
+
+// ═════════════════════════════════════════════════════════════
 // FrequencyChart — weekly sessions vs target
 // ═════════════════════════════════════════════════════════════
 // weeks: [{ label: "29 Mar", sessions: 3 }, ...]
 // target: number (weekly session goal)
 export function FrequencyChart({ weeks, target = 4 }) {
   return (
-    <Card padding={SPACE.lg} style={{ marginBottom: 14 }}>
+    <ChartSection padding={SPACE.lg} style={{ marginBottom: 14 }}>
       <div
         style={{
           display: "flex",
@@ -76,7 +97,7 @@ export function FrequencyChart({ weeks, target = 4 }) {
                     left: 0,
                     right: 0,
                     height: `${pct}%`,
-                    background: hit ? C3.amber : C3.you,
+                    background: hit ? C3.amber : C3.line2,
                     opacity: hit ? 1 : 0.55,
                     transition: "height 300ms",
                   }}
@@ -97,7 +118,7 @@ export function FrequencyChart({ weeks, target = 4 }) {
           );
         })}
       </div>
-    </Card>
+    </ChartSection>
   );
 }
 
@@ -142,19 +163,25 @@ export function computeGappedGroups(sessionsByGroup, now = new Date(), gapDays =
 export function GapAlert({ gappedGroups }) {
   if (!gappedGroups || gappedGroups.length === 0) return null;
 
+  // One quiet line, not a red panel: red is for destructive actions and real
+  // errors. And a list of six muscle groups in one breathless sentence is not
+  // readable — past three, say how many and name the first two.
+  const named = gappedGroups.slice(0, 2).join(" and ");
+  const rest = gappedGroups.length - 2;
+  const what = rest > 0
+    ? `${named} and ${rest} other${rest === 1 ? "" : "s"}`
+    : gappedGroups.join(" and ");
+
   return (
     <div
       style={{
         marginTop: 12,
-        padding: "10px 14px",
-        background: C3.warnFaint,
-        borderLeft: `3px solid ${C3.warn}`,
-        borderRadius: RADIUS.md,
-        color: C3.text,
+        fontFamily: FONTS.sans,
         fontSize: 12,
+        color: C3.faint,
       }}
     >
-      <b style={{ color: C3.warn }}>Gap alert:</b> No {gappedGroups.join(", ")} in 2+ weeks
+      Nothing logged for {what} in two weeks
     </div>
   );
 }
@@ -174,7 +201,7 @@ export function ExerciseSelector({ exercises, selectedId, onSelect, initialOpen 
   return (
     <div style={{ display: "grid", gap: 8 }}>
       {Object.entries(groups).map(([groupName, exs]) => (
-        <Card key={groupName} padding={0} style={{ overflow: "hidden" }}>
+        <ChartSection key={groupName} padding={0} style={{ overflow: "hidden" }}>
           <button
             onClick={() => setOpenGroup(openGroup === groupName ? null : groupName)}
             style={{
@@ -211,7 +238,7 @@ export function ExerciseSelector({ exercises, selectedId, onSelect, initialOpen 
               ))}
             </div>
           )}
-        </Card>
+        </ChartSection>
       ))}
     </div>
   );
@@ -259,11 +286,11 @@ function groupExercises(exercises) {
 export function ProgressChart({ points, maxBest = 30, maxVolume = 1000, title, subtitle }) {
   if (!points || points.length === 0) {
     return (
-      <Card padding={SPACE.lg}>
+      <ChartSection>
         <div style={{ color: C3.muted, fontSize: 12, textAlign: "center", padding: 20 }}>
           No sessions yet
         </div>
-      </Card>
+      </ChartSection>
     );
   }
 
@@ -282,7 +309,7 @@ export function ProgressChart({ points, maxBest = 30, maxVolume = 1000, title, s
   const volPath = points.map((p, i) => `${xs[i]},${ly(p.volume, maxVolume)}`).join(" ");
 
   return (
-    <Card padding={SPACE.lg}>
+    <ChartSection>
       {(title || subtitle) && (
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
           {title && <SectionLabel>{title}</SectionLabel>}
@@ -312,10 +339,10 @@ export function ProgressChart({ points, maxBest = 30, maxVolume = 1000, title, s
         ))}
         {/* Volume (blue) */}
         {points.length > 1 && (
-          <polyline points={volPath} fill="none" stroke={C3.you} strokeWidth="2" />
+          <polyline points={volPath} fill="none" stroke={C3.faint} strokeWidth="2" />
         )}
         {points.map((p, i) => (
-          <circle key={`v${i}`} cx={xs[i]} cy={ly(p.volume, maxVolume)} r="4" fill={C3.you} />
+          <circle key={`v${i}`} cx={xs[i]} cy={ly(p.volume, maxVolume)} r="4" fill={C3.faint} />
         ))}
         {/* X labels */}
         {points.map((p, i) => (
@@ -334,8 +361,120 @@ export function ProgressChart({ points, maxBest = 30, maxVolume = 1000, title, s
         }}
       >
         <LegendDot color={C3.amber} label="Best Set (kg)" />
-        <LegendDot color={C3.you} label="Volume (kg)" />
+        <LegendDot color={C3.faint} label="Volume (kg)" />
       </div>
-    </Card>
+    </ChartSection>
+  );
+}
+
+// ═════════════════════════════════════════════════════════════
+// CruxTrends — the four big lifts, side by side
+// ═════════════════════════════════════════════════════════════
+// The four cruxes are what the method is actually about, so they get their own
+// row rather than being buried in an exercise picker. Small multiples: same
+// scale rules, same hue, read across in one glance.
+//
+// lifts: [{ name, points: number[] (oldest first), latest: number, delta: number }]
+export function CruxTrends({ lifts }) {
+  if (!lifts || lifts.length === 0) return null;
+
+  return (
+    <ChartSection>
+      <SectionLabel>The four lifts</SectionLabel>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: `repeat(${Math.min(lifts.length, 4)}, 1fr)`,
+          gap: 12,
+          marginTop: 12,
+        }}
+      >
+        {lifts.map((lift) => (
+          <Sparkline key={lift.name} {...lift} />
+        ))}
+      </div>
+    </ChartSection>
+  );
+}
+
+function Sparkline({ name, points = [], latest, delta }) {
+  const W = 72;
+  const H = 26;
+  const clean = points.filter((p) => Number.isFinite(p));
+  const min = Math.min(...clean);
+  const max = Math.max(...clean);
+  const span = max - min || 1;
+
+  const path = clean
+    .map((p, i) => {
+      const x = clean.length === 1 ? W / 2 : (i * W) / (clean.length - 1);
+      const y = H - ((p - min) / span) * H;
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    })
+    .join(" ");
+
+  return (
+    <div style={{ minWidth: 0 }}>
+      <div
+        style={{
+          fontFamily: FONTS.sans,
+          fontSize: 10,
+          fontWeight: 600,
+          letterSpacing: 1.2,
+          textTransform: "uppercase",
+          color: C3.faint,
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        }}
+      >
+        {name}
+      </div>
+
+      <div
+        style={{
+          fontFamily: FONTS.sans,
+          fontSize: 17,
+          fontWeight: 600,
+          color: C3.text,
+          fontVariantNumeric: "tabular-nums",
+          marginTop: 3,
+        }}
+      >
+        {latest == null ? "—" : latest}
+        {latest != null && (
+          <span style={{ fontSize: 11, fontWeight: 400, color: C3.muted }}>kg</span>
+        )}
+      </div>
+
+      {clean.length > 1 ? (
+        <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: H, marginTop: 4 }}>
+          <polyline
+            points={path}
+            fill="none"
+            stroke={C3.amber}
+            strokeWidth="1.5"
+            strokeLinejoin="round"
+            strokeLinecap="round"
+            vectorEffect="non-scaling-stroke"
+          />
+        </svg>
+      ) : (
+        <div style={{ height: H + 4 }} />
+      )}
+
+      {/* Movement over the window, stated. No arrows, no colour-coding a drop
+          as a failure — a deload week is not a red number. */}
+      <div
+        style={{
+          fontFamily: FONTS.sans,
+          fontSize: 11,
+          color: C3.muted,
+          fontVariantNumeric: "tabular-nums",
+        }}
+      >
+        {delta == null || delta === 0 ? "level" : delta > 0 ? `+${delta}` : `${delta}`}
+      </div>
+    </div>
   );
 }

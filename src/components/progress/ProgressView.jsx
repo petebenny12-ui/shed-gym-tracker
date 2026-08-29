@@ -1,13 +1,26 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useWorkoutData } from '../../hooks/useWorkoutData';
+import { useRoutine } from '../../hooks/useRoutine';
 import { useBodyweight } from '../../hooks/useBodyweight';
 import { useAuth } from '../../context/AuthContext';
-import { C3, Card, ExerciseSelector, FrequencyChart, GapAlert, ProgressChart, SPACE, SectionLabel, computeGappedGroups } from '../../design';
+import {
+  C3,
+  Card,
+  CruxTrends,
+  ExerciseSelector,
+  FrequencyChart,
+  GapAlert,
+  ProgressChart,
+  SPACE,
+  SectionLabel,
+  computeGappedGroups,
+} from '../../design';
 import BodyweightChart from './BodyweightChart';
 import BodyweightGoalEditor from './BodyweightGoalEditor';
 
 export default function ProgressView() {
   const { fetchSessions, fetchNonRepExercises } = useWorkoutData();
+  const { days } = useRoutine();
   const { fetchAll } = useBodyweight();
   const { profile } = useAuth();
   const [sessions, setSessions] = useState([]);
@@ -58,6 +71,42 @@ export default function ProgressView() {
     }
     return map;
   }, [sessions]);
+
+  // The four crux lifts, as small multiples. Top weight per session,
+  // chronological, last eight sessions of each.
+  const cruxTrends = useMemo(() => {
+    const cruxes = [];
+    for (const day of days || []) {
+      const row = (day.supersets || []).find((ss) => ss.tier === 'crux');
+      if (row?.ex1) cruxes.push({ id: row.ex1.id, name: row.ex1.name, day: day.day });
+    }
+    if (cruxes.length === 0) return [];
+
+    const chronological = [...sessions].sort(
+      (a, b) => new Date(a.started_at) - new Date(b.started_at),
+    );
+
+    return cruxes
+      .sort((a, b) => a.day - b.day)
+      .map(({ id, name }) => {
+        const points = [];
+        for (const s of chronological) {
+          const weights = (s.session_sets || [])
+            .filter((set) => set.exercise_id === id)
+            .map((set) => parseFloat(set.weight_kg) || 0)
+            .filter((w) => w > 0);
+          if (weights.length > 0) points.push(Math.max(...weights));
+        }
+        const window = points.slice(-8);
+        const latest = window.length ? window[window.length - 1] : null;
+        const delta = window.length > 1
+          ? Math.round((latest - window[0]) * 100) / 100
+          : null;
+        // "Barbell Back Squat" → "Back Squat"; the row is four barbells wide.
+        const short = name.replace(/^Barbell\s+/, '');
+        return { name: short, points: window, latest, delta };
+      });
+  }, [days, sessions]);
 
   // Build exercise list with id, name, muscleGroup for ExerciseSelector.
   // A carry is logged in metres, so it has no strength trend to chart — it is
@@ -134,6 +183,9 @@ export default function ProgressView() {
     <div style={{ padding: '0 12px 24px' }}>
       <BodyweightChart logs={bwLogs} settings={profile?.settings} />
       <BodyweightGoalEditor logs={bwLogs} />
+
+      {/* The four cruxes first — they are what the method is about */}
+      <CruxTrends lifts={cruxTrends} />
 
       {/* Training frequency with gap alert */}
       <FrequencyChart weeks={weeklyFrequency} target={4} />

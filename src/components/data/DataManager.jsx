@@ -193,8 +193,7 @@ export default function DataManager() {
               style={{
                 color: bwCount <= 1 ? C3.warn : C3.soft,
                 fontSize: 11,
-                letterSpacing: 1,
-                textTransform: 'uppercase',
+                letterSpacing: 1,
                 marginTop: 2,
                 fontWeight: bwCount <= 1 ? 700 : 400,
               }}
