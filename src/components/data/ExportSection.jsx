@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import { C3 } from '../../design';
+import { todayKey } from '../../lib/localDate';
 
 export default function ExportSection({ onStatus }) {
   const { user, profile } = useAuth();
@@ -37,7 +38,7 @@ export default function ExportSection({ onStatus }) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `shed-gym-${(profile?.display_name || 'data').toLowerCase()}-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `shed-gym-${(profile?.display_name || 'data').toLowerCase()}-${todayKey()}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

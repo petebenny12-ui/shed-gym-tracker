@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { supabase, withTimeout } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { sanitizeText } from '../lib/validation';
+import { localDateKey } from '../lib/localDate';
 
 export function useSupplements() {
   const { user } = useAuth();
@@ -104,7 +105,7 @@ export function useSupplements() {
     for (let i = 0; i < 60; i++) {
       const checkDate = new Date(today);
       checkDate.setDate(checkDate.getDate() - i);
-      const dateStr = checkDate.toISOString().slice(0, 10);
+      const dateStr = localDateKey(checkDate);
 
       if (data.some((d) => d.checked_date === dateStr)) {
         streak++;

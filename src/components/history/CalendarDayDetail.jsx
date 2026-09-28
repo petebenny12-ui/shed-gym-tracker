@@ -112,7 +112,7 @@ export default function CalendarDayDetail({
   onDelete,
   onBack,
 }) {
-  const dateDisplay = new Date(date + 'T12:00:00').toLocaleDateString('en-US', {
+  const dateDisplay = new Date(date + 'T12:00:00').toLocaleDateString('en-NZ', {
     weekday: 'long',
     month: 'long',
     day: 'numeric',

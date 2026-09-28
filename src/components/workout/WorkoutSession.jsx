@@ -10,6 +10,7 @@ import ExerciseDemo from '../exercises/ExerciseDemo';
 import PRCelebration from '../alerts/PRCelebration';
 import WarmUpSection from '../warmup/WarmUpSection';
 import CoolDownSection from '../warmup/CoolDownSection';
+import { localDateKey, localNoonISO, todayKey } from '../../lib/localDate';
 
 function getStorageKey(userId, dayNumber) {
   return `workout-progress-${userId}-${dayNumber}`;
@@ -70,7 +71,7 @@ export default function WorkoutSession({ day, onBack }) {
   const [demoExercise, setDemoExercise] = useState(null);
   const [prInfo, setPrInfo] = useState(null);
   const [sessionDate, setSessionDate] = useState(
-    savedProgress.current?.sessionDate || new Date().toISOString().slice(0, 10)
+    savedProgress.current?.sessionDate || todayKey()
   );
   const startedAtRef = useRef(savedProgress.current?.startedAt || new Date().toISOString());
 
@@ -130,9 +131,9 @@ export default function WorkoutSession({ day, onBack }) {
 
     if (exercises.length === 0) return;
 
-    const startedAt = sessionDate === new Date().toISOString().slice(0, 10)
+    const startedAt = sessionDate === localDateKey(startedAtRef.current)
       ? startedAtRef.current
-      : new Date(sessionDate + 'T12:00:00').toISOString();
+      : localNoonISO(sessionDate);
 
     const { error } = await saveSession({
       routineId: day.id,

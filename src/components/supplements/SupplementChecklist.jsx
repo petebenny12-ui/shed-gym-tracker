@@ -3,6 +3,7 @@ import { useSupplements } from '../../hooks/useSupplements';
 import { C3 } from '../../design';
 import SupplementSetup from './SupplementSetup';
 import StreakDisplay from './StreakDisplay';
+import { todayKey } from '../../lib/localDate';
 
 export default function SupplementChecklist() {
   const { fetchSupplements, fetchCheckins, toggleCheckin, getStreak, removeSupplement } = useSupplements();
@@ -11,7 +12,7 @@ export default function SupplementChecklist() {
   const [streaks, setStreaks] = useState({});
   const [showSetup, setShowSetup] = useState(false);
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayKey();
 
   const loadData = useCallback(async () => {
     const supps = await fetchSupplements();

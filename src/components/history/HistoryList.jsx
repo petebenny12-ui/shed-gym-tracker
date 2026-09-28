@@ -7,13 +7,12 @@ import { C3, CalendarGrid, CalendarHeader, CalendarLegend, MonthlySummary, Recen
 import { sessionTitle } from '../../lib/sessionTitle';
 import SessionEditor from './SessionEditor';
 import CalendarDayDetail from './CalendarDayDetail';
+import { localDateKey } from '../../lib/localDate';
 
 // Null-safe: a row with no start time can't sit on a calendar, so it gets no
 // key rather than throwing a RangeError and taking the Log tab down with it.
 function toDateKey(dateStr) {
-  if (!dateStr) return null;
-  const d = new Date(dateStr);
-  return Number.isNaN(d.getTime()) ? null : d.toISOString().slice(0, 10);
+  return localDateKey(dateStr);
 }
 
 const MONTHS = [
@@ -170,13 +169,13 @@ export default function HistoryList() {
       const dt = new Date(d);
       if (Number.isNaN(dt.getTime())) return null;
       dt.setDate(dt.getDate() - dt.getDay());
-      return dt.toISOString().slice(0, 10);
+      return localDateKey(dt);
     };
     const weeks = new Set(mySessions.map(s => weekOf(s.started_at)).filter(Boolean));
     let streak = 0;
     const cur = new Date();
     while (true) {
-      const wk = weekOf(cur.toISOString());
+      const wk = weekOf(cur);
       if (weeks.has(wk)) { streak++; cur.setDate(cur.getDate() - 7); } else break;
     }
     return streak;

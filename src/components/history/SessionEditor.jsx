@@ -2,16 +2,12 @@ import { useState } from 'react';
 import { useWorkoutData } from '../../hooks/useWorkoutData';
 import { C3, INNER_HIGHLIGHT } from '../../design';
 import { sessionDayLabel } from '../../lib/sessionTitle';
+import { localDateKey, localNoonISO, todayKey } from '../../lib/localDate';
 
 export default function SessionEditor({ session, dayTitle, onBack, onSaved }) {
   const { updateSession } = useWorkoutData();
   const [saving, setSaving] = useState(false);
-  const [sessionDate, setSessionDate] = useState(() => {
-    const d = session.started_at ? new Date(session.started_at) : null;
-    return d && !Number.isNaN(d.getTime())
-      ? d.toISOString().slice(0, 10)
-      : new Date().toISOString().slice(0, 10);
-  });
+  const [sessionDate, setSessionDate] = useState(() => localDateKey(session.started_at) || todayKey());
 
   // Build editable exercises from session_sets
   const buildExercises = () => {
@@ -74,7 +70,10 @@ export default function SessionEditor({ session, dayTitle, onBack, onSaved }) {
 
   const handleSave = async () => {
     setSaving(true);
-    const startedAt = new Date(sessionDate + 'T12:00:00').toISOString();
+    // Keep the original timestamp if the day wasn't changed.
+    const startedAt = sessionDate === localDateKey(session.started_at)
+      ? session.started_at
+      : localNoonISO(sessionDate);
     const payload = exercises.map((ex) => ({
       exerciseId: ex.exerciseId,
       supersetLabel: ex.supersetLabel,

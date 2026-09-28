@@ -13,6 +13,7 @@
 import { FONTS, RADIUS } from '../tokens';
 import { LegendDot } from '../primitives';
 import { C3 } from '..';
+import { localDateKey } from '../../lib/localDate';
 
 // Short labels for calendar tiles. Full names are fine for Recent Sessions but
 // truncate on tiles (you saw "Shoulde..." in the live app — that's why).
@@ -247,7 +248,7 @@ export function buildCalendarDays({ year, month, sessionsByDate = {}, today = ne
   const cells = [];
   for (let i = 0; i < firstWeekday; i++) cells.push(null);
 
-  const todayStr = today.toISOString().slice(0, 10);
+  const todayStr = localDateKey(today);
   for (let d = 1; d <= daysInMonth; d++) {
     const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
     const s = sessionsByDate[dateStr] || {};
