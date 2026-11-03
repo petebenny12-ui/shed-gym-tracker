@@ -26,7 +26,7 @@ src/
   lib/            — supabase client, auth helpers, validation, alerts, routineBuilder
   config/         — constants (colors, timer presets, supplement list, quotes)
 supabase/
-  migrations/     — numbered SQL migrations (001-007), run manually in Supabase SQL Editor
+  migrations/     — numbered SQL migrations (001-016), run manually in Supabase SQL Editor
 ```
 
 ## Key Patterns

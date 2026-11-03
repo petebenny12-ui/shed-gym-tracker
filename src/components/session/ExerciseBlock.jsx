@@ -253,7 +253,7 @@ export default function ExerciseBlock({
       >
         <div ref={bodyRef}>
           <div style={{ padding: '16px 22px 0' }}>
-            <SetColumnHeads bodyweight={bodyweight} repUnit={repUnit} />
+            <SetColumnHeads bodyweight={bodyweight} repUnit={repUnit} perHand={exercise?.loadType === 'per_hand'} />
           </div>
 
           <div style={{ padding: '4px 22px 0' }}>
@@ -266,6 +266,7 @@ export default function ExerciseBlock({
                 weightLadder={ladder}
                 repValues={repValues}
                 repUnit={repUnit}
+                perHand={exercise?.loadType === 'per_hand'}
                 logged={!!set.logged}
                 isNext={i === nextSetIndex}
                 exerciseName={name}
@@ -303,7 +304,7 @@ export default function ExerciseBlock({
                 />
               ) : null}
             </span>
-            <span style={{ ...TYPE.meta, color: C3.faint, flexShrink: 0 }}>hold to type</span>
+            <span style={{ ...TYPE.meta, color: C3.faint, flexShrink: 0 }}>flick · tap ± · hold to type</span>
           </div>
         </div>
       </div>

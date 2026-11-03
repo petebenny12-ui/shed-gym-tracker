@@ -22,6 +22,7 @@ export const EQUIPMENT_LADDERS = {
   dumbbell:   { increment: 2.5, min: 2.5 },  // singular spelling, just in case
   machine:    { increment: 5,   min: 5 },
   cable:      { increment: 5,   min: 5 },
+  plate:      { increment: 2.5, min: 2.5 },  // one plate: 2.5, 5, 10, 15, 20…
   bodyweight: null,
 };
 

@@ -1,38 +1,62 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { C3, FONTS, TYPE } from '../../design';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
+import { C3, FONTS } from '../../design';
 import { nearestIndex } from '../../lib/ladder';
+import { haptic } from '../../lib/haptics';
 
 /**
- * NumberWheel — a vertical scroll wheel for one number.
+ * NumberWheel v2 — a drum you can feel.
  *
- * The whole session screen lives or dies on this component. A set is logged by
- * flicking numbers; the OS keyboard never appears. Long-press is the escape
- * hatch to the in-app keypad.
+ * v1 rode the browser's native scroll with `scroll-snap: mandatory`. It was
+ * small (24px rows in a 72px window), it fought the page for the gesture, and
+ * snap-scroll settles late and differently on every phone, so it never felt
+ * like it was under the finger. v2 drops native scroll and drives the wheel
+ * itself, the way the pickers that do feel good are built (iOS UIPickerView,
+ * and the open-source react-wheel-picker this borrows its physics from):
  *
- * Geometry is fixed: 24px items, a 72px window showing three of them, with
- * 24px spacers top and bottom so the first and last value can reach the centre.
+ *  - Pointer-driven, 1:1. The number moves exactly with the finger, every frame.
+ *  - Real momentum. Release velocity is measured off the last ~80ms of the drag
+ *    and projected with constant deceleration, so a flick travels and a nudge
+ *    doesn't. The landing is eased (cubic out) onto a rung — never a jump.
+ *  - Rubber band past the ends instead of a dead stop.
+ *  - A drum, not a list: rows curve away on a cylinder (scaled and faded by
+ *    their angle), with a solid centre band so the live number is unmissable.
+ *  - Taps work: tap above the centre for one rung down, below for one rung up.
+ *  - A tick per rung — vibration on Android, the Safari switch trick on iPhone
+ *    (see lib/haptics.js) — and the band pulses amber when a new value lands.
+ *  - Hold still to open the keypad, as before.
+ *
+ * Higher values sit below the centre: drag up (or tap below) to go heavier.
+ * The DOM is a fixed pool of rows painted directly each frame — React renders
+ * once, so a fling costs no re-renders at all.
  */
 
-export const ITEM_H = 24;
-export const WHEEL_H = 72;
-const SPACER = (WHEEL_H - ITEM_H) / 2;
+export const ITEM_H = 34;
+export const WHEEL_H = 108;
 
-/** Long-press to open the keypad. */
+/** Degrees of drum between neighbouring rows. */
+const STEP_DEG = 24;
+const STEP_RAD = (STEP_DEG * Math.PI) / 180;
+/** Cylinder radius that makes neighbouring rows sit one ITEM_H apart at the centre. */
+const RADIUS = ITEM_H / (2 * Math.sin(STEP_RAD / 2));
+/** Rows painted either side of centre. 90° / 24° ≈ 3.7, so 4 covers the drum. */
+const POOL_SIDE = 4;
+const POOL = POOL_SIDE * 2 + 1;
+
 const LONG_PRESS_MS = 450;
-/** A drag of more than this cancels the long press. */
-const LONG_PRESS_SLOP = 8;
-/** Fallback settle debounce where `scrollend` is missing (Safari, at time of writing). */
-const SETTLE_MS = 120;
-
-/** Virtualise past this many values — a 20–200kg ladder in 1.25 steps is 145 items. */
-const VIRTUALISE_ABOVE = 60;
-/**
- * Half-window of rendered items either side of centre. The brief says 12; 16 with a
- * re-render only once the centre has drifted 5 items keeps snap targets present
- * through a fling, which sparse targets under `scroll-snap-type: mandatory` do not.
- */
-const WINDOW = 16;
-const WINDOW_DRIFT = 5;
+/** Movement (px) under which a touch is still a tap or a hold. */
+const SLOP = 6;
+/** Velocity window for the release. */
+const SAMPLE_MS = 80;
+/** Rows/s² of friction. Higher stops sooner. */
+const DECEL = 28;
+/** Fastest fling, rows/s — stops a hard swipe skipping off the end of a 145-rung ladder. */
+const MAX_V = 30;
+/** Resistance once dragged past an end (0–1, lower is stiffer). */
+const RUBBER = 0.35;
+const SNAP_MS = 170;
+const MAX_FLING_MS = 1100;
+/** Mouse-wheel / trackpad pixels per rung. */
+const WHEEL_PX = 40;
 
 // ── One shared rAF loop for every wheel on the screen, not one each ──────────
 const pendingFrame = new Set();
@@ -53,60 +77,66 @@ export function scheduleFrame(fn) {
   }
 }
 
-// ── Styles ──────────────────────────────────────────────────────────────────
-// Injected once. Inline styles cannot express ::-webkit-scrollbar or the
-// [data-d] taper, and the taper must be written by attribute rather than by
-// re-rendering React on every scroll frame. Every colour still comes from tokens.
-const STYLE_ID = 'shed-numberwheel-styles';
-
+const STYLE_ID = 'shed-numberwheel-v2';
 const WHEEL_CSS = `
-.nw-scroll {
+.nw2 {
+  position: relative;
   height: ${WHEEL_H}px;
-  overflow-y: auto;
-  scroll-snap-type: y mandatory;
-  overscroll-behavior: contain;
-  touch-action: pan-y;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  overflow: hidden;
+  touch-action: none;
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
   outline: none;
-  position: relative;
+  cursor: grab;
+  border-radius: ${C3.radius + 2}px;
 }
-.nw-scroll::-webkit-scrollbar { display: none; }
-.nw-scroll:focus-visible { box-shadow: 0 0 0 ${C3.hair}px ${C3.amberEdge}; border-radius: ${C3.radius}px; }
-.nw-item {
-  height: ${ITEM_H}px;
+.nw2:active { cursor: grabbing; }
+.nw2:focus-visible { box-shadow: 0 0 0 ${C3.hair}px ${C3.amberEdge}; }
+.nw2[data-disabled="true"] { cursor: default; opacity: 0.55; }
+.nw2-band {
+  position: absolute; left: 4px; right: 4px;
+  top: ${(WHEEL_H - ITEM_H) / 2}px; height: ${ITEM_H}px;
+  border-radius: ${C3.radius + 1}px;
+  background: ${C3.raise2};
+  box-shadow: inset 0 0 0 ${C3.hair}px ${C3.line2};
+  transition: box-shadow 260ms ease-out, background 260ms ease-out;
+  pointer-events: none;
+}
+.nw2[data-logged="true"] .nw2-band { box-shadow: inset 0 0 0 ${C3.hair}px ${C3.amberEdge}; }
+.nw2[data-pulse="true"] .nw2-band {
+  transition: none;
+  background: ${C3.amberWarm};
+  box-shadow: inset 0 0 0 ${C3.hair}px ${C3.amber};
+}
+.nw2-row {
+  position: absolute; left: 0; right: 0;
+  top: ${(WHEEL_H - ITEM_H) / 2}px; height: ${ITEM_H}px;
   line-height: ${ITEM_H}px;
-  scroll-snap-align: center;
   text-align: center;
   font-family: ${FONTS.sans};
   font-variant-numeric: tabular-nums;
-  font-size: ${TYPE.wheelFar.fontSize}px;
-  color: ${C3.ghost};
-  transition: font-size 90ms linear, color 90ms linear;
-  will-change: font-size, color;
-}
-.nw-item[data-d="0"] {
-  font-size: ${TYPE.wheelValue.fontSize}px;
-  letter-spacing: ${TYPE.wheelValue.letterSpacing}px;
+  font-size: 23px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
   color: ${C3.text};
+  will-change: transform, opacity;
+  pointer-events: none;
+  backface-visibility: hidden;
 }
-.nw-item[data-d="1"] {
-  font-size: ${TYPE.wheelNear.fontSize}px;
-  color: ${C3.faint};
+.nw2-fade {
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(to bottom, ${C3.raise} 0%, transparent 30%, transparent 70%, ${C3.raise} 100%);
+  opacity: 0.55;
 }
-.nw-scroll[data-disabled="true"] .nw-item[data-d="0"] { color: ${C3.muted}; }
 @media (prefers-reduced-motion: reduce) {
-  .nw-scroll { scroll-behavior: auto; }
-  .nw-item { transition: none; }
+  .nw2-band { transition: none; }
 }
 `;
 
 function ensureStyles() {
-  if (typeof document === 'undefined') return;
-  if (document.getElementById(STYLE_ID)) return;
+  if (typeof document === 'undefined' || document.getElementById(STYLE_ID)) return;
   const el = document.createElement('style');
   el.id = STYLE_ID;
   el.textContent = WHEEL_CSS;
@@ -119,23 +149,22 @@ const prefersReducedMotion = () =>
   window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const clamp = (n, lo, hi) => Math.min(hi, Math.max(lo, n));
-
-/** Default rendering: 82.5 stays 82.5, 80 stays 80. */
+const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+const now = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
 const defaultFormat = (v) => String(v);
 
 /**
  * @param {object} props
  * @param {number[]} props.values      ascending, already filtered to what's possible
  * @param {number} props.value         controlled
- * @param {(v:number)=>void} props.onChange     fires on settle, not on every scroll frame
+ * @param {(v:number)=>void} props.onChange     fires when the wheel comes to rest on a new value
  * @param {()=>void} [props.onLongPress]        opens the keypad
- * @param {number} [props.width]       104 for weight, 82 for reps
+ * @param {number} [props.width]
  * @param {boolean} [props.disabled]
- * @param {string} props.ariaLabel     e.g. "Set 3 weight, kilograms"
- * @param {boolean} [props.logged]     amber slot marks once the set is logged
+ * @param {string} props.ariaLabel
+ * @param {boolean} [props.logged]     amber band once the set is logged
  * @param {string} [props.unit]        spoken unit, e.g. "kilograms"
  * @param {(v:number)=>string} [props.format]
- * @param {number} [props.slotInset]   26 for the weight wheel, 22 for reps
  */
 export default function NumberWheel({
   values,
@@ -148,20 +177,9 @@ export default function NumberWheel({
   logged = false,
   unit = '',
   format = defaultFormat,
-  slotInset,
 }) {
-  const scrollRef = useRef(null);
-  const isProgrammatic = useRef(false);
-  const lastCentre = useRef(-1);
-  const settleTimer = useRef(null);
-  const pressTimer = useRef(null);
-  const pressOrigin = useRef(null);
-  const longPressFired = useRef(false);
-  const onChangeRef = useRef(onChange);
-  onChangeRef.current = onChange;
-
   const list = useMemo(() => (Array.isArray(values) ? values : []), [values]);
-  const virtual = list.length > VIRTUALISE_ABOVE;
+  const maxIndex = Math.max(0, list.length - 1);
 
   const valueIndex = useMemo(() => {
     if (list.length === 0) return -1;
@@ -169,120 +187,261 @@ export default function NumberWheel({
     return exact >= 0 ? exact : nearestIndex(list, value);
   }, [list, value]);
 
-  const [windowCentre, setWindowCentre] = useState(() => Math.max(0, valueIndex));
+  const rootRef = useRef(null);
+  const rowRefs = useRef([]);
+  /** Fractional index under the centre band. The single source of truth while moving. */
+  const pos = useRef(Math.max(0, valueIndex));
+  const lastTick = useRef(Math.round(pos.current));
+  const anim = useRef(0);
+  const drag = useRef(null);
+  const pressTimer = useRef(null);
+  const pulseTimer = useRef(null);
+  const wheelAccum = useRef(0);
+  const wheelTimer = useRef(null);
 
-  const first = virtual ? clamp(windowCentre - WINDOW, 0, Math.max(0, list.length - 1)) : 0;
-  const last = virtual ? clamp(windowCentre + WINDOW, 0, Math.max(0, list.length - 1)) : list.length - 1;
-  const slice = useMemo(
-    () => list.slice(first, last + 1).map((v, i) => ({ v, i: first + i })),
-    [list, first, last],
-  );
+  const live = useRef({});
+  live.current = { list, maxIndex, value, onChange, onLongPress, disabled, format };
 
   useEffect(ensureStyles, []);
 
-  // ── Taper: written as a data attribute, never as a React re-render ────────
+  // ── Paint: position every pooled row on the drum ─────────────────────────
   const paint = useCallback(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const centre = clamp(Math.round(el.scrollTop / ITEM_H), 0, Math.max(0, list.length - 1));
-
-    if (centre !== lastCentre.current) {
-      const crossed = lastCentre.current !== -1;
-      lastCentre.current = centre;
-      // A tick per index crossing while the finger is on the glass. iOS Safari
-      // has no vibrate — it degrades to nothing, deliberately, with no sound.
-      if (crossed && !isProgrammatic.current && !disabled) navigator.vibrate?.(8);
-      if (virtual && Math.abs(centre - windowCentre) >= WINDOW_DRIFT) setWindowCentre(centre);
+    const { list: l, format: fmt } = live.current;
+    const p = pos.current;
+    const base = Math.round(p);
+    for (let k = 0; k < POOL; k++) {
+      const el = rowRefs.current[k];
+      if (!el) continue;
+      const i = base + k - POOL_SIDE;
+      const angle = (i - p) * STEP_RAD;
+      if (i < 0 || i >= l.length || Math.abs(angle) >= Math.PI / 2) {
+        el.style.opacity = '0';
+        continue;
+      }
+      const text = fmt(l[i]);
+      if (el.textContent !== text) el.textContent = text;
+      const y = RADIUS * Math.sin(angle);
+      const c = Math.cos(angle);
+      const d = Math.abs(i - p);
+      // Full strength in the band, falling away fast, so the live number owns the eye.
+      const opacity = d < 0.5 ? 1 : clamp(0.95 - d * 0.32, 0.12, 0.7);
+      const scale = 0.72 + 0.28 * c;
+      el.style.transform = `translate3d(0, ${y.toFixed(2)}px, 0) scale(${scale.toFixed(3)}, ${(c * scale).toFixed(3)})`;
+      el.style.opacity = opacity.toFixed(3);
     }
+  }, []);
 
-    const items = el.querySelectorAll('.nw-item');
-    for (const item of items) {
-      const i = Number(item.dataset.i);
-      const d = Math.min(2, Math.abs(i - centre));
-      const current = item.getAttribute('data-d');
-      const next = String(d);
-      if (current !== next) item.setAttribute('data-d', next);
+  /** A tick each time a new rung crosses the band. */
+  const tickIfCrossed = useCallback(() => {
+    const r = clamp(Math.round(pos.current), 0, live.current.maxIndex);
+    if (r !== lastTick.current) {
+      lastTick.current = r;
+      haptic();
     }
-  }, [list.length, virtual, windowCentre, disabled]);
+  }, []);
 
-  const settle = useCallback(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    isProgrammatic.current = false;
-    if (list.length === 0) return;
-    const index = clamp(Math.round(el.scrollTop / ITEM_H), 0, list.length - 1);
-    const next = list[index];
-    if (next !== value) onChangeRef.current?.(next);
-  }, [list, value]);
-
-  const handleScroll = useCallback(() => {
-    cancelLongPress();
+  const setPos = useCallback((p) => {
+    pos.current = p;
+    tickIfCrossed();
     scheduleFrame(paint);
-    if (typeof window !== 'undefined' && 'onscrollend' in window) return;
-    if (settleTimer.current) clearTimeout(settleTimer.current);
-    settleTimer.current = setTimeout(settle, SETTLE_MS);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [paint, settle]);
+  }, [paint, tickIfCrossed]);
 
-  // ── Keep the wheel under the controlled value ─────────────────────────────
-  useLayoutEffect(() => {
-    const el = scrollRef.current;
-    if (!el || valueIndex < 0) return;
-    const target = valueIndex * ITEM_H;
-    if (Math.abs(el.scrollTop - target) < 1) return;
-    isProgrammatic.current = true;
-    if (typeof el.scrollTo === 'function') {
-      el.scrollTo({ top: target, behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
-    } else {
-      el.scrollTop = target;
+  const stopAnim = () => {
+    if (anim.current) cancelAnimationFrame(anim.current);
+    anim.current = 0;
+  };
+
+  const pulse = () => {
+    const el = rootRef.current;
+    if (!el || prefersReducedMotion()) return;
+    el.setAttribute('data-pulse', 'true');
+    if (pulseTimer.current) clearTimeout(pulseTimer.current);
+    pulseTimer.current = setTimeout(() => el.setAttribute('data-pulse', 'false'), 140);
+  };
+
+  /** Landed: tell the screen, once, if the value changed. */
+  const commit = useCallback((index) => {
+    const { list: l, value: v, onChange: cb } = live.current;
+    if (l.length === 0) return;
+    const next = l[clamp(index, 0, l.length - 1)];
+    if (next !== v) {
+      pulse();
+      cb?.(next);
     }
-    scheduleFrame(paint);
-  }, [valueIndex, paint]);
+  }, []);
 
-  // Paint on mount and whenever the rendered window changes.
-  useLayoutEffect(() => {
-    lastCentre.current = -1;
-    paint();
-  }, [paint, slice]);
-
-  // ── Long press → keypad ───────────────────────────────────────────────────
-  function cancelLongPress() {
-    if (pressTimer.current) {
-      clearTimeout(pressTimer.current);
-      pressTimer.current = null;
+  /** Ease from wherever we are onto `target`, then commit it. */
+  const animateTo = useCallback((target, ms, { commitAfter = true } = {}) => {
+    stopAnim();
+    const from = pos.current;
+    const to = clamp(Math.round(target), 0, live.current.maxIndex);
+    if (ms <= 0 || prefersReducedMotion() || typeof requestAnimationFrame !== 'function' || from === to) {
+      setPos(to);
+      if (commitAfter) commit(to);
+      return;
     }
-    pressOrigin.current = null;
-  }
+    const start = now();
+    const step = () => {
+      const t = clamp((now() - start) / ms, 0, 1);
+      setPos(from + (to - from) * easeOutCubic(t));
+      if (t < 1) anim.current = requestAnimationFrame(step);
+      else {
+        anim.current = 0;
+        if (commitAfter) commit(to);
+      }
+    };
+    anim.current = requestAnimationFrame(step);
+  }, [commit, setPos]);
+
+  // ── Follow the controlled value when it changes from outside ─────────────
+  useLayoutEffect(() => {
+    if (valueIndex < 0 || drag.current || anim.current) return;
+    if (Math.abs(pos.current - valueIndex) < 0.01) { scheduleFrame(paint); return; }
+    lastTick.current = valueIndex; // an outside change is not a finger tick
+    animateTo(valueIndex, 200, { commitAfter: false });
+  }, [valueIndex, animateTo, paint]);
+
+  useLayoutEffect(() => { paint(); }, [paint, list, format]);
+
+  useEffect(() => () => {
+    stopAnim();
+    if (pressTimer.current) clearTimeout(pressTimer.current);
+    if (pulseTimer.current) clearTimeout(pulseTimer.current);
+    if (wheelTimer.current) clearTimeout(wheelTimer.current);
+  }, []);
+
+  // ── Pointer: drag, fling, tap, hold ──────────────────────────────────────
+  const cancelPress = () => {
+    if (pressTimer.current) clearTimeout(pressTimer.current);
+    pressTimer.current = null;
+  };
 
   const onPointerDown = (e) => {
-    if (disabled || !onLongPress) return;
-    longPressFired.current = false;
-    pressOrigin.current = { x: e.clientX, y: e.clientY };
-    const native = e.nativeEvent ?? e;
-    pressTimer.current = setTimeout(() => {
-      pressTimer.current = null;
-      longPressFired.current = true;
-      navigator.vibrate?.(18);
-      // Stops a text selection or callout starting on the press. The contextmenu
-      // handler below is what actually holds on mobile — by the time this timer
-      // runs the pointerdown has usually finished dispatching.
-      if (native?.cancelable) native.preventDefault?.();
-      onLongPress();
-    }, LONG_PRESS_MS);
+    if (live.current.disabled || list.length === 0) return;
+    if (e.button != null && e.button !== 0) return;
+    stopAnim();
+    rootRef.current?.focus?.({ preventScroll: true });
+    try { e.currentTarget.setPointerCapture?.(e.pointerId); } catch { /* jsdom */ }
+    const t = now();
+    drag.current = {
+      id: e.pointerId,
+      startY: e.clientY,
+      startPos: pos.current,
+      startT: t,
+      moved: false,
+      held: false,
+      samples: [[e.clientY, t]],
+    };
+    if (live.current.onLongPress) {
+      pressTimer.current = setTimeout(() => {
+        pressTimer.current = null;
+        if (!drag.current || drag.current.moved) return;
+        drag.current.held = true;
+        haptic('heavy');
+        live.current.onLongPress();
+      }, LONG_PRESS_MS);
+    }
   };
 
   const onPointerMove = (e) => {
-    const origin = pressOrigin.current;
-    if (!origin) return;
-    if (Math.hypot(e.clientX - origin.x, e.clientY - origin.y) > LONG_PRESS_SLOP) cancelLongPress();
+    const d = drag.current;
+    if (!d || d.id !== e.pointerId || d.held) return;
+    const dy = e.clientY - d.startY;
+    if (!d.moved && Math.abs(dy) < SLOP) return;
+    if (!d.moved) { d.moved = true; cancelPress(); }
+    const t = now();
+    d.samples.push([e.clientY, t]);
+    while (d.samples.length > 2 && t - d.samples[0][1] > SAMPLE_MS) d.samples.shift();
+
+    // Finger up = heavier: content follows the finger, so moving up brings
+    // the rows below into the band.
+    let p = d.startPos - dy / ITEM_H;
+    const max = live.current.maxIndex;
+    if (p < 0) p *= RUBBER;
+    else if (p > max) p = max + (p - max) * RUBBER;
+    setPos(p);
   };
+
+  const onPointerUp = (e) => {
+    const d = drag.current;
+    if (!d || d.id !== e.pointerId) return;
+    drag.current = null;
+    cancelPress();
+    if (d.held) return; // the keypad has it
+
+    const max = live.current.maxIndex;
+
+    if (!d.moved) {
+      // A tap: above the band steps down a rung, below steps up, on it does nothing.
+      const rect = rootRef.current?.getBoundingClientRect?.();
+      const y = rect ? e.clientY - rect.top : WHEEL_H / 2;
+      const off = y - WHEEL_H / 2;
+      if (Math.abs(off) > ITEM_H / 2) {
+        const target = clamp(Math.round(pos.current) + (off > 0 ? 1 : -1), 0, max);
+        animateTo(target, SNAP_MS);
+      } else {
+        animateTo(pos.current, SNAP_MS);
+      }
+      return;
+    }
+
+    // Release velocity in rows/s, from the recent samples only.
+    const s = d.samples;
+    let v = 0;
+    if (s.length >= 2) {
+      const [y0, t0] = s[0];
+      const [y1, t1] = s[s.length - 1];
+      const dt = (t1 - t0) / 1000;
+      if (dt > 0 && now() - t1 < 100) v = -((y1 - y0) / ITEM_H) / dt;
+    }
+    v = clamp(v, -MAX_V, MAX_V);
+
+    const p = pos.current;
+    // Out past an end: spring back, whatever the velocity.
+    if (p < 0 || p > max) { animateTo(clamp(p, 0, max), SNAP_MS + 80); return; }
+
+    if (Math.abs(v) < 1.5) { animateTo(p, SNAP_MS); return; }
+
+    const travel = (v * Math.abs(v)) / (2 * DECEL);
+    const target = clamp(Math.round(p + travel), 0, max);
+    const ms = clamp((Math.abs(v) / DECEL) * 1000, 220, MAX_FLING_MS);
+    animateTo(target, ms);
+  };
+
+  const onPointerCancel = () => {
+    if (!drag.current) return;
+    drag.current = null;
+    cancelPress();
+    animateTo(pos.current, SNAP_MS);
+  };
+
+  // ── Mouse wheel / trackpad ────────────────────────────────────────────────
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el) return undefined;
+    const onWheel = (e) => {
+      if (live.current.disabled || live.current.list.length === 0) return;
+      e.preventDefault();
+      stopAnim();
+      wheelAccum.current += e.deltaY;
+      const p = clamp(pos.current + e.deltaY / WHEEL_PX, 0, live.current.maxIndex);
+      setPos(p);
+      if (wheelTimer.current) clearTimeout(wheelTimer.current);
+      wheelTimer.current = setTimeout(() => {
+        wheelAccum.current = 0;
+        animateTo(pos.current, SNAP_MS);
+      }, 90);
+    };
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => el.removeEventListener('wheel', onWheel);
+  }, [animateTo, setPos]);
 
   // ── Keyboard ──────────────────────────────────────────────────────────────
   const move = (delta) => {
     if (list.length === 0) return;
     const from = valueIndex < 0 ? 0 : valueIndex;
     const next = list[clamp(from + delta, 0, list.length - 1)];
-    if (next !== value) onChangeRef.current?.(next);
+    if (next !== value) onChange?.(next);
   };
 
   const onKeyDown = (e) => {
@@ -294,66 +453,48 @@ export default function NumberWheel({
       case 'PageDown':  e.preventDefault(); move(-5); break;
       case 'Home':      e.preventDefault(); move(-list.length); break;
       case 'End':       e.preventDefault(); move(list.length); break;
+      case 'Enter':     if (onLongPress) { e.preventDefault(); onLongPress(); } break;
       default: break;
     }
   };
 
-  useEffect(() => () => {
-    if (settleTimer.current) clearTimeout(settleTimer.current);
-    if (pressTimer.current) clearTimeout(pressTimer.current);
-  }, []);
-
-  const inset = slotInset ?? (width >= 100 ? 26 : 22);
-  const slotColor = logged ? C3.amberEdge : C3.slotIdle;
   const shown = valueIndex >= 0 ? list[valueIndex] : null;
   const valueText = shown === null ? '' : `${format(shown)}${unit ? ` ${unit}` : ''}`;
 
-  const topPad = virtual ? SPACER + first * ITEM_H : SPACER;
-  const bottomPad = virtual ? SPACER + (list.length - 1 - last) * ITEM_H : SPACER;
-
   return (
-    <div style={{ position: 'relative', width, height: WHEEL_H, flexShrink: 0 }}>
-      <div
-        ref={scrollRef}
-        className="nw-scroll"
-        data-disabled={disabled ? 'true' : 'false'}
-        style={{
-          width,
-          overflowY: disabled ? 'hidden' : 'auto',
-          scrollBehavior: prefersReducedMotion() ? 'auto' : undefined,
-        }}
-        role="spinbutton"
-        tabIndex={disabled ? -1 : 0}
-        aria-label={ariaLabel}
-        aria-valuenow={shown ?? undefined}
-        aria-valuemin={list[0] ?? undefined}
-        aria-valuemax={list[list.length - 1] ?? undefined}
-        aria-valuetext={valueText}
-        aria-disabled={disabled || undefined}
-        onScroll={handleScroll}
-        onScrollEnd={settle}
-        onKeyDown={onKeyDown}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={cancelLongPress}
-        onPointerCancel={cancelLongPress}
-        onPointerLeave={cancelLongPress}
-        onContextMenu={(e) => e.preventDefault()}
-      >
-        <div style={{ height: topPad }} />
-        {slice.map(({ v, i }) => (
-          <div key={i} className="nw-item" data-i={i} data-d="2">
-            {format(v)}
-          </div>
-        ))}
-        <div style={{ height: bottomPad }} />
-      </div>
-
-      {/* The selection slot: two hairlines, not a filled band. Amber once logged. */}
-      <div aria-hidden="true" style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-        <div style={{ position: 'absolute', top: SPACER, left: inset, width: C3.hair, height: ITEM_H, background: slotColor }} />
-        <div style={{ position: 'absolute', top: SPACER, right: inset, width: C3.hair, height: ITEM_H, background: slotColor }} />
-      </div>
+    <div
+      ref={rootRef}
+      className="nw2"
+      data-disabled={disabled ? 'true' : 'false'}
+      data-logged={logged ? 'true' : 'false'}
+      data-pulse="false"
+      style={{ width, flexShrink: 0 }}
+      role="spinbutton"
+      tabIndex={disabled ? -1 : 0}
+      aria-label={ariaLabel}
+      aria-valuenow={shown ?? undefined}
+      aria-valuemin={list[0] ?? undefined}
+      aria-valuemax={list[list.length - 1] ?? undefined}
+      aria-valuetext={valueText}
+      aria-disabled={disabled || undefined}
+      onKeyDown={onKeyDown}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerCancel}
+      onContextMenu={(e) => e.preventDefault()}
+    >
+      <div className="nw2-band" aria-hidden="true" />
+      {Array.from({ length: POOL }, (_, k) => (
+        <div
+          key={k}
+          ref={(el) => { rowRefs.current[k] = el; }}
+          className="nw2-row"
+          aria-hidden="true"
+          style={{ opacity: 0 }}
+        />
+      ))}
+      <div className="nw2-fade" aria-hidden="true" />
     </div>
   );
 }

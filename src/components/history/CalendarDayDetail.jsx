@@ -1,3 +1,4 @@
+import { byPlanOrder } from '../../lib/sessionFormat';
 import { useState } from 'react';
 import { C3, INNER_HIGHLIGHT } from '../../design';
 import { sessionDayLabel, sessionTitle } from '../../lib/sessionTitle';
@@ -15,7 +16,7 @@ function SessionDetail({ session, dayTitle, isOwn, onEdit, onDelete }) {
     }
     exerciseMap[name].sets.push(set);
   }
-  const exercises = Object.values(exerciseMap);
+  const exercises = byPlanOrder(Object.values(exerciseMap));
   exercises.forEach(ex => ex.sets.sort((a, b) => a.set_number - b.set_number));
 
   const totalVol = (session.session_sets || []).reduce(

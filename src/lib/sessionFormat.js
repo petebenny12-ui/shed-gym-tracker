@@ -180,3 +180,15 @@ export function completionShape(exercises) {
   if (tiers.has('foundation')) return 'short';
   return 'brutal';
 }
+
+/**
+ * Exercises in plan order — A, B, C… — the way the mission is written, never
+ * the order the rows happened to come back from the database.
+ * @param {Array<{label?:string, supersetLabel?:string, name?:string}>} list
+ */
+export function byPlanOrder(list) {
+  const key = (ex) => String(ex?.label ?? ex?.supersetLabel ?? '~');
+  return [...(list || [])].sort(
+    (a, b) => key(a).localeCompare(key(b)) || String(a?.name || '').localeCompare(String(b?.name || '')),
+  );
+}

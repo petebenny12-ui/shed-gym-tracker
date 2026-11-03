@@ -1,3 +1,4 @@
+import { byPlanOrder } from '../../lib/sessionFormat';
 import { useState } from 'react';
 import { useWorkoutData } from '../../hooks/useWorkoutData';
 import { C3, INNER_HIGHLIGHT } from '../../design';
@@ -32,7 +33,7 @@ export default function SessionEditor({ session, dayTitle, onBack, onSaved }) {
     Object.values(map).forEach((ex) =>
       ex.sets.sort((a, b) => a.setNumber - b.setNumber)
     );
-    return Object.values(map);
+    return byPlanOrder(Object.values(map));
   };
 
   const [exercises, setExercises] = useState(buildExercises);

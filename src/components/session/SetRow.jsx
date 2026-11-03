@@ -11,8 +11,8 @@ import NumberWheel, { WHEEL_H } from './NumberWheel';
  * touching when the numbers are not already right.
  */
 
-export const WEIGHT_WHEEL_W = 104;
-export const REPS_WHEEL_W = 82;
+export const WEIGHT_WHEEL_W = 116;
+export const REPS_WHEEL_W = 92;
 const GUTTER = 14;
 
 export default function SetRow({
@@ -22,6 +22,7 @@ export default function SetRow({
   weightLadder = [],
   repValues = [],
   repUnit = 'reps',
+  perHand = false,
   logged = false,
   isNext = false,
   disabled = false,
@@ -68,8 +69,8 @@ export default function SetRow({
           width={WEIGHT_WHEEL_W}
           logged={logged}
           disabled={disabled}
-          unit="kilograms"
-          ariaLabel={`${label} weight, kilograms`}
+          unit={perHand ? 'kilograms per hand' : 'kilograms'}
+          ariaLabel={`${label} weight, kilograms${perHand ? ' per hand' : ''}`}
         />
       )}
 
@@ -124,7 +125,7 @@ export default function SetRow({
 }
 
 /** The KG / REPS heads, on the same grid as the rows above. */
-export function SetColumnHeads({ bodyweight = false, repUnit = 'reps' }) {
+export function SetColumnHeads({ bodyweight = false, repUnit = 'reps', perHand = false }) {
   const head = {
     fontFamily: FONTS.sans,
     fontSize: 9.5,
@@ -140,7 +141,7 @@ export function SetColumnHeads({ bodyweight = false, repUnit = 'reps' }) {
     <div style={{ display: 'flex', alignItems: 'center' }} aria-hidden="true">
       <div style={{ width: GUTTER, flexShrink: 0 }} />
       <div style={{ flex: 1 }} />
-      <div style={{ ...head, width: WEIGHT_WHEEL_W }}>{bodyweight ? '' : 'KG'}</div>
+      <div style={{ ...head, width: WEIGHT_WHEEL_W }}>{bodyweight ? '' : perHand ? 'KG / HAND' : 'KG'}</div>
       <div style={{ width: GUTTER, flexShrink: 0 }} />
       <div style={{ ...head, width: REPS_WHEEL_W }}>{unitLabel(repUnit)}</div>
       <div style={{ flex: 1 }} />

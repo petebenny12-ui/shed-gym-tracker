@@ -1,3 +1,4 @@
+import { byPlanOrder } from '../../lib/sessionFormat';
 import { useState } from 'react';
 import { C3 } from '../../design';
 import { sessionDayLabel } from '../../lib/sessionTitle';
@@ -16,7 +17,7 @@ export default function SessionCard({ session, dayTitle, onEdit, onDelete }) {
     }
     exerciseMap[name].sets.push(set);
   }
-  const exercises = Object.values(exerciseMap);
+  const exercises = byPlanOrder(Object.values(exerciseMap));
 
   // Sort sets within each exercise
   exercises.forEach((ex) => ex.sets.sort((a, b) => a.set_number - b.set_number));

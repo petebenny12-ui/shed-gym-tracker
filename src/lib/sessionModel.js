@@ -64,20 +64,32 @@ export function repValuesFor(repMax, repUnit = 'reps') {
   return Array.from({ length: top }, (_, i) => i + 1);
 }
 
-function prefillFor({ ladder, suggestion, lastSets, repMin, repMax, repValues, setIndex }) {
-  const last = lastSets?.[setIndex];
+/**
+ * What a set opens at: exactly what was logged for that set number the last
+ * time this movement was done — any mission, any day. Pete's rule (3 Nov 2026):
+ * never prefill the suggested increase; the progression nudge is shown beside
+ * the target, and going up is a deliberate flick of the wheel.
+ *
+ * A set number that didn't exist last time (4 sets today, 3 last time) repeats
+ * the last set logged. A movement never done before opens at the bottom of the
+ * ladder and the bottom of the rep range.
+ */
+export function prefillFor({ ladder, lastSets, repMin, repMax, repValues, setIndex }) {
+  const done = (lastSets || []).filter((s) => s && Number(s.reps) > 0);
+  const last = done.find((s) => Number(s.set_number) === setIndex + 1)
+    ?? done[setIndex]
+    ?? done[done.length - 1]
+    ?? null;
   const lastReps = Number(last?.reps);
-  const lastWeight = topWeight(lastSets);
+  const lastWeight = last == null ? null : Number(last.weight_kg ?? last.weight);
 
-  let weight = suggestion?.suggestion;
-  if (weight == null) weight = lastWeight;
-  if (weight == null) weight = ladder?.[0] ?? 0;
-  if (ladder && ladder.length > 0) weight = nearest(ladder, weight) ?? weight;
+  let weight = Number.isFinite(lastWeight) ? lastWeight : (topWeight(lastSets) ?? ladder?.[0] ?? 0);
+  // Weights typed off-ladder are merged into the ladder as extras, so a
+  // logged weight is normally a rung already; snap only if it is not.
+  if (ladder && ladder.length > 0 && !ladder.includes(weight)) weight = nearest(ladder, weight) ?? weight;
 
-  // Going up means dropping back to the bottom of the range — double progression.
   let reps;
-  if (suggestion?.delta > 0) reps = Number(repMin) || lastReps || 8;
-  else if (Number.isFinite(lastReps) && lastReps > 0) reps = lastReps;
+  if (Number.isFinite(lastReps) && lastReps > 0) reps = lastReps;
   else reps = Number(repMin) || Number(repMax) || 8;
 
   // Snap onto what the wheel actually offers — a carry counts in 5s, so a
@@ -137,7 +149,7 @@ export function toSessionExercises({ day, history = {}, settings = {} }) {
     const sets = Array.from({ length: targetSets }, (_, i) => ({
       setNumber: i + 1,
       logged: false,
-      ...prefillFor({ ladder, suggestion, lastSets, repMin, repMax, repValues, setIndex: i }),
+      ...prefillFor({ ladder, lastSets, repMin, repMax, repValues, setIndex: i }),
     }));
 
     return {
@@ -147,6 +159,9 @@ export function toSessionExercises({ day, history = {}, settings = {} }) {
       supersetLabel: ss.label,
       name: exercise.name,
       equipment: exercise.equipment,
+      // 'per_hand' — the number is one dumbbell of a pair. Everything else is
+      // the total on the bar, the stack, or the one dumbbell/plate held.
+      loadType: exercise.loadType || 'single',
       tier,
       targetSets,
       repMin,
